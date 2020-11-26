@@ -1,0 +1,68 @@
+dataset: ReDial
+data_path: data/redial
+data_files:
+  train_data: train_data_reformulated.json
+  valid_data: valid_data_reformulated.json
+  test_data: test_data_reformulated.json
+  token2index: word2index_redial.json
+  entity2id: entity2entityId.pkl
+  entity_kg: subkg.pkl
+  word2id: key2index_3rd.json
+  word_kg: conceptnet_subkg.txt
+  copy_mask: copy_mask.npy
+  stopwords: stopwords.txt
+  word2vec: word2vec_redial.npy
+lower: true
+context_max_length: 256
+response_max_length: 30
+pad_token_idx: 0
+start_token_idx: 1
+end_token_idx: 2
+unk_token_idx: 3
+vocab_size: 23929
+entity_max_length: 30
+words_max_length: 30
+n_entity: 64369
+n_relation: 35
+entity_pad_idx: 64368
+n_word: 29308
+word_pad_idx: 0
+rec_model: KGSF
+conv_model: KGSF
+n_heads: 2
+n_layers: 2
+token_emb_size: 300
+hidden_size: 300
+ffn_size: 300
+dropout: 0.1
+attention_dropout: 0.0
+relu_dropout: 0.1
+learn_positional_embeddings: false
+embeddings_scale: true
+reduction: false
+n_positions: 1024
+kg_emb_size: 128
+num_bases: 8
+optimizer: adam
+learning_rate: !!float 3e-3
+optim:
+  pretrain:
+    epoch: 3
+  rec:
+    epoch: 5
+    regular_weight: 0.025
+  conv:
+    epoch: 30
+    lr_scheduler: reduceonplateau
+    lr_scheduler_patience: 3
+    lr_scheduler_decay: 0.5
+    gradient_clip: 0.1
+val_impatience: 5
+val_mode: min
+batch_size:
+  pretrain: 256
+  rec: 256
+  conv: 64
+debug: true
+use_gpu: False
+gpu_id: 0
