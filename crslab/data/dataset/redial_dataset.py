@@ -213,7 +213,8 @@ class ReDialDataset(BaseDataset):
         logger.info("[Finish entity KG preprocess]")
         processed_word_kg = self._word_kg_preprocess()
         logger.info("[Finish word KG preprocess]")
-        return processed_entity_kg, processed_word_kg
+        movie_entity_ids = pkl.load(open(os.path.join(self.data_path, 'movie_ids.pkl'), 'rb'))
+        return processed_entity_kg, processed_word_kg, movie_entity_ids
 
     def _entity_kg_preprocess(self, SELF_LOOP_ID=185):
         """get dbpedia edge information

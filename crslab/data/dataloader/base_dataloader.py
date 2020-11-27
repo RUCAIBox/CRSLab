@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/11/26
+# @Time   : 2020/11/23, 2020/11/27
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -53,6 +53,53 @@ class BaseDataLoader(ABC):
         for start_idx in range(batch_num):
             batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
             yield [dataset[idx] for idx in batch_idx]
+
+    def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None):
+        dataset = self.dataset
+        if process_fn is not None:
+            dataset = process_fn(dataset)
+        batches_iteration = self.batch_split(dataset, batch_size, shuffle)
+        return [batch_fn(batch) for batch in batches_iteration]
+
+    def get_conv_data(self, batch_size, shuffle=False):
+        return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn)
+
+    def get_rec_data(self, batch_size, shuffle=False):
+        return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn)
+
+    def get_guide_data(self, batch_size, shuffle=False):
+        return self.get_data(self.guide_batchify, batch_size, shuffle, self.guide_process_fn)
+
+    def conv_process_fn(self, *args, **kwargs):
+        return self.dataset
+
+    def conv_batchify(self, *args, **kwargs):
+        raise NotImplementedError('dataloader must implement conv_batchify() method')
+
+    def rec_process_fn(self, *args, **kwargs):
+        return self.dataset
+
+    def rec_batchify(self, *args, **kwargs):
+        raise NotImplementedError('dataloader must implement rec_batchify() method')
+
+    def guide_process_fn(self, *args, **kwargs):
+        return self.dataset
+
+    def guide_batchify(self, *args, **kwargs):
+        raise NotImplementedError('dataloader must implement guide_batchify() method')
+
+    @staticmethod
+    def get_side_data(data, type='RGCN'):
+        if type == 'RGCN':
+            edge_sets = torch.tensor(data, dtype=torch.long)
+            edge_idx = edge_sets[:, :2].t()
+            edge_type = edge_sets[:, 2]
+            return edge_idx, edge_type
+        elif type == 'GCN':
+            edge_set = [[co[0] for co in data], [co[1] for co in data]]
+            return torch.tensor(edge_set, dtype=torch.long)
+        else:
+            raise NotImplementedError('type {} has not been implemented', type)
 
     @staticmethod
     def padded_tensor(
@@ -117,57 +164,8 @@ class BaseDataLoader(ABC):
     def get_onehot_label(label_lists, categories):
         onehot_labels = []
         for label_list in label_lists:
-            onehot_label = np.zeros([categories], dtype=np.float)
+            onehot_label = torch.zeros(categories)
             for label in label_list:
                 onehot_label[label] = 1.0 / len(label_list)
-            onehot_labels.append(copy(onehot_label))
-        return torch.tensor(onehot_labels)
-
-    def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None):
-        dataset = self.dataset
-        if process_fn is not None:
-            dataset = process_fn(dataset)
-        batches_iteration = self.batch_split(dataset, batch_size, shuffle)
-        return [batch_fn(batch) for batch in batches_iteration]
-
-    def get_conv_data(self, batch_size, shuffle=False):
-        return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn)
-
-    def get_rec_data(self, batch_size, shuffle=False):
-        return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn)
-
-    def get_guide_data(self, batch_size, shuffle=False):
-        return self.get_data(self.guide_batchify, batch_size, shuffle, self.guide_process_fn)
-
-    def conv_process_fn(self, *args, **kwargs):
-        return self.dataset
-
-    @abstractmethod
-    def conv_batchify(self, *args, **kwargs):
-        raise NotImplementedError('dataloader must implement conv_batchify() method')
-
-    def rec_process_fn(self, *args, **kwargs):
-        return self.dataset
-
-    @abstractmethod
-    def rec_batchify(self, *args, **kwargs):
-        raise NotImplementedError('dataloader must implement rec_batchify() method')
-
-    def guide_process_fn(self, *args, **kwargs):
-        return self.dataset
-
-    def guide_batchify(self, *args, **kwargs):
-        raise NotImplementedError('dataloader must implement guide_batchify() method')
-
-    @staticmethod
-    def get_side_data(data, type='RGCN'):
-        if type == 'RGCN':
-            edge_sets = torch.tensor(data, dtype=torch.long)
-            edge_idx = edge_sets[:, :2].t()
-            edge_type = edge_sets[:, 2]
-            return edge_idx, edge_type
-        elif type == 'GCN':
-            edge_set = [[co[0] for co in data], [co[1] for co in data]]
-            return torch.tensor(edge_set, dtype=torch.long)
-        else:
-            raise NotImplementedError('type {} has not been implemented', type)
+            onehot_labels.append(onehot_label)
+        return torch.stack(onehot_labels, dim=0)
