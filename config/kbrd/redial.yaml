@@ -1,0 +1,10 @@
+# dataset
+dataset: ReDial
+n_entity: 64368
+context_truncate: 1024
+response_truncate: 1024
+# dataloader
+# rec_model
+rec_model: KBRD
+# conv_model
+conv_model: KBRD

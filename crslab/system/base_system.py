@@ -3,25 +3,24 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/11/24, 2020/11/29
+# @Author : Kun Zhou, Xiaolei Wang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
-import math
+import os
+from abc import ABC, abstractmethod
+
+import numpy as np
 import torch
 from loguru import logger
-from random import shuffle
-from math import ceil
-import numpy as np
-from copy import deepcopy
-from crslab.system import *
-from crslab.model import get_model
-from crslab.evaluator import Evaluator
 from torch import optim
-import os
+
+from crslab.data.dataloader.base_dataloader import BaseDataLoader
+from crslab.evaluator import Evaluator
+from crslab.model import get_model
 
 
-class BaseSystem(object):
+class BaseSystem(ABC):
     r"""Trainer Class is used to manage the training and evaluation processes of recommender system models.
     AbstractTrainer is an abstract class in which the fit() and evaluate() method should be implemented according
     to different training and evaluation strategies.
@@ -29,59 +28,68 @@ class BaseSystem(object):
     For side data, it is judged by model
     """
 
-    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, side_data):
+    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None):
         self.config = config
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         self.train_dataloader = train_dataloader
         self.valid_dataloader = valid_dataloader
         self.test_dataloader = test_dataloader
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.ind2tok = ind2tok
+        if side_data:
+            # no matter need or not, we prepare side data
+            side_data = self._side_data_prepare(side_data)
+
+        if config['rec_model'] in ['KGSF', 'KBRD']:
+            self.model = get_model(config, config['rec_model'], self.device, side_data)
+            self.model = self.model.to(self.device)
+        else:
+            self.rec_model = get_model(config, config['rec_model'], self.device, side_data)
+            self.rec_model = self.rec_model.to(self.device)
+            self.conv_model = get_model(config, config['conv_model'], self.device, side_data)
+            self.conv_model = self.conv_model.to(self.device)
+        self.saved_model_file = os.path.join(config['data_path'], '{}-{}.pth'.format(self.config['rec_model'],
+                                                                                     self.config['conv_model']))
+        self.evaluator = Evaluator()
+
         self._number_grad_accum = 0
         self._number_training_updates = 0
-        self.evaluator=Evaluator()
-
         self.best_valid = None
         self.val_impatience = 0
         self.val_optim = 1 if self.config["val_mode"] == "max" else -1
         self.stop = False
 
-        self.saved_model_file=os.path.join(config['data_path'], '{}-{}.pth'.format(self.config['rec_model'],
-                                                                                   self.config['conv_model']))
+    @staticmethod
+    def _side_data_prepare(side_data):
+        rgcn_data = BaseDataLoader.get_side_data(side_data[0], 'RGCN')
+        gcn_data = BaseDataLoader.get_side_data(side_data[1], 'GCN')
+        return rgcn_data, gcn_data
 
-        if side_data!=None:
-            #no matter need or not, we prepare side data
-            side_data=self.side_data_prepare(side_data)
-
-        if config['rec_model'] in ['KGSF','KBRD']:
-            self.model = get_model(config, config['rec_model'], self.device, side_data)
-            self.model=self.model.to(self.device)
-        else:
-            self.rec_model = get_model(config, config['rec_model'], self.device, side_data)
-            self.rec_model=self.rec_model.to(self.device)
-            self.conv_model = get_model(config, config['conv_model'], self.device, side_data)
-            self.conv_model=self.conv_model.to(self.device)
-
-    def side_data_prepare(self, side_data):
-        rgcn_data = self.test_dataloader.get_side_data(side_data[0], 'RGCN')
-        gcn_data = self.test_dataloader.get_side_data(side_data[1], 'GCN')
-        return (rgcn_data, gcn_data)
-
-    def fit(self, train_data):
+    @abstractmethod
+    def fit(self):
         r"""Train the model based on the train data.
 
         """
         raise NotImplementedError('Method [next] should be implemented.')
 
-    def evaluate(self, eval_data):
+    def evaluate(self, pred, label):
         r"""Evaluate the model based on the eval data.
 
         """
-        raise NotImplementedError('Method [next] should be implemented.')
+        pass
+
+    def rec_evaluate(self, pred, label):
+        pass
+
+    def conv_evaluate(self, pred, label):
+        pass
 
     @staticmethod
     def build_optimizer(config, parameters):
         def _optim_opts():
             opts = {k.lower(): v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()}
             return opts
+
         # set up optimizer args
         lr = config["learning_rate"]
         kwargs = {'lr': lr}
@@ -196,7 +204,7 @@ class BaseSystem(object):
         else:
             raise ValueError(
                 "Don't know what to do with lr_scheduler '{}'"
-                .format(config.get('lr_scheduler'))
+                    .format(config.get('lr_scheduler'))
             )
         logger.info("[Build lr_scheduler: {}]", config.get("lr_scheduler"))
         return scheduler, warmup_scheduler
@@ -208,7 +216,7 @@ class BaseSystem(object):
         optimizer.zero_grad()
 
     def _reset_training_steps(self):
-        self._number_training_updates=0
+        self._number_training_updates = 0
 
     def _is_lr_warming_up(self, warmup_scheduler=None):
         """Checks if we're warming up the learning rate."""
@@ -248,12 +256,8 @@ class BaseSystem(object):
         update_freq = self.config.get('update_freq', 1)
         if update_freq > 1:
             self._number_grad_accum = (self._number_grad_accum + 1) % update_freq
-            if self._number_grad_accum == 0:
-                # gradient accumulation, but still need to average across the minibatches
-                loss = loss / update_freq
-                loss.backward()
-        else:
-            loss.backward()
+            loss /= update_freq
+        loss.backward()
 
         self._update_params(optimizer, warmup_scheduler, scheduler)
 
@@ -303,15 +307,12 @@ class BaseSystem(object):
     def reset_metrics(self):
         self.evaluator.reset_metrics()
 
-    def setup_ind2token(self, ind2token):
-        self.ind2token = ind2token
-
     def inds2txt(self, indexes):
-        sentence=[]
+        sentence = []
         for index in indexes:
             if index == self.config['end_token_idx']:
                 break
-            sentence.append(self.ind2token.get(index, 'unk'))
+            sentence.append(self.ind2tok.get(index, 'unk'))
         return ' '.join(sentence)
 
     def save_system(self):

@@ -10,7 +10,6 @@ data_files:
   word2id: key2index_3rd.json
   word_kg: conceptnet_subkg.txt
   copy_mask: copy_mask.npy
-  stopwords: stopwords.txt
   word2vec: word2vec_redial.npy
 lower: true
 context_max_length: 256

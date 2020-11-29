@@ -3,9 +3,9 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/11/24, 2020/11/29
+# @Author : Kun Zhou, Xiaolei Wang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import torch
 from loguru import logger
@@ -19,11 +19,10 @@ from crslab.system.utils import nice_report
 class KGSFSystem(BaseSystem):
     r"""S3RecTrainer is designed for S3Rec, which is a self-supervised learning based sequentail recommenders.
         It includes two training stages: pre-training ang fine-tuning.
+    """
 
-        """
-
-    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, side_data):
-        super(KGSFSystem, self).__init__(config, train_dataloader, valid_dataloader, test_dataloader, side_data)
+    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data):
+        super(KGSFSystem, self).__init__(config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data)
         self.pretrain_epoch = self.config['optim']['pretrain']['epoch']
         self.rec_epoch = self.config['optim']['rec']['epoch']
         self.conv_epoch = self.config['optim']['conv']['epoch']
@@ -33,19 +32,11 @@ class KGSFSystem(BaseSystem):
         self.conv_batch_size = self.config['batch_size']['conv']
         self.movie_ids = self.train_dataloader.get_movie_ids()
 
-    def init_optim(self):
-        r"""Init the Optimizer
-
-        Returns:
-            torch.optim: the optimizer
-        """
         self.pretrain_optimizer = self.build_optimizer(self.config, self.model.parameters())
         self.pretrain_scheduler, self.pretrain_warmup_scheduler = self.build_lr_scheduler(self.config,
                                                                                           self.pretrain_optimizer)
-
         self.rec_optimizer = self.build_optimizer(self.config, self.model.parameters())
         self.rec_scheduler, self.rec_warmup_scheduler = self.build_lr_scheduler(self.config, self.rec_optimizer)
-
         self.model.stem_conv_parameters()
         self.conv_optimizer = self.build_optimizer(self.config, self.model.parameters())
         self.conv_scheduler, self.conv_warmup_scheduler = self.build_lr_scheduler(self.config, self.conv_optimizer)
@@ -67,10 +58,10 @@ class KGSFSystem(BaseSystem):
             self.evaluator.get_evaluate_fn('conv')(p_str, [r_str])
 
     def step(self, batch, stage, mode):
-        '''
+        """
         stage=['pretrain','rec','conv']
         mode=['train','val']
-        '''
+        """
         # encode user
         batch = [ele.to(self.device) for ele in batch]
         if stage == 'pretrain':
@@ -92,13 +83,12 @@ class KGSFSystem(BaseSystem):
             self.evaluator.add_metric("rec", "rec_loss", AverageMetric(rec_loss))
         elif stage == "conv":
             if mode == "train":
-                conv_loss = self.model.conversation(batch, mode)
-
-                self.backward(self.conv_optimizer, conv_loss, self.conv_warmup_scheduler, self.conv_scheduler)
+                gen_loss = self.model.conversation(batch, mode)
+                self.backward(self.conv_optimizer, gen_loss, self.conv_warmup_scheduler, self.conv_scheduler)
                 # eval
-                conv_loss = conv_loss.item()
-                self.evaluator.add_metric("conv", "gen_loss", AverageMetric(conv_loss))
-                self.evaluator.add_metric("conv", "ppl", PPLMetric(conv_loss))
+                gen_loss = gen_loss.item()
+                self.evaluator.add_metric("conv", "gen_loss", AverageMetric(gen_loss))
+                self.evaluator.add_metric("conv", "ppl", PPLMetric(gen_loss))
             else:
                 pred = self.model.conversation(batch, mode)
                 self.conv_evaluate(pred, batch[-1])
@@ -133,7 +123,7 @@ class KGSFSystem(BaseSystem):
                 report = self.evaluator.report()
                 self.reset_metrics()
                 logger.info(nice_report(report))
-            if self.stop == True:
+            if self.stop:
                 break
         with torch.no_grad():
             for batch in rec_test_batches:
@@ -161,7 +151,7 @@ class KGSFSystem(BaseSystem):
                 report = self.evaluator.report()
                 self.reset_metrics()
                 logger.info(nice_report(report))
-            if self.stop == True:
+            if self.stop:
                 break
         with torch.no_grad():
             for batch in conv_test_batches:

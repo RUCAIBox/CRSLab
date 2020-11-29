@@ -16,6 +16,7 @@ dataset_register_table = {
 
 dataloader_register_table = {
     'KGSF': KGSFDataLoader,
+    'KBRD': KBRDDataLoader
 }
 
 

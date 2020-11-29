@@ -12,6 +12,7 @@ from typing import Optional
 from crslab.evaluator.metrics import GenMetrics, RecMetrics, aggregate_unnamed_reports, Metrics, Metric, \
     EvalMetrics
 
+
 class Evaluator:
     def __init__(self):
         self.all_metrics = {
@@ -23,14 +24,12 @@ class Evaluator:
     def add_metric(self, category: str, key: str, value: Optional[Metric]):
         if category in self.all_metrics.keys():
             self.all_metrics[category].add(key, value)
-        else:
-            raise
+        raise
 
     def get_evaluate_fn(self, key: str):
         if key in self.all_metrics.keys() and isinstance(self.all_metrics[key], EvalMetrics):
             return self.all_metrics[key].evaluate
-        else:
-            raise
+        raise
 
     def get_metric(self, category: str, key: str):
         return self.all_metrics[category][key]

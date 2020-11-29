@@ -1,1 +1,1 @@
-from crslab.data.dataset.redial_dataset import ReDialDataset
+from .redial_dataset import ReDialDataset

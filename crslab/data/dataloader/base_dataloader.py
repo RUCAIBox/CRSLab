@@ -7,14 +7,12 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
-from abc import ABC, abstractmethod
-from copy import copy
+import random
+from abc import ABC
 from math import ceil
 from typing import List, Tuple, Optional, Union
 
-import numpy as np
 import torch
-import random
 
 
 class BaseDataLoader(ABC):
@@ -150,7 +148,7 @@ class BaseDataLoader(ABC):
                 continue
             if not isinstance(item, torch.Tensor):
                 # put non-tensors into a tensor
-                item = torch.LongTensor(item)  # type: ignore
+                item = torch.tensor(item, dtype=torch.long)  # type: ignore
             if right_padded:
                 # place at beginning
                 output[i, :length] = item

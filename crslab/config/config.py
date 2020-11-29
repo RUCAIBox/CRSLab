@@ -3,9 +3,9 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/11/23, 2020/11/29
+# @Author : Kun Zhou, Xiaolei Wang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import json
 import os
@@ -17,10 +17,10 @@ from loguru import logger
 from tqdm import tqdm
 
 
-class Config(object):
+class Config:
     """ Configurator module that load the defined parameters.
 
-    Configurator module will first load the default parameters from the fixed properties in RecBole and then
+    Configurator module will first load the default parameters from the fixed config in RecBole and then
     load parameters from the external input.
 
     External input supports three kind of forms: config file, command line and parameter dictionaries.
@@ -58,28 +58,31 @@ class Config(object):
             config_file_list (list of str): the external config file, it allows multiple config files, default is None.
             config_dict (dict): the external parameter dictionaries, default is None.
         """
-        self.config_dict = self._load_yaml_configs(config_file)
+        self.opt = self.load_yaml_configs(config_file)
+        dataset = self.opt['dataset']
+        rec_model = self.opt.get('rec_model')
+        conv_model = self.opt.get('conv_model')
 
         if not os.path.exists("log"):
             os.makedirs("log")
-        log_name = self.config_dict.get("log_name",
-                                        self.config_dict['dataset'] + '_' + self.config_dict['rec_model'] + '_' +
-                                        self.config_dict['conv_model'] + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
-                                                                                             time.localtime())) + ".log"
         logger.remove()
-        logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
+        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True)
+        log_name = self.opt.get("log_name",
+                                dataset + '_' + rec_model + '_' + conv_model + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
+                                                                                                   time.localtime())) + ".log"
         logger.add(os.path.join("log", log_name))
 
-        logger.info("[DATASET: {}]", self.config_dict['dataset'])
-        logger.info("[Recommender Model: {}]", self.config_dict['rec_model'])
-        logger.info("[Conversation Model: {}]", self.config_dict['conv_model'])
-        logger.info("[CONFIG]" + '\n' + json.dumps(self.config_dict, indent=4))
+        logger.info("[DATASET: {}]", dataset)
+        logger.info("[Recommender Model: {}]", rec_model)
+        logger.info("[Conversation Model: {}]", conv_model)
+        logger.info("[CONFIG]" + '\n' + json.dumps(self.opt, indent=4))
 
         # self.model, self.model_class, self.dataset = self._get_model_and_dataset(self.config_dict['dataset'],
         #                                                  self.config_dict['rec_model'],self.config_dict['conv_model'])
         # self._init_device()
 
-    def _load_yaml_configs(self, filename):
+    @staticmethod
+    def load_yaml_configs(filename):
         """
         This function reads yaml file to build config dictionary
         """
@@ -99,29 +102,32 @@ class Config(object):
     def __setitem__(self, key, value):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
-        self.config_dict[key] = value
+        self.opt[key] = value
 
     def __getitem__(self, item):
-        if item in self.config_dict:
-            return self.config_dict[item]
+        if item in self.opt:
+            return self.opt[item]
         else:
             return None
 
     def get(self, item, default=None):
-        if item in self.config_dict:
-            return self.config_dict[item]
+        if item in self.opt:
+            return self.opt[item]
         else:
             return default
 
     def __contains__(self, key):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
-        return key in self.config_dict
+        return key in self.opt
+
+    def __str__(self):
+        return str(self.opt)
 
     def __repr__(self):
         return self.__str__()
 
 
 if __name__ == '__main__':
-    opt_dict = Config('../../properties/kbrd_redial.yaml')
+    opt_dict = Config('../../config/kbrd/redial.yaml')
     pprint(opt_dict)
