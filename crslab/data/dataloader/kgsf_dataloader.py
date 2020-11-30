@@ -10,7 +10,7 @@
 import torch
 from copy import deepcopy
 
-from crslab.data.dataloader.base_dataloader import BaseDataLoader
+from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, get_onehot_label
 
 
 class KGSFDataLoader(BaseDataLoader):
@@ -49,8 +49,8 @@ class KGSFDataLoader(BaseDataLoader):
             context_entities.append(conv_dict['context_entities'])
             context_words.append(conv_dict['context_words'])
 
-        return (self.padded_tensor(context_words, self.config['word_pad']),
-                self.get_onehot_label(context_entities, self.config['n_entity']))
+        return (padded_tensor(context_words, self.config['word_pad']),
+                get_onehot_label(context_entities, self.config['n_entity']))
 
     def rec_process_fn(self):
         """
@@ -84,9 +84,9 @@ class KGSFDataLoader(BaseDataLoader):
             context_words.append(conv_dict['context_words'])
             movies.append(conv_dict['movie'])
 
-        return (self.padded_tensor(context_entities, self.config['entity_pad']),
-                self.padded_tensor(context_words, self.config['word_pad']),
-                self.get_onehot_label(context_entities, self.config['n_entity']),
+        return (padded_tensor(context_entities, self.config['entity_pad']),
+                padded_tensor(context_words, self.config['word_pad']),
+                get_onehot_label(context_entities, self.config['n_entity']),
                 torch.tensor(movies, dtype=torch.long))
 
     def conv_batchify(self, batch):
@@ -110,7 +110,7 @@ class KGSFDataLoader(BaseDataLoader):
             context_words.append(conv_dict['context_words'])
             response.append(conv_dict['response'])
 
-        return (self.padded_tensor(context_tokens, self.config['pad_token_idx'], right_padded=False),
-                self.padded_tensor(context_entities, self.config['entity_pad']),
-                self.padded_tensor(context_words, self.config['word_pad']),
-                self.padded_tensor(response, self.config['pad_token_idx']))
+        return (padded_tensor(context_tokens, self.config['pad_token_idx'], right_padded=False),
+                padded_tensor(context_entities, self.config['entity_pad']),
+                padded_tensor(context_words, self.config['word_pad']),
+                padded_tensor(response, self.config['pad_token_idx']))

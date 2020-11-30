@@ -1,42 +1,34 @@
-# @Time   : 2020/11/22
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/11/30
+# @Author : Xiaolei Wang
+# @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/11/24
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/11/30
+# @Author : Xiaolei Wang
+# @Email  : wxl1999@foxmail.com
 
-from typing import Optional
+from abc import ABC, abstractmethod
 
-from crslab.evaluator.metrics import GenMetrics, RecMetrics, aggregate_unnamed_reports, Metrics, Metric, \
-    EvalMetrics
+from crslab.evaluator.metrics import Metrics
 
 
-class Evaluator:
+class BaseEvaluator(ABC):
     def __init__(self):
-        self.all_metrics = {
-            "rec": RecMetrics(),
-            "conv": GenMetrics(),
-            "other": Metrics()
-        }
+        self.optim_metrics = Metrics()
 
-    def add_metric(self, category: str, key: str, value: Optional[Metric]):
-        if category in self.all_metrics.keys():
-            self.all_metrics[category].add(key, value)
-        raise
+    def evaluate(self, preds, label):
+        pass
 
-    def get_evaluate_fn(self, key: str):
-        if key in self.all_metrics.keys() and isinstance(self.all_metrics[key], EvalMetrics):
-            return self.all_metrics[key].evaluate
-        raise
+    def rec_evaluate(self, preds, label):
+        pass
 
-    def get_metric(self, category: str, key: str):
-        return self.all_metrics[category][key]
+    def gen_evaluate(self, preds, label):
+        pass
 
+    @abstractmethod
     def report(self):
-        return aggregate_unnamed_reports([metrics.report() for metrics in self.all_metrics.values()])
+        pass
 
+    @abstractmethod
     def reset_metrics(self):
-        for metrics in self.all_metrics.values():
-            metrics.clear()
+        self.optim_metrics.clear()

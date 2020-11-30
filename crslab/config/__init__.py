@@ -1,1 +1,1 @@
-from crslab.config.config import Config
+from .config import Config

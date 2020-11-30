@@ -15,7 +15,7 @@ from loguru import logger
 from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
-from crslab.model.base_model import BaseModel
+from crslab.model.base_model import BaseModel, init_embedding
 from crslab.model.layers import SelfAttentionSeq, GateLayer, load_copy_mask
 from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
 
@@ -64,7 +64,7 @@ class KGSFModel(BaseModel):
 
         self.build_model()
 
-    def build_model(self):
+    def build_model(self, pretrained_embedding=None):
         self._init_embeddings()
         self._build_GNN_layer()
         self._build_infomax_layer()
@@ -73,9 +73,9 @@ class KGSFModel(BaseModel):
 
     def _init_embeddings(self):
         # build embeddings, for entity_KGE, the entity_encoder needs not
-        self.token_embedding = self.init_embedding(self.vocab_size, self.token_emb_size, self.pad_token_idx,
+        self.token_embedding = init_embedding(self.vocab_size, self.token_emb_size, self.pad_token_idx,
                                                    self.word2vec_path)
-        self.word_KG_embedding = self.init_embedding(self.n_word, self.kg_emb_size, self.word_pad)
+        self.word_KG_embedding = init_embedding(self.n_word, self.kg_emb_size, self.word_pad)
         logger.debug('finish initializing embeddings')
 
     def _build_GNN_layer(self):

@@ -3,7 +3,7 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/11/27
+# @Time   : 2020/11/30
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -11,7 +11,7 @@ from copy import deepcopy
 
 import torch
 
-from crslab.data.dataloader.base_dataloader import BaseDataLoader
+from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor
 
 
 class KBRDDataLoader(BaseDataLoader):
@@ -48,8 +48,10 @@ class KBRDDataLoader(BaseDataLoader):
             context_entities.append(conv_dict['context_entities'])
             movies.append(conv_dict['movie'])
 
-        return (self.padded_tensor(context_entities, self.config['entity_pad']),
-                torch.tensor(movies, dtype=torch.long))
+        return {
+            "context_entity": padded_tensor(context_entities, self.config['pad_entity_idx']),
+            "movie": torch.tensor(movies, dtype=torch.long)
+        }
 
     def conv_batchify(self, batch):
         """
@@ -70,6 +72,8 @@ class KBRDDataLoader(BaseDataLoader):
             context_entities.append(conv_dict['context_entities'])
             response.append(conv_dict['response'])
 
-        return (self.padded_tensor(context_tokens, self.config['pad_token_idx'], right_padded=False),
-                self.padded_tensor(context_entities, self.config['entity_pad']),
-                self.padded_tensor(response, self.config['pad_token_idx']))
+        return {
+            "context_token": padded_tensor(context_tokens, self.config['pad_token_idx'], right_padded=False),
+            "context_entity": padded_tensor(context_entities, self.config['pad_entity_idx']),
+            "response": padded_tensor(response, self.config['pad_token_idx'])
+        }

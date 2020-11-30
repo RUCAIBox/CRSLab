@@ -20,7 +20,7 @@ dataloader_register_table = {
 }
 
 
-def get_dataset(config, restore, save):
+def get_dataset(config, restore, save) -> BaseDataset:
     """Create dataset according to :attr:`config['model']`.
 
     Args:
@@ -35,7 +35,7 @@ def get_dataset(config, restore, save):
         raise NotImplementedError('The dataloader [{}] has not been implemented'.format(config['dataset']))
 
 
-def get_dataloader(config, dataset):
+def get_dataloader(config, dataset) -> BaseDataLoader:
     """Return a dataloader class according to :attr:`config`.
 
     Args:

@@ -16,7 +16,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.data.dataset.base_dataset import BaseDataset, DATA_PATH
+from crslab.data.dataset.base_dataset import BaseDataset, DATA_PATH, add_start_end_token_idx, truncate
 from crslab.data.dataset.download import DownloadableFile, build
 
 
@@ -195,14 +195,14 @@ class ReDialDataset(BaseDataset):
             text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
             # to id
             if len(context_tokens) > 0:
-                response_add_SE = self.add_start_end_token_idx(text_tokens, add_start=True,
-                                                               start_idx=self.start_token_idx, add_end=True,
-                                                               end_idx=self.end_token_idx)
+                response_add_SE = add_start_end_token_idx(text_tokens, add_start=True,
+                                                          start_token_idx=self.start_token_idx, add_end=True,
+                                                          end_token_idx=self.end_token_idx)
                 conv_dict = {
-                    "context_tokens": self.truncate(copy(context_tokens), self.context_truncate, truncate_tail=False),
-                    "context_entities": self.truncate(copy(context_entities), self.entity_truncate),
-                    "context_words": self.truncate(copy(context_words), self.word_truncate),
-                    "response": self.truncate(copy(response_add_SE), self.response_truncate),
+                    "context_tokens": truncate(copy(context_tokens), self.context_truncate, truncate_tail=False),
+                    "context_entities": truncate(copy(context_entities), self.entity_truncate),
+                    "context_words": truncate(copy(context_words), self.word_truncate),
+                    "response": truncate(copy(response_add_SE), self.response_truncate),
                     "movie": copy(movies)
                 }
                 augmented_conv_dicts.append(conv_dict)
@@ -226,6 +226,7 @@ class ReDialDataset(BaseDataset):
         logger.info("[Finish word KG preprocess]")
         movie_entity_ids = pkl.load(open(os.path.join(self.dpath, 'movie_ids.pkl'), 'rb'))
         logger.info('[Load movie entity ids]')
+
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,

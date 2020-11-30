@@ -21,10 +21,6 @@ from nltk.util import ngrams
 TScalar = Union[int, float, torch.Tensor]
 TVector = Union[List[TScalar], torch.Tensor]
 
-re_art = re.compile(r'\b(a|an|the)\b')
-re_punc = re.compile(r'[!"#$%&()*+,-./:;<=>?@\[\]\\^`{|}~_\']')
-re_space = re.compile(r'\s+')
-
 
 @functools.total_ordering
 class Metric(ABC):
@@ -188,103 +184,6 @@ class AverageMetric(Metric):
         return self._numer / self._denom
 
 
-class PPLMetric(AverageMetric):
-    def value(self):
-        return math.exp(super().value())
-
-
-def normalize_answer(s):
-    """
-    Lower text and remove punctuation, articles and extra whitespace.
-    """
-
-    s = s.lower()
-    s = re_punc.sub(' ', s)
-    s = re_art.sub(' ', s)
-    s = re_space.sub(' ', s)
-    # s = ' '.join(s.split())
-    return s
-
-
-class ExactMatchMetric(AverageMetric):
-    @staticmethod
-    def compute(guess: str, answers: List[str]) -> 'ExactMatchMetric':
-        if guess is None or answers is None:
-            return None
-        for a in answers:
-            if guess == a:
-                return ExactMatchMetric(1)
-        return ExactMatchMetric(0)
-
-
-class F1Metric(AverageMetric):
-    """
-    Helper class which computes token-level F1.
-    """
-
-    @staticmethod
-    def _prec_recall_f1_score(pred_items, gold_items):
-        """
-        Compute precision, recall and f1 given a set of gold and prediction items.
-
-        :param pred_items: iterable of predicted values
-        :param gold_items: iterable of gold values
-
-        :return: tuple (p, r, f1) for precision, recall, f1
-        """
-        common = Counter(gold_items) & Counter(pred_items)
-        num_same = sum(common.values())
-        if num_same == 0:
-            return 0
-        precision = 1.0 * num_same / len(pred_items)
-        recall = 1.0 * num_same / len(gold_items)
-        f1 = (2 * precision * recall) / (precision + recall)
-        return f1
-
-    @staticmethod
-    def compute(guess: str, answers: List[str]) -> 'F1Metric':
-        if guess is None or answers is None:
-            return AverageMetric(0, 0)
-        g_tokens = guess.split()
-        scores = [
-            F1Metric._prec_recall_f1_score(g_tokens, a.split())
-            for a in answers
-        ]
-        return F1Metric(max(scores), 1)
-
-
-class BleuMetric(AverageMetric):
-    @staticmethod
-    def compute(guess: str, answers: List[str], k: int) -> Optional['BleuMetric']:
-        """
-        Compute approximate BLEU score between guess and a set of answers.
-        """
-
-        weights = [0] * 4
-        weights[k - 1] = 1
-        score = sentence_bleu(
-            [a.split(" ") for a in answers],
-            guess.split(" "),
-            weights=weights,
-        )
-        return BleuMetric(score)
-
-
-class DistMetric(SumMetric):
-    @staticmethod
-    def compute(sent: str, k: int) -> 'DistMetric':
-        token_set = set()
-        for token in ngrams(sent.split(), k):
-            token_set.add(token)
-        return DistMetric(len(token_set))
-
-
-class RecallMetric(AverageMetric):
-    @staticmethod
-    def compute(scores, label, k) -> 'RecallMetric':
-        return RecallMetric(int(label in scores[:k]))
-
-
 def aggregate_unnamed_reports(reports: List[Dict[str, Metric]]) -> Dict[str, Metric]:
     """
     Combines metrics without regard for tracking provenence.
@@ -336,47 +235,3 @@ class Metrics(object):
         Clear all the metrics.
         """
         self._data.clear()
-
-
-class EvalMetrics(Metrics, ABC):
-    @abstractmethod
-    def evaluate(self, *args, **kwargs):
-        pass
-
-
-class GenMetrics(EvalMetrics):
-    def __init__(self):
-        # bleu@1-4, dist@1-4, f1
-        super(GenMetrics, self).__init__()
-        self.dist_set = defaultdict(set)
-        self.dist_cnt = 0
-
-    def evaluate(self, pred: str, labels: List[str]):
-        if pred:
-            self.add("f1", F1Metric.compute(pred, labels))
-            for k in range(1, 5):
-                self.add(f"bleu@{k}", BleuMetric.compute(pred, labels, k))
-                for token in ngrams(pred, k):
-                    self.dist_set[f"dist@{k}"].add(token)
-            self.dist_cnt += 1
-
-    def report(self):
-        for k, v in self.dist_set.items():
-            self.add(k, AverageMetric(len(v) / self.dist_cnt))
-        return super(GenMetrics, self).report()
-
-    def clear(self):
-        super(GenMetrics, self).clear()
-        self.dist_set.clear()
-        self.dist_cnt = 0
-
-
-class RecMetrics(EvalMetrics):
-    def __init__(self):
-        # recall@1, 10, 50
-        super(RecMetrics, self).__init__()
-
-    def evaluate(self, scores: TVector, label: TScalar):
-        for k in [1, 10, 50]:
-            if len(scores) >= k:
-                self.add(f"recall@{k}", RecallMetric.compute(scores, label, k))

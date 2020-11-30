@@ -1,4 +1,3 @@
-from crslab.evaluator.rec_evaluator import *
-from crslab.evaluator.conv_evaluator import *
-from crslab.evaluator.base_evaluator import *
-from crslab.evaluator.metrics import *
+from .standard_evaluator import StandardEvaluator
+from .rec_evaluator import RecEvaluator
+from .conv_evaluator import ConvEvaluator

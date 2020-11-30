@@ -3,16 +3,95 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/11/27
+# @Time   : 2020/11/23, 2020/11/30
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import random
 from abc import ABC
 from math import ceil
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Union
 
 import torch
+
+
+def padded_tensor(
+        items: List[Union[List[int], torch.LongTensor]],
+        pad_idx: int = 0,
+        right_padded: bool = True,
+        max_len: Optional[int] = None,
+) -> torch.LongTensor:
+    """
+    Create a padded matrix from an uneven list of lists.
+
+    Returns (padded, lengths), where padded is the padded matrix, and lengths
+    is a list containing the lengths of each row.
+
+    Matrix is right-padded (filled to the right) by default, but can be
+    left padded if the flag is set to True.
+
+    Matrix can also be placed on cuda automatically.
+
+    :param list[iter[int]] items: List of items
+    :param int pad_idx: the value to use for padding
+    :param bool right_padded:
+    :param int max_len: if None, the max length is the maximum item length
+
+    :returns: (padded, lengths) tuple
+    :rtype: (Tensor[int64], list[int])
+    """
+
+    # number of items
+    n = len(items)
+    # length of each item
+    lens: List[int] = [len(item) for item in items]  # type: ignore
+    # max in time dimension
+    t = max(lens) if max_len is None else max_len
+    # if input tensors are empty, we should expand to nulls
+    t = max(t, 1)
+
+    if isinstance(items[0], torch.Tensor):
+        # keep type of input tensors, they may already be cuda ones
+        output = items[0].new(n, t)  # type: ignore
+    else:
+        output = torch.LongTensor(n, t)  # type: ignore
+    output.fill_(pad_idx)
+
+    for i, (item, length) in enumerate(zip(items, lens)):
+        if length == 0:
+            # skip empty items
+            continue
+        if not isinstance(item, torch.Tensor):
+            # put non-tensors into a tensor
+            item = torch.tensor(item, dtype=torch.long)  # type: ignore
+        if right_padded:
+            # place at beginning
+            output[i, :length] = item
+        else:
+            # place at end
+            output[i, t - length:] = item
+
+    return output
+
+
+def get_onehot_label(label_lists, categories) -> torch.Tensor:
+    onehot_labels = []
+    for label_list in label_lists:
+        onehot_label = torch.zeros(categories)
+        for label in label_list:
+            onehot_label[label] = 1.0 / len(label_list)
+        onehot_labels.append(onehot_label)
+    return torch.stack(onehot_labels, dim=0)
+
+
+def batch_split(dataset, batch_size, shuffle=False):
+    batch_num = ceil(len(dataset) / batch_size)
+    idx_list = list(range(len(dataset)))
+    if shuffle:
+        random.shuffle(idx_list)
+    for start_idx in range(batch_num):
+        batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
+        yield [dataset[idx] for idx in batch_idx]
 
 
 class BaseDataLoader(ABC):
@@ -42,22 +121,13 @@ class BaseDataLoader(ABC):
         self.config = config
         self.dataset = dataset
 
-    @staticmethod
-    def batch_split(dataset, batch_size, shuffle=False):
-        batch_num = ceil(len(dataset) / batch_size)
-        idx_list = list(range(len(dataset)))
-        if shuffle:
-            random.shuffle(idx_list)
-        for start_idx in range(batch_num):
-            batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
-            yield [dataset[idx] for idx in batch_idx]
-
-    def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None):
+    def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None, *args, **kwargs):
         dataset = self.dataset
         if process_fn is not None:
-            dataset = process_fn(dataset)
-        batches_iteration = self.batch_split(dataset, batch_size, shuffle)
-        return [batch_fn(batch) for batch in batches_iteration]
+            dataset = process_fn(args, kwargs)
+
+        for batch in batch_split(dataset, batch_size, shuffle):
+            yield batch_fn(batch)
 
     def get_conv_data(self, batch_size, shuffle=False):
         return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn)
@@ -85,85 +155,3 @@ class BaseDataLoader(ABC):
 
     def guide_batchify(self, *args, **kwargs):
         raise NotImplementedError('dataloader must implement guide_batchify() method')
-
-    @staticmethod
-    def get_side_data(data, type='RGCN'):
-        if type == 'RGCN':
-            edge_sets = torch.tensor(data, dtype=torch.long)
-            edge_idx = edge_sets[:, :2].t()
-            edge_type = edge_sets[:, 2]
-            return edge_idx, edge_type
-        elif type == 'GCN':
-            edge_set = [[co[0] for co in data], [co[1] for co in data]]
-            return torch.tensor(edge_set, dtype=torch.long)
-        else:
-            raise NotImplementedError('type {} has not been implemented', type)
-
-    @staticmethod
-    def padded_tensor(
-            items: List[Union[List[int], torch.LongTensor]],
-            pad_idx: int = 0,
-            right_padded: bool = True,
-            max_len: Optional[int] = None,
-    ) -> Tuple[torch.LongTensor, List[int]]:
-        """
-        Create a padded matrix from an uneven list of lists.
-
-        Returns (padded, lengths), where padded is the padded matrix, and lengths
-        is a list containing the lengths of each row.
-
-        Matrix is right-padded (filled to the right) by default, but can be
-        left padded if the flag is set to True.
-
-        Matrix can also be placed on cuda automatically.
-
-        :param list[iter[int]] items: List of items
-        :param int pad_idx: the value to use for padding
-        :param bool right_padded:
-        :param int max_len: if None, the max length is the maximum item length
-
-        :returns: (padded, lengths) tuple
-        :rtype: (Tensor[int64], list[int])
-        """
-
-        # number of items
-        n = len(items)
-        # length of each item
-        lens: List[int] = [len(item) for item in items]  # type: ignore
-        # max in time dimension
-        t = max(lens) if max_len is None else max_len
-        # if input tensors are empty, we should expand to nulls
-        t = max(t, 1)
-
-        if isinstance(items[0], torch.Tensor):
-            # keep type of input tensors, they may already be cuda ones
-            output = items[0].new(n, t)  # type: ignore
-        else:
-            output = torch.LongTensor(n, t)  # type: ignore
-        output.fill_(pad_idx)
-
-        for i, (item, length) in enumerate(zip(items, lens)):
-            if length == 0:
-                # skip empty items
-                continue
-            if not isinstance(item, torch.Tensor):
-                # put non-tensors into a tensor
-                item = torch.tensor(item, dtype=torch.long)  # type: ignore
-            if right_padded:
-                # place at beginning
-                output[i, :length] = item
-            else:
-                # place at end
-                output[i, t - length:] = item
-
-        return output, lens
-
-    @staticmethod
-    def get_onehot_label(label_lists, categories):
-        onehot_labels = []
-        for label_list in label_lists:
-            onehot_label = torch.zeros(categories)
-            for label in label_list:
-                onehot_label[label] = 1.0 / len(label_list)
-            onehot_labels.append(onehot_label)
-        return torch.stack(onehot_labels, dim=0)

@@ -1,10 +1,10 @@
 # dataset
 dataset: ReDial
-n_entity: 64368
+n_entity: 64363
 context_truncate: 1024
 response_truncate: 1024
 # dataloader
-# rec_model
-rec_model: KBRD
-# conv_model
-conv_model: KBRD
+pad_token_idx: 0
+pad_entity_idx: 64362
+# model
+model: KBRD

@@ -11,8 +11,8 @@ import torch
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.evaluator.metrics import AverageMetric, PPLMetric
-from crslab.system.base_system import BaseSystem
+from crslab.evaluator.metrics import AverageMetric
+from crslab.system.base_system import BaseSystem, build_optimizer, build_lr_scheduler
 from crslab.system.utils import nice_report
 
 
@@ -32,14 +32,14 @@ class KGSFSystem(BaseSystem):
         self.conv_batch_size = self.config['batch_size']['conv']
         self.movie_ids = self.train_dataloader.get_movie_ids()
 
-        self.pretrain_optimizer = self.build_optimizer(self.config, self.model.parameters())
-        self.pretrain_scheduler, self.pretrain_warmup_scheduler = self.build_lr_scheduler(self.config,
+        self.pretrain_optimizer = build_optimizer(self.config, self.model.parameters())
+        self.pretrain_scheduler, self.pretrain_warmup_scheduler = build_lr_scheduler(self.config,
                                                                                           self.pretrain_optimizer)
-        self.rec_optimizer = self.build_optimizer(self.config, self.model.parameters())
-        self.rec_scheduler, self.rec_warmup_scheduler = self.build_lr_scheduler(self.config, self.rec_optimizer)
+        self.rec_optimizer = build_optimizer(self.config, self.model.parameters())
+        self.rec_scheduler, self.rec_warmup_scheduler = build_lr_scheduler(self.config, self.rec_optimizer)
         self.model.stem_conv_parameters()
-        self.conv_optimizer = self.build_optimizer(self.config, self.model.parameters())
-        self.conv_scheduler, self.conv_warmup_scheduler = self.build_lr_scheduler(self.config, self.conv_optimizer)
+        self.conv_optimizer = build_optimizer(self.config, self.model.parameters())
+        self.conv_scheduler, self.conv_warmup_scheduler = build_lr_scheduler(self.config, self.conv_optimizer)
 
     def rec_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()
@@ -53,8 +53,8 @@ class KGSFSystem(BaseSystem):
     def conv_evaluate(self, prediction, response):
         response = response.cpu().detach()
         for p, r in zip(prediction, response):
-            p_str = self.inds2txt(p)
-            r_str = self.inds2txt(r)
+            p_str = self.ind2txt(p)
+            r_str = self.ind2txt(r)
             self.evaluator.get_evaluate_fn('conv')(p_str, [r_str])
 
     def step(self, batch, stage, mode):

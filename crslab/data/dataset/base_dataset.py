@@ -21,6 +21,26 @@ ROOT_PATH = dirname(dirname(dirname(dirname(realpath(__file__)))))
 DATA_PATH = os.path.join(ROOT_PATH, "data")
 
 
+def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
+    if add_start:
+        vec.insert(0, start_token_idx)
+    if add_end:
+        vec.append(end_token_idx)
+    return vec
+
+
+def truncate(vec, max_length, truncate_tail=True):
+    """Check that vector is truncated correctly."""
+    if max_length is None:
+        return vec
+    if len(vec) <= max_length:
+        return vec
+    if truncate_tail:
+        return vec[:max_length]
+    else:
+        return vec[-max_length:]
+
+
 class BaseDataset(ABC):
     """:class:`Dataset` stores the original dataset in memory.
     It provides many useful functions for data preprocessing. Finally, the dataset are preprocessed as
@@ -48,10 +68,10 @@ class BaseDataset(ABC):
 
         if not restore:
             train_data, valid_data, test_data, self.tok2ind, self.ind2tok = self._load_data()
+            embedding = self._pretrain_embedding(train_data)
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
                                                                                                      valid_data,
                                                                                                      test_data)
-            embedding = self._pretrain_embedding(train_data)
             if embedding:
                 self.side_data["embedding"] = embedding
         else:
@@ -89,26 +109,6 @@ class BaseDataset(ABC):
             os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
-
-    @staticmethod
-    def add_start_end_token_idx(vec: list, add_start=False, start_idx=None, add_end=False, end_idx=None):
-        if add_start:
-            vec.insert(0, start_idx)
-        if add_end:
-            vec.append(end_idx)
-        return vec
-
-    @staticmethod
-    def truncate(vec, max_length, truncate_tail=True):
-        """Check that vector is truncated correctly."""
-        if max_length is None:
-            return vec
-        if len(vec) <= max_length:
-            return vec
-        if truncate_tail:
-            return vec[:max_length]
-        else:
-            return vec[-max_length:]
 
     def _pretrain_embedding(self, data=None):
         emb_type = self.opt.get('embedding_type', None)
