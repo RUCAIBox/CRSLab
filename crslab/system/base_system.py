@@ -9,31 +9,15 @@
 
 import os
 from abc import ABC, abstractmethod
-from os.path import dirname, realpath
 
 import torch
 from loguru import logger
 from torch import optim
 
-from crslab.evaluator import get_evaluator
+from crslab.config.config import SAVE_PATH
+from crslab.evaluator import StandardEvaluator
 from crslab.model import get_model
 from crslab.system.lr_scheduler import LRScheduler
-
-ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
-SAVE_PATH = os.path.join(ROOT_PATH, 'save')
-
-
-def edge_to_gcn_format(edge, type='RGCN'):
-    if type == 'RGCN':
-        edge_sets = torch.as_tensor(edge, dtype=torch.long)
-        edge_idx = edge_sets[:, :2].t()
-        edge_type = edge_sets[:, 2]
-        return edge_idx, edge_type
-    elif type == 'GCN':
-        edge_set = [[co[0] for co in edge], [co[1] for co in edge]]
-        return torch.as_tensor(edge_set, dtype=torch.long)
-    else:
-        raise NotImplementedError('type {} has not been implemented', type)
 
 
 class BaseSystem(ABC):
@@ -52,6 +36,7 @@ class BaseSystem(ABC):
         self.valid_dataloader = valid_dataloader
         self.test_dataloader = test_dataloader
         self.ind2tok = ind2tok
+        self.end_token_idx = opt['end_token_idx']
         # model
         if 'model' in opt:
             self.model = get_model(opt, opt['model'], self.device, side_data).to(self.device)
@@ -62,16 +47,19 @@ class BaseSystem(ABC):
         if 'policy_model' in opt:
             self.policy_model = get_model(opt, opt['policy_model'], self.device, side_data).to(self.device)
         self.model_file_save_path = os.path.join(SAVE_PATH, f'{opt["model_name"]}.pth')
-        self.evaluator = get_evaluator(opt['evaluator'])
+        self.evaluator = StandardEvaluator()
         # optim
+        # gradient acumulation
+        self.update_freq = opt.get('update_freq', 1)
         self._number_grad_accum = 0
+        # LR scheduler
         self._number_training_updates = 0
+        # early stop
         self.best_valid = None
-        self.val_impatience = 0
+        self.impatience = opt.get('impatience', 3)
+        self.drop_cnt = 0
         self.val_optim = 1 if opt["val_mode"] == "max" else -1
         self.stop = False
-        self.warmup_updates = opt.get('warmup_updates', -1)
-        self.update_freq = self.opt.get('update_freq', 1)
 
     @abstractmethod
     def fit(self):
@@ -140,8 +128,10 @@ class BaseSystem(ABC):
         """
         if states is None:
             states = {}
-        self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, states, hard_reset)
-        logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
+        if opt.get('lr_scheduler', None):
+            self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, states, hard_reset)
+            self._number_training_updates = self.scheduler.get_initial_number_training_updates()
+            logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
 
     def reset_training_steps(self):
         self._number_training_updates = 0
@@ -186,21 +176,21 @@ class BaseSystem(ABC):
     def early_stop(self, metric):
         if self.best_valid is None or self.best_valid < metric * self.val_optim:
             self.best_valid = metric
-            self.val_impatience = 0
+            self.drop_cnt = 0
         else:
-            self.val_impatience += 1
-            if self.val_impatience >= self.opt["val_impatience"]:
+            self.drop_cnt += 1
+            if self.drop_cnt >= self.impatience:
                 self.stop = True
 
     def reset_early_stop_state(self):
         self.best_valid = None
-        self.val_impatience = 0
+        self.drop_cnt = 0
         self.stop = False
 
     def ind2txt(self, inds):
         sentence = []
         for ind in inds:
-            if ind == self.opt['end_token_idx']:
+            if ind == self.end_token_idx:
                 break
             sentence.append(self.ind2tok.get(ind, 'unk'))
         return ' '.join(sentence)

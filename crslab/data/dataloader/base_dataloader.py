@@ -137,21 +137,21 @@ class BaseDataLoader(ABC):
         self.opt = opt
         self.dataset = dataset
 
-    def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None, *args, **kwargs):
+    def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None, *args, **kwargs):
         dataset = self.dataset
         if process_fn is not None:
-            dataset = process_fn(args, kwargs)
+            dataset = process_fn(*args, **kwargs)
 
         for batch in batch_split(dataset, batch_size, shuffle):
             yield batch_fn(batch)
 
-    def get_conv_data(self, batch_size, shuffle=False):
+    def get_conv_data(self, batch_size, shuffle=True):
         return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn)
 
-    def get_rec_data(self, batch_size, shuffle=False):
+    def get_rec_data(self, batch_size, shuffle=True):
         return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn)
 
-    def get_guide_data(self, batch_size, shuffle=False):
+    def get_guide_data(self, batch_size, shuffle=True):
         return self.get_data(self.guide_batchify, batch_size, shuffle, self.guide_process_fn)
 
     def conv_process_fn(self, *args, **kwargs):

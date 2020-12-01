@@ -12,21 +12,13 @@ import torch
 from torch import nn
 
 
-def init_embedding(vocab_size, dim, pad_idx=None, pretrained_embedding=None, freeze=True):
-    if pretrained_embedding:
-        e = nn.Embedding.from_pretrained(pretrained_embedding, freeze, pad_idx)
-    else:
-        e = nn.Embedding(vocab_size, dim, pad_idx)
-    return e
-
-
 class BaseModel(ABC, nn.Module):
     r"""Base class for all models
     """
 
-    def __init__(self, config, device):
+    def __init__(self, opt, device):
         super(BaseModel, self).__init__()
-        self.config = config
+        self.opt = opt
         self.device = device
 
     @abstractmethod

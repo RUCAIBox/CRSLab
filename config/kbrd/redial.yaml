@@ -8,5 +8,3 @@ pad_token_idx: 0
 pad_entity_idx: 64362
 # model
 model: KBRD
-# evaluator
-evaluator: standard

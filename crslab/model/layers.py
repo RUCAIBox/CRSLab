@@ -8,17 +8,10 @@
 # @Author : Kun Zhou
 # @Email  : francis_kun_zhou@163.com
 
-from logging import getLogger
-import numpy as np
-import copy
-import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.init import normal_
 
-def load_copy_mask(copy_mask_path):
-    return torch.BoolTensor(np.load(copy_mask_path).astype(bool)).cuda()
 
 class SelfAttentionSeq(nn.Module):
     def __init__(self, dim, da, alpha=0.2, dropout=0.5):
@@ -41,8 +34,8 @@ class SelfAttentionSeq(nn.Module):
         e = torch.matmul(torch.tanh(torch.matmul(h, self.a)), self.b)  # (batch, seq_len, 1)
         if mask is not None:
             full_mask = -1e30 * mask.float()
-            batch_mask = torch.sum((mask==False), -1).bool().float().unsqueeze(-1)  #for all padding one, the mask=0
-            mask = full_mask*batch_mask
+            batch_mask = torch.sum((mask == False), -1).bool().float().unsqueeze(-1)  # for all padding one, the mask=0
+            mask = full_mask * batch_mask
             e += mask.unsqueeze(-1)
         attention = F.softmax(e, dim=1)  # (batch, seq_len, 1)
         # (batch, dim)
@@ -51,10 +44,11 @@ class SelfAttentionSeq(nn.Module):
         else:
             return torch.matmul(torch.transpose(attention, 1, 2), h).squeeze(1)
 
+
 class GateLayer(nn.Module):
     def __init__(self, input_dim):
         super(GateLayer, self).__init__()
-        self._norm_layer1 = nn.Linear(input_dim*2, input_dim)
+        self._norm_layer1 = nn.Linear(input_dim * 2, input_dim)
         self._norm_layer2 = nn.Linear(input_dim, 1)
 
     def forward(self, input1, input2):

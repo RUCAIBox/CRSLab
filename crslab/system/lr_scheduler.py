@@ -135,7 +135,7 @@ class LRScheduler(ABC):
         max_lr_steps = opt.get('max_lr_steps', -1)
         invsqrt_lr_decay_gamma = opt.get('invsqrt_lr_decay_gamma', -1)
 
-        if opt.get('lr_scheduler') == 'none':
+        if opt.get('lr_scheduler', 'none') == 'none':
             return None
         elif decay == 1.0:
             logger.warning(

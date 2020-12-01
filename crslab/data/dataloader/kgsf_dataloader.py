@@ -10,6 +10,7 @@
 from copy import deepcopy
 
 import torch
+from tqdm import tqdm
 
 from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, get_onehot_label, truncate, \
     merge_utt
@@ -17,6 +18,7 @@ from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor
 
 class KGSFDataLoader(BaseDataLoader):
     def __init__(self, opt, dataset):
+        self.n_entity = opt['n_entity']
         self.pad_token_idx = opt['pad_token_idx']
         self.pad_entity_idx = opt['pad_entity_idx']
         self.pad_word_idx = opt['pad_word_idx']
@@ -26,7 +28,7 @@ class KGSFDataLoader(BaseDataLoader):
         self.word_truncate = opt.get('word_truncate', None)
         super().__init__(opt, dataset)
 
-    def get_pretrain_data(self, batch_size, shuffle=False):
+    def get_pretrain_data(self, batch_size, shuffle=True):
         """
         input: conv_dict = {
                     "context_tokens": [id1, id2, ..., ],  # [int]
@@ -59,7 +61,7 @@ class KGSFDataLoader(BaseDataLoader):
             batch_context_words.append(conv_dict['context_words'])
 
         return (padded_tensor(batch_context_words, self.pad_word_idx),
-                get_onehot_label(batch_context_entities, self.pad_entity_idx))
+                get_onehot_label(batch_context_entities, self.n_entity))
 
     def rec_process_fn(self):
         """
@@ -67,7 +69,7 @@ class KGSFDataLoader(BaseDataLoader):
         hence we need to augment data for each recommended movie
         """
         augment_dataset = []
-        for conv_dict in self.dataset:
+        for conv_dict in tqdm(self.dataset):
             for movie in conv_dict['items']:
                 augment_conv_dict = deepcopy(conv_dict)
                 augment_conv_dict['item'] = movie
@@ -95,7 +97,7 @@ class KGSFDataLoader(BaseDataLoader):
 
         return (padded_tensor(batch_context_entities, self.pad_entity_idx),
                 padded_tensor(batch_context_words, self.pad_word_idx),
-                get_onehot_label(batch_context_entities, self.pad_entity_idx),
+                get_onehot_label(batch_context_entities, self.n_entity),
                 torch.tensor(batch_movie, dtype=torch.long))
 
     def conv_batchify(self, batch):
@@ -114,18 +116,15 @@ class KGSFDataLoader(BaseDataLoader):
         batch_context_words = []
         batch_response = []
         for conv_dict in batch:
-            batch_context_tokens.append(merge_utt(conv_dict['context_tokens']))
-            batch_context_entities.append(conv_dict['context_entities'])
-            batch_context_words.append(conv_dict['context_words'])
-            batch_response.append(conv_dict['response'])
+            batch_context_tokens.append(truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
+            batch_context_entities.append(truncate(conv_dict['context_entities'], self.entity_truncate))
+            batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate))
+            batch_response.append(truncate(conv_dict['response'], self.response_truncate))
 
-        return (padded_tensor(truncate(batch_context_tokens, self.context_truncate, truncate_tail=False),
-                              self.pad_token_idx, right_padded=False),
-                padded_tensor(truncate(batch_context_entities, self.entity_truncate),
-                              self.pad_entity_idx),
-                padded_tensor(truncate(batch_context_words, self.word_truncate), self.pad_word_idx),
-                padded_tensor(truncate(batch_response, self.response_truncate),
-                              self.pad_token_idx))
+        return (padded_tensor(batch_context_tokens, self.pad_token_idx, right_padded=False),
+                padded_tensor(batch_context_entities, self.pad_entity_idx),
+                padded_tensor(batch_context_words, self.pad_word_idx),
+                padded_tensor(batch_response, self.pad_token_idx))
 
     def guide_batchify(self, *args, **kwargs):
         pass

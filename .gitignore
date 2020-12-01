@@ -4,6 +4,7 @@
 data
 !crslab/data
 log
+save
 
 ### VisualStudioCode template
 .vscode/*

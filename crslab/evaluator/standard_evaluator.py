@@ -14,7 +14,7 @@ from nltk import ngrams
 
 from crslab.evaluator.base_evaluator import BaseEvaluator
 from crslab.evaluator.gen_metrics import F1Metric, BleuMetric
-from crslab.evaluator.metrics import aggregate_unnamed_reports, Metrics
+from crslab.evaluator.metrics import aggregate_unnamed_reports, Metrics, AverageMetric
 from crslab.evaluator.rec_metrics import RecallMetric
 from crslab.system.utils import nice_report
 
@@ -28,6 +28,8 @@ class StandardEvaluator(BaseEvaluator):
         self.dist_set = defaultdict(set)
         self.dist_cnt = 0
         self.gen_metrics = Metrics()
+        # optim
+        self.optim_metrics = Metrics()
 
     def rec_evaluate(self, preds, label):
         for k in [1, 10, 50]:
@@ -44,6 +46,8 @@ class StandardEvaluator(BaseEvaluator):
             self.dist_cnt += 1
 
     def report(self):
+        for k, v in self.dist_set.items():
+            self.gen_metrics.add(k, AverageMetric(len(v) / self.dist_cnt))
         reports = [self.rec_metrics.report(), self.gen_metrics.report(), self.optim_metrics.report()]
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 

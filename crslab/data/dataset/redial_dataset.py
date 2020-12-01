@@ -16,7 +16,8 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.data.dataset.base_dataset import BaseDataset, DATA_PATH, add_start_end_token_idx
+from crslab.config.config import DATA_PATH
+from crslab.data.dataset.base_dataset import BaseDataset, add_start_end_token_idx
 from crslab.data.dataset.download import DownloadableFile, build
 
 
@@ -225,7 +226,7 @@ class ReDialDataset(BaseDataset):
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,
-            "item_ids": movie_entity_ids,
+            "item_entity_ids": movie_entity_ids,
         }
         return side_data
 

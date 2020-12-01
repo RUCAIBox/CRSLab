@@ -17,7 +17,7 @@ from crslab.system import get_system
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_file', type=str, default='config/kbrd/redial.yaml', help='config files')
+    parser.add_argument('--config_file', type=str, default='config/kgsf/redial.yaml', help='config files')
     parser.add_argument('--save', type=bool, default=False, help='whether save the preprocessed dataset')
     parser.add_argument('--restore', type=bool, default=False, help='whether restore the preprocessed dataset')
     args, _ = parser.parse_known_args()

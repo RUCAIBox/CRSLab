@@ -10,11 +10,17 @@
 import json
 import os
 import time
+from os.path import dirname, realpath
 from pprint import pprint
 
 import yaml
 from loguru import logger
 from tqdm import tqdm
+
+
+ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
+DATA_PATH = os.path.join(ROOT_PATH, "data")
+SAVE_PATH = os.path.join(ROOT_PATH, 'save')
 
 
 class Config:
@@ -64,7 +70,6 @@ class Config:
         rec_model = self.opt.get('rec_model', None)
         conv_model = self.opt.get('conv_model', None)
         policy_model = self.opt.get('policy_model', None)
-        evaluator = self.opt['evaluator']
         if model:
             model_name = model
         else:
@@ -94,7 +99,6 @@ class Config:
             logger.info(f'[Conversation Model: {conv_model}]')
         if policy_model:
             logger.info(f'[Policy Model: {policy_model}]')
-        logger.info(f'[Evaluator: {evaluator}]')
         logger.info("[Config]" + '\n' + json.dumps(self.opt, indent=4))
 
     @staticmethod

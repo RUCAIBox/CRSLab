@@ -10,13 +10,9 @@
 import os
 import pickle as pkl
 from abc import ABC, abstractmethod
-from os.path import dirname, realpath
 
 import numpy as np
 from loguru import logger
-
-ROOT_PATH = dirname(dirname(dirname(dirname(realpath(__file__)))))
-DATA_PATH = os.path.join(ROOT_PATH, "data")
 
 
 def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
