@@ -9,13 +9,18 @@
 
 import os
 from abc import ABC, abstractmethod
+from os.path import dirname, realpath
 
-import numpy as np
 import torch
 from loguru import logger
 from torch import optim
 
+from crslab.evaluator import get_evaluator
 from crslab.model import get_model
+from crslab.system.lr_scheduler import LRScheduler
+
+ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
+SAVE_PATH = os.path.join(ROOT_PATH, 'save')
 
 
 def edge_to_gcn_format(edge, type='RGCN'):
@@ -31,131 +36,6 @@ def edge_to_gcn_format(edge, type='RGCN'):
         raise NotImplementedError('type {} has not been implemented', type)
 
 
-def build_optimizer(config, parameters):
-    def _optim_opts():
-        opts = {k.lower(): v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()}
-        return opts
-
-    # set up optimizer args
-    lr = config["learning_rate"]
-    kwargs = {'lr': lr}
-    if config.get('weight_decay', 0):
-        kwargs['weight_decay'] = config['weight_decay']
-    if config.get('momentum', 0) > 0 and config['optimizer'] in ['sgd', 'rmsprop', 'qhm']:
-        # turn on momentum for optimizers that use it
-        kwargs['momentum'] = config['momentum']
-        if config['optimizer'] == 'sgd' and config.get('nesterov', True):
-            # for sgd, maybe nesterov
-            kwargs['nesterov'] = config.get('nesterov', True)
-        elif config['optimizer'] == 'qhm':
-            # qhm needs a nu
-            kwargs['nu'] = config.get('nus', (0.7,))[0]
-    elif config['optimizer'] == 'adam':
-        # turn on amsgrad for `adam`
-        # amsgrad paper: https://openreview.net/forum?id=ryQu7f-RZ
-        kwargs['amsgrad'] = True
-    elif config['optimizer'] == 'qhadam':
-        # set nus for qhadam
-        kwargs['nus'] = config.get('nus', (0.7, 1.0))
-    elif config['optimizer'] == 'adafactor':
-        # adafactor params
-        kwargs['beta1'] = config.get('betas', (0.9, 0.999))[0]
-        kwargs['eps'] = config['adafactor_eps']
-        kwargs['warmup_init'] = config.get('warmup_updates', -1) > 0
-
-    if config['optimizer'] in [
-        'adam',
-        'sparseadam',
-        'fused_adam',
-        'adamax',
-        'qhadam',
-        'fused_lamb',
-    ]:
-        # set betas for optims that use it
-        kwargs['betas'] = config.get('betas', (0.9, 0.999))
-        # set adam optimizer, but only if user specified it
-        if config.get('adam_eps'):
-            kwargs['eps'] = config['adam_eps']
-
-    optim_class = _optim_opts()[config['optimizer']]
-    logger.info("[Build optimizer: {}]", config["optimizer"])
-    return optim_class(parameters, **kwargs)
-
-
-def build_lr_scheduler(config, optimizer):
-    """
-    Create the learning rate scheduler, and assign it to self.scheduler.
-    This scheduler will be updated upon a call to receive_metrics.
-
-    May also create self.warmup_scheduler, if appropriate.
-    """
-
-    if config.get('warmup_updates', -1) > 0:
-        def _warmup_lr(step):
-            start = config['warmup_rate']
-            end = 1.0
-            progress = min(1.0, step / config['warmup_updates'])
-            lr_mult = start + (end - start) * progress
-            return lr_mult
-
-        warmup_scheduler = optim.lr_scheduler.LambdaLR(
-            optimizer,
-            _warmup_lr
-        )
-        logger.info("[Build warmup_scheduler]")
-    else:
-        warmup_scheduler = None
-
-    patience = config.get('lr_scheduler_patience', 3)
-    decay = config.get('lr_scheduler_decay', 0.5)
-
-    if config.get('lr_scheduler', "none") == 'none':
-        scheduler = None
-    elif decay == 1.0:
-        # warn_once(
-        #     "Your LR decay is set to 1.0. Assuming you meant you wanted "
-        #     "to disable learning rate scheduling. Adjust --lr-scheduler-decay "
-        #     "if this is not correct."
-        # )
-        scheduler = None
-    elif config.get('lr_scheduler') == 'reduceonplateau':
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            'min',
-            factor=decay,
-            patience=patience,
-            verbose=True
-        )
-    elif config.get('lr_scheduler') == 'fixed':
-        scheduler = optim.lr_scheduler.StepLR(
-            optimizer,
-            patience,
-            gamma=decay,
-        )
-    elif config.get('lr_scheduler') == 'invsqrt':
-        if config.get('warmup_updates', -1) <= 0:
-            raise ValueError(
-                '--lr-scheduler invsqrt requires setting --warmup-updates'
-            )
-        warmup_updates = config['warmup_updates']
-        decay_factor = np.sqrt(max(1, warmup_updates))
-
-        def _invsqrt_lr(step):
-            return decay_factor / np.sqrt(max(1, step))
-
-        scheduler = optim.lr_scheduler.LambdaLR(
-            optimizer,
-            _invsqrt_lr,
-        )
-    else:
-        raise ValueError(
-            "Don't know what to do with lr_scheduler '{}'"
-                .format(config.get('lr_scheduler'))
-        )
-    logger.info("[Build lr_scheduler: {}]", config.get("lr_scheduler"))
-    return scheduler, warmup_scheduler
-
-
 class BaseSystem(ABC):
     r"""Trainer Class is used to manage the training and evaluation processes of recommender system models.
     AbstractTrainer is an abstract class in which the fit() and evaluate() method should be implemented according
@@ -164,33 +44,34 @@ class BaseSystem(ABC):
     For side data, it is judged by model
     """
 
-    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, evaluator, side_data=None):
-        self.config = config
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None):
+        self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+        # data
         self.train_dataloader = train_dataloader
         self.valid_dataloader = valid_dataloader
         self.test_dataloader = test_dataloader
         self.ind2tok = ind2tok
-
-        if 'model' in config:
-            self.model = get_model(config, config['model'], self.device, side_data)
-            self.model = self.model.to(self.device)
-        else:
-            self.rec_model = get_model(config, config['rec_model'], self.device, side_data)
-            self.rec_model = self.rec_model.to(self.device)
-            self.conv_model = get_model(config, config['conv_model'], self.device, side_data)
-            self.conv_model = self.conv_model.to(self.device)
-        self.model_file_save_path = os.path.join(config['data_path'], '{}-{}.pth'.format(self.config['rec_model'],
-                                                                                         self.config['conv_model']))
-        self.evaluator = evaluator
-
+        # model
+        if 'model' in opt:
+            self.model = get_model(opt, opt['model'], self.device, side_data).to(self.device)
+        if 'rec_model' in opt:
+            self.rec_model = get_model(opt, opt['rec_model'], self.device, side_data).to(self.device)
+        if 'conv_model' in opt:
+            self.conv_model = get_model(opt, opt['conv_model'], self.device, side_data).to(self.device)
+        if 'policy_model' in opt:
+            self.policy_model = get_model(opt, opt['policy_model'], self.device, side_data).to(self.device)
+        self.model_file_save_path = os.path.join(SAVE_PATH, f'{opt["model_name"]}.pth')
+        self.evaluator = get_evaluator(opt['evaluator'])
+        # optim
         self._number_grad_accum = 0
         self._number_training_updates = 0
         self.best_valid = None
         self.val_impatience = 0
-        self.val_optim = 1 if self.config["val_mode"] == "max" else -1
+        self.val_optim = 1 if opt["val_mode"] == "max" else -1
         self.stop = False
+        self.warmup_updates = opt.get('warmup_updates', -1)
+        self.update_freq = self.opt.get('update_freq', 1)
 
     @abstractmethod
     def fit(self):
@@ -199,86 +80,108 @@ class BaseSystem(ABC):
         """
         raise NotImplementedError('Method [next] should be implemented.')
 
+    def build_optimizer(self, opt, parameters):
+        optimizer = opt['optimizer']
+        # set up optimizer args
+        lr = opt["learning_rate"]
+        kwargs = {'lr': lr}
+        if opt.get('weight_decay', 0):
+            kwargs['weight_decay'] = opt['weight_decay']
+        if opt.get('momentum', 0) > 0 and opt['optimizer'] in ['sgd', 'rmsprop', 'qhm']:
+            # turn on momentum for optimizers that use it
+            kwargs['momentum'] = opt['momentum']
+            if opt['optimizer'] == 'sgd' and opt.get('nesterov', True):
+                # for sgd, maybe nesterov
+                kwargs['nesterov'] = opt.get('nesterov', True)
+            elif opt['optimizer'] == 'qhm':
+                # qhm needs a nu
+                kwargs['nu'] = opt.get('nus', (0.7,))[0]
+        elif opt['optimizer'] == 'adam':
+            # turn on amsgrad for `adam`
+            # amsgrad paper: https://openreview.net/forum?id=ryQu7f-RZ
+            kwargs['amsgrad'] = True
+        elif opt['optimizer'] == 'qhadam':
+            # set nus for qhadam
+            kwargs['nus'] = opt.get('nus', (0.7, 1.0))
+        elif opt['optimizer'] == 'adafactor':
+            # adafactor params
+            kwargs['beta1'] = opt.get('betas', (0.9, 0.999))[0]
+            kwargs['eps'] = opt['adafactor_eps']
+            kwargs['warmup_init'] = opt.get('warmup_updates', -1) > 0
+
+        if opt['optimizer'] in [
+            'adam',
+            'sparseadam',
+            'fused_adam',
+            'adamax',
+            'qhadam',
+            'fused_lamb',
+        ]:
+            # set betas for optims that use it
+            kwargs['betas'] = opt.get('betas', (0.9, 0.999))
+            # set adam optimizer, but only if user specified it
+            if opt.get('adam_eps'):
+                kwargs['eps'] = opt['adam_eps']
+
+        optim_class = {k.lower(): v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()}
+        self.optimizer = optim_class[optimizer](parameters, **kwargs)
+        logger.info("[Build optimizer: {}]", opt["optimizer"])
+
+    def build_lr_scheduler(self, opt, states=None, hard_reset=False):
+        """
+        Create the learning rate scheduler, and assign it to self.scheduler. This
+        scheduler will be updated upon a call to receive_metrics. May also create
+        self.warmup_scheduler, if appropriate.
+
+        :param state_dict states: Possible state_dict provided by model
+            checkpoint, for restoring LR state
+        :param bool hard_reset: If true, the LR scheduler should ignore the
+            state dictionary.
+        """
+        if states is None:
+            states = {}
+        self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, states, hard_reset)
+        logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
+
     def reset_training_steps(self):
         self._number_training_updates = 0
 
-    def _zero_grad(self, optimizer):
+    def _zero_grad(self):
         if self._number_grad_accum != 0:
             # if we're accumulating gradients, don't actually zero things out yet.
             return
-        optimizer.zero_grad()
+        self.optimizer.zero_grad()
 
-    def _is_lr_warming_up(self, warmup_scheduler=None):
-        """Checks if we're warming up the learning rate."""
-        return (
-                warmup_scheduler is not None and
-                self._number_training_updates <= self.config['warmup_updates']
-        )
-
-    def _update_params(self, optimizer, warmup_scheduler=None, scheduler=None):
-        update_freq = self.config.get('update_freq', 1)
-        if update_freq > 1:
+    def _update_params(self):
+        if self.update_freq > 1:
             # we're doing gradient accumulation, so we don't only want to step
             # every N updates instead
             # self._number_grad_accum is updated in backward function
             if self._number_grad_accum != 0:
                 return
 
+        self.optimizer.step()
+
         # keep track up number of steps, compute warmup factor
         self._number_training_updates += 1
-        # compute warmup adjustment if needed
-        if self.config.get('warmup_updates', -1) > 0:
-            if not hasattr(self, 'warmup_scheduler'):
-                raise RuntimeError(
-                    'Looks like you forgot to call build_lr_scheduler'
-                )
-            if self._is_lr_warming_up(warmup_scheduler):
-                warmup_scheduler.step(epoch=self._number_training_updates)
-        if self.config.get('lr_scheduler') == 'invsqrt' and not self._is_lr_warming_up():
-            # training step scheduler
-            scheduler.step(self._number_training_updates)
 
-        optimizer.step()
+        if hasattr(self, 'scheduler'):
+            self.scheduler.step(self._number_training_updates)
 
-    def backward(self, optimizer, loss, warmup_scheduler=None, scheduler=None):
-        self._zero_grad(optimizer)
+    def backward(self, loss):
+        self._zero_grad()
 
-        update_freq = self.config.get('update_freq', 1)
-        if update_freq > 1:
-            self._number_grad_accum = (self._number_grad_accum + 1) % update_freq
-            loss /= update_freq
+        if self.update_freq > 1:
+            self._number_grad_accum = (self._number_grad_accum + 1) % self.update_freq
+            loss /= self.update_freq
         loss.backward()
 
-        self._update_params(optimizer, warmup_scheduler, scheduler)
+        self._update_params()
 
-    def adjust_lr(self, scheduler=None, metric=None):
-        """
-        Use the metric to decide when to adjust LR schedule.
-
-        Override this to override the behavior.
-        """
-        if scheduler is None:
+    def adjust_lr(self, metric=None):
+        if not hasattr(self, 'scheduler') or self.scheduler is None:
             return
-
-        if self._is_lr_warming_up():
-            # we're not done warming up, so don't start using validation
-            # metrics to adjust schedule
-            return
-
-        if self.config['lr_scheduler'] == 'none':
-            # no scheduler, nothing to adjust here
-            pass
-        elif self.config['lr_scheduler'] == 'reduceonplateau':
-            scheduler.step(metric)
-        elif self.config['lr_scheduler'] == 'fixed':
-            scheduler.step()
-        elif self.config['lr_scheduler'] == 'invsqrt':
-            # this is a training step lr scheduler, nothing to adjust in validation
-            pass
-        else:
-            raise ValueError(
-                "Don't know how to work with lr scheduler '{}'".format(self.config['lr_scheduler'])
-            )
+        self.scheduler.valid_step(metric)
 
     def early_stop(self, metric):
         if self.best_valid is None or self.best_valid < metric * self.val_optim:
@@ -286,7 +189,7 @@ class BaseSystem(ABC):
             self.val_impatience = 0
         else:
             self.val_impatience += 1
-            if self.val_impatience >= self.config["val_impatience"]:
+            if self.val_impatience >= self.opt["val_impatience"]:
                 self.stop = True
 
     def reset_early_stop_state(self):
@@ -297,7 +200,7 @@ class BaseSystem(ABC):
     def ind2txt(self, inds):
         sentence = []
         for ind in inds:
-            if ind == self.config['end_token_idx']:
+            if ind == self.opt['end_token_idx']:
                 break
             sentence.append(self.ind2tok.get(ind, 'unk'))
         return ' '.join(sentence)
@@ -310,17 +213,15 @@ class BaseSystem(ABC):
             saved_model_file (str): file name for saved pretrained model
 
         """
+        state = {'config': self.opt}
         if hasattr(self, 'model'):
-            state = {
-                'config': self.config,
-                'model_state_dict': self.model.state_dict(),
-            }
-        else:
-            state = {
-                'config': self.config,
-                'rec_state_dict': self.rec_model.state_dict(),
-                'conv_state_dict': self.conv_model.state_dict(),
-            }
+            state['model_state_dict'] = self.model.state_dict()
+        if hasattr(self, 'rec_model'):
+            state['rec_state_dict'] = self.rec_model.state_dict()
+        if hasattr(self, 'conv_model'):
+            state['conv_state_dict'] = self.conv_model.state_dict()
+        if hasattr(self, 'policy_model'):
+            state['policy_state_dict'] = self.policy_model.state_dict()
         torch.save(state, self.model_file_save_path)
 
     def load_system(self):
@@ -332,9 +233,12 @@ class BaseSystem(ABC):
 
         """
         checkpoint = torch.load(self.model_file_save_path)
-        self.config = checkpoint['config']
+        self.opt = checkpoint['config']
         if hasattr(self, 'model'):
             self.model.load_state_dict(checkpoint['model_state_dict'])
-        else:
+        if hasattr(self, 'rec_model'):
             self.rec_model.load_state_dict(checkpoint['rec_state_dict'])
+        if hasattr(self, 'conv_model'):
             self.conv_model.load_state_dict(checkpoint['conv_state_dict'])
+        if hasattr(self, 'policy_model'):
+            self.policy_model.load_state_dict(checkpoint['policy_state_dict'])

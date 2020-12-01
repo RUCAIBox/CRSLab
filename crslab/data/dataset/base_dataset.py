@@ -13,9 +13,7 @@ from abc import ABC, abstractmethod
 from os.path import dirname, realpath
 
 import numpy as np
-from gensim.models import Word2Vec, FastText
 from loguru import logger
-from torchtext import vocab
 
 ROOT_PATH = dirname(dirname(dirname(dirname(realpath(__file__)))))
 DATA_PATH = os.path.join(ROOT_PATH, "data")
@@ -27,18 +25,6 @@ def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, ad
     if add_end:
         vec.append(end_token_idx)
     return vec
-
-
-def truncate(vec, max_length, truncate_tail=True):
-    """Check that vector is truncated correctly."""
-    if max_length is None:
-        return vec
-    if len(vec) <= max_length:
-        return vec
-    if truncate_tail:
-        return vec[:max_length]
-    else:
-        return vec[-max_length:]
 
 
 class BaseDataset(ABC):
@@ -68,12 +54,12 @@ class BaseDataset(ABC):
 
         if not restore:
             train_data, valid_data, test_data, self.tok2ind, self.ind2tok = self._load_data()
-            embedding = self._pretrain_embedding(train_data)
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
                                                                                                      valid_data,
                                                                                                      test_data)
+            embedding = opt.get('embedding', None)
             if embedding:
-                self.side_data["embedding"] = embedding
+                self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
         else:
             self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok = self._load_from_restore()
 
@@ -109,73 +95,3 @@ class BaseDataset(ABC):
             os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
-
-    def _pretrain_embedding(self, data=None):
-        emb_type = self.opt.get('embedding_type', None)
-        if emb_type is None:
-            return None
-
-        embedding = np.zeros(len(self.tok2ind), self.opt["embedding_dim"])
-        pretrained = self.opt.get("pretrained", False)
-        dim = self.opt.get('embedding_dim', 300)
-        if pretrained:
-            if emb_type == "fasttext":
-                name = 'fasttext'
-                model = vocab.FastText(cache=os.path.join(self.dpath, "fasttext_vectors"))
-            elif emb_type == "fasttext_cc":
-                name = 'fasttext_cc'
-                model = vocab.Vectors(
-                    name='crawl-300d-2M.vec',
-                    url='https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip',
-                    cache=os.path.join(self.dpath, 'fasttext_cc_vectors'),
-                )
-            elif emb_type == "glove":
-                name = self.opt.get('embedding_name', '840B')
-                model = vocab.GloVe(name=name, dim=dim, cache=os.path.join(self.dpath, 'glove_vectors'))
-                name = 'glove_' + name
-            else:
-                raise RuntimeError(
-                    'embedding type {} not implemented. check arg, '
-                    'submit PR to this function, or override it.'
-                    ''.format(emb_type)
-                )
-
-            cnt = 0
-            for w, i in self.tok2ind.items():
-                if w in model.stoi:
-                    embedding[i] = model.vectors[model.stoi[w]]
-                    cnt += 1
-            logger.info(
-                f'[Initialized embeddings for {cnt} tokens '
-                f'({cnt / len(self.tok2ind):.1%}) from {name}_{dim}d]'
-            )
-        else:
-            def corpus():
-                for conv in data:
-                    for utt in conv["dialog"]:
-                        yield utt["text"]
-
-            logger.info(f'[Start pretrain {emb_type}]')
-            opt = self.opt.get(emb_type, None)
-            if emb_type == "word2vec":
-                if opt:
-                    model = Word2Vec(corpus, size=dim, **opt)
-                else:
-                    model = Word2Vec(corpus, size=dim)
-            elif emb_type == "fasttext":
-                if opt:
-                    model = FastText(corpus, size=dim, **self.opt['fasttext'])
-                else:
-                    model = FastText(corpus, size=dim)
-            else:
-                raise RuntimeError(
-                    'embedding type {} not implemented. check arg, '
-                    'submit PR to this function, or override it.'
-                    ''.format(emb_type)
-                )
-            for w, i in self.tok2ind.items():
-                if w in model:
-                    embedding[i] = model[w]
-            logger.info(f'[Finish pretrain {emb_type}]')
-
-        return embedding

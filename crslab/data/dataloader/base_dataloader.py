@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/11/30
+# @Time   : 2020/11/23, 2020/12/1
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -94,13 +94,29 @@ def batch_split(dataset, batch_size, shuffle=False):
         yield [dataset[idx] for idx in batch_idx]
 
 
+def truncate(vec, max_length, truncate_tail=True):
+    """Check that vector is truncated correctly."""
+    if max_length is None:
+        return vec
+    if len(vec) <= max_length:
+        return vec
+    if truncate_tail:
+        return vec[:max_length]
+    else:
+        return vec[-max_length:]
+
+
+def merge_utt(conv):
+    return [token for utt in conv for token in utt]
+
+
 class BaseDataLoader(ABC):
     """:class:`BaseDataLoader` is an base object which would return a batch of data which is loaded by
         :class:`~recbole.data.interaction.Interaction` when it is iterated.
         And it is also the ancestor of all other dataloader.
 
         Args:
-            config (Config): The config of dataloader.
+            opt (Config): The config of dataloader.
             dataset (Dataset): The dataset of dataloader.
             batch_size (int, optional): The batch_size of dataloader. Defaults to ``1``.
             dl_format (InputType, optional): The input type of dataloader. Defaults to
@@ -117,8 +133,8 @@ class BaseDataLoader(ABC):
             batch_size (int): The max interaction number for all batch.
         """
 
-    def __init__(self, config, dataset):
-        self.config = config
+    def __init__(self, opt, dataset):
+        self.opt = opt
         self.dataset = dataset
 
     def get_data(self, batch_fn, batch_size, shuffle=False, process_fn=None, *args, **kwargs):

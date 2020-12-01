@@ -34,11 +34,12 @@ if __name__ == '__main__':
     valid_dataloader = get_dataloader(config, valid_data)
     test_dataloader = get_dataloader(config, test_data)
 
-    for i, batch in enumerate(train_dataloader.get_conv_data(32, shuffle=True)):
-        pprint(batch)
-        if i == 5:
-            break
-    exit()
+    # for i, batch in enumerate(train_dataloader.get_conv_data(32, shuffle=True)):
+    #     pprint(batch)
+    #     if i == 5:
+    #         break
+    # exit()
+
     # system init and fit
     CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data)
     CRS.fit(debug=True)

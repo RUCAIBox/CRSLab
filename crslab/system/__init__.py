@@ -14,21 +14,14 @@ system_register_table = {
 }
 
 
-def get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data=None):
+def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data=None):
     """
     return the system class
     """
-    if 'model' in config:
-        return system_register_table[config['model']](config, train_dataloader,
-                                                      valid_dataloader, test_dataloader, ind2token, side_data)
-    elif 'rec_model' and 'conv_model' in config:
-        if config['rec_model'] in system_register_table:
-            return system_register_table[config['rec_model'] + '_' + config['conv_model']](config, train_dataloader,
-                                                                                           valid_dataloader,
-                                                                                           test_dataloader, ind2token,
-                                                                                           side_data)
-        else:
-            raise NotImplementedError('The system with models [{}, {}] in dataset [{}] has not been implemented'.
-                                      format(config['rec_model'], config['conv_model'], config['dataset']))
+    model_name = opt['model_name']
+    if model_name in system_register_table:
+        return system_register_table[model_name](opt, train_dataloader, valid_dataloader, test_dataloader,
+                                                 ind2token, side_data)
     else:
-        raise
+        raise NotImplementedError('The system with model [{}] in dataset [{}] has not been implemented'.
+                                  format(model_name, opt['dataset']))

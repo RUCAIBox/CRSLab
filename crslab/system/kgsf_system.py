@@ -12,7 +12,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.evaluator.metrics import AverageMetric
-from crslab.system.base_system import BaseSystem, build_optimizer, build_lr_scheduler
+from crslab.system.base_system import BaseSystem
 from crslab.system.utils import nice_report
 
 
@@ -21,25 +21,16 @@ class KGSFSystem(BaseSystem):
         It includes two training stages: pre-training ang fine-tuning.
     """
 
-    def __init__(self, config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data):
-        super(KGSFSystem, self).__init__(config, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data)
-        self.pretrain_epoch = self.config['optim']['pretrain']['epoch']
-        self.rec_epoch = self.config['optim']['rec']['epoch']
-        self.conv_epoch = self.config['optim']['conv']['epoch']
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data):
+        super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data)
+        self.pretrain_epoch = self.opt['optim']['pretrain']['epoch']
+        self.rec_epoch = self.opt['optim']['rec']['epoch']
+        self.conv_epoch = self.opt['optim']['conv']['epoch']
 
-        self.pretrain_batch_size = self.config['batch_size']['pretrain']
-        self.rec_batch_size = self.config['batch_size']['rec']
-        self.conv_batch_size = self.config['batch_size']['conv']
+        self.pretrain_batch_size = self.opt['batch_size']['pretrain']
+        self.rec_batch_size = self.opt['batch_size']['rec']
+        self.conv_batch_size = self.opt['batch_size']['conv']
         self.movie_ids = self.train_dataloader.get_movie_ids()
-
-        self.pretrain_optimizer = build_optimizer(self.config, self.model.parameters())
-        self.pretrain_scheduler, self.pretrain_warmup_scheduler = build_lr_scheduler(self.config,
-                                                                                          self.pretrain_optimizer)
-        self.rec_optimizer = build_optimizer(self.config, self.model.parameters())
-        self.rec_scheduler, self.rec_warmup_scheduler = build_lr_scheduler(self.config, self.rec_optimizer)
-        self.model.stem_conv_parameters()
-        self.conv_optimizer = build_optimizer(self.config, self.model.parameters())
-        self.conv_scheduler, self.conv_warmup_scheduler = build_lr_scheduler(self.config, self.conv_optimizer)
 
     def rec_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()

@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/11/29
+# @Time   : 2020/11/23, 2020/12/1
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -16,7 +16,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.data.dataset.base_dataset import BaseDataset, DATA_PATH, add_start_end_token_idx, truncate
+from crslab.data.dataset.base_dataset import BaseDataset, DATA_PATH, add_start_end_token_idx
 from crslab.data.dataset.download import DownloadableFile, build
 
 
@@ -24,10 +24,6 @@ class ReDialDataset(BaseDataset):
     def __init__(self, opt, restore=False, save=False):
         self.n_entity = opt.get('n_entity', 0)
         self.n_word = opt.get('n_word', 0)
-        self.context_truncate = opt.get('context_truncate', None)
-        self.response_truncate = opt.get('response_truncate', None)
-        self.entity_truncate = opt.get('entity_truncate', None)
-        self.word_truncate = opt.get('word_truncate', None)
 
         dpath = os.path.join(DATA_PATH, "redial")
         super().__init__(opt, dpath, restore, save)
@@ -137,7 +133,7 @@ class ReDialDataset(BaseDataset):
         augmented_convs = [self._merge_conv_data(conversation["dialog"]) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
-            augmented_conv_dicts.extend(self._augment_and_truncate(conv))
+            augmented_conv_dicts.extend(self._augment_and_add(conv))
         return augmented_conv_dicts
 
     def _merge_conv_data(self, dialog):
@@ -176,7 +172,7 @@ class ReDialDataset(BaseDataset):
 
         return augmented_convs
 
-    def _augment_and_truncate(self, raw_conv_dict):
+    def _augment_and_add(self, raw_conv_dict):
         """
         input: {
                     "role": role,
@@ -186,28 +182,27 @@ class ReDialDataset(BaseDataset):
                     "word": word_ids
                 }
         1.augment one conversation into several instances;
-        2.pad or truncate;
+        2.add start or end token;
         """
         augmented_conv_dicts = []
         context_tokens, context_entities, context_words = [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
             text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
-            # to id
             if len(context_tokens) > 0:
                 response_add_SE = add_start_end_token_idx(text_tokens, add_start=True,
                                                           start_token_idx=self.start_token_idx, add_end=True,
                                                           end_token_idx=self.end_token_idx)
                 conv_dict = {
-                    "context_tokens": truncate(copy(context_tokens), self.context_truncate, truncate_tail=False),
-                    "context_entities": truncate(copy(context_entities), self.entity_truncate),
-                    "context_words": truncate(copy(context_words), self.word_truncate),
-                    "response": truncate(copy(response_add_SE), self.response_truncate),
-                    "movie": copy(movies)
+                    "context_tokens": copy(context_tokens),
+                    "context_entities": copy(context_entities),
+                    "context_words": copy(context_words),
+                    "response": copy(response_add_SE),
+                    "items": copy(movies)
                 }
                 augmented_conv_dicts.append(conv_dict)
 
-            context_tokens += text_tokens
+            context_tokens.append(text_tokens)
             for entity in entities + movies:
                 if entity not in entity_set:
                     entity_set.add(entity)
@@ -230,7 +225,7 @@ class ReDialDataset(BaseDataset):
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,
-            "movie_entity_id": movie_entity_ids,
+            "item_ids": movie_entity_ids,
         }
         return side_data
 

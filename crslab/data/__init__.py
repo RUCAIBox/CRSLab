@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/11/26
+# @Time   : 2020/11/24, 2020/12/1
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -20,34 +20,35 @@ dataloader_register_table = {
 }
 
 
-def get_dataset(config, restore, save) -> BaseDataset:
+def get_dataset(opt, restore, save) -> BaseDataset:
     """Create dataset according to :attr:`config['model']`.
 
     Args:
-        config (Config): An instance object of Config, used to record parameter information.
+        opt (Config): An instance object of Config, used to record parameter information.
 
     Returns:
         Dataset: Constructed dataset.
     """
-    if config['dataset'] in dataset_register_table:
-        return dataset_register_table[config['dataset']](config, restore, save)
+    dataset = opt['dataset']
+    if dataset in dataset_register_table:
+        return dataset_register_table[dataset](opt, restore, save)
     else:
-        raise NotImplementedError('The dataloader [{}] has not been implemented'.format(config['dataset']))
+        raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
 
 
-def get_dataloader(config, dataset) -> BaseDataLoader:
+def get_dataloader(opt, dataset) -> BaseDataLoader:
     """Return a dataloader class according to :attr:`config`.
 
     Args:
         name (str): The stage of dataloader. It can only take two values: 'train' or 'evaluation'.
-        config (Config): An instance object of Config, used to record parameter information.
+        opt (Config): An instance object of Config, used to record parameter information.
         eval_setting (EvalSetting): An instance object of EvalSetting, used to record evaluation settings.
 
     Returns:
         type: The dataloader class that meets the requirements in :attr:`config`.
     """
-    if config['rec_model'] in dataloader_register_table:
-        return dataloader_register_table[config['rec_model']](config, dataset)
+    model_name = opt['model_name']
+    if model_name in dataloader_register_table:
+        return dataloader_register_table[model_name](opt, dataset)
     else:
-        raise NotImplementedError('The dataloader [{}, {}] has not been implemented'.
-                                  format(config['rec_model'], config['conv_model']))
+        raise NotImplementedError(f'The dataloader [{model_name}] has not been implemented')

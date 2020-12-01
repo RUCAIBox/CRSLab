@@ -60,26 +60,42 @@ class Config:
         """
         self.opt = self.load_yaml_configs(config_file)
         dataset = self.opt['dataset']
-        rec_model = self.opt.get('rec_model')
-        conv_model = self.opt.get('conv_model')
+        model = self.opt.get('model', None)
+        rec_model = self.opt.get('rec_model', None)
+        conv_model = self.opt.get('conv_model', None)
+        policy_model = self.opt.get('policy_model', None)
+        evaluator = self.opt['evaluator']
+        if model:
+            model_name = model
+        else:
+            models = []
+            if rec_model:
+                models.append(rec_model)
+            if conv_model:
+                models.append(conv_model)
+            if policy_model:
+                models.append(policy_model)
+            model_name = '_'.join(models)
+        self.opt['model_name'] = model_name
 
+        log_name = self.opt.get("log_name", dataset + '_' + model_name + '_' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + ".log"
         if not os.path.exists("log"):
             os.makedirs("log")
         logger.remove()
-        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True)
-        log_name = self.opt.get("log_name",
-                                dataset + '_' + rec_model + '_' + conv_model + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
-                                                                                                   time.localtime())) + ".log"
         logger.add(os.path.join("log", log_name))
+        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True)
 
-        logger.info("[DATASET: {}]", dataset)
-        logger.info("[Recommender Model: {}]", rec_model)
-        logger.info("[Conversation Model: {}]", conv_model)
-        logger.info("[CONFIG]" + '\n' + json.dumps(self.opt, indent=4))
-
-        # self.model, self.model_class, self.dataset = self._get_model_and_dataset(self.config_dict['dataset'],
-        #                                                  self.config_dict['rec_model'],self.config_dict['conv_model'])
-        # self._init_device()
+        logger.info(f"[Dataset: {dataset}]")
+        if model:
+            logger.info(f'[Model: {model}]')
+        if rec_model:
+            logger.info(f'[Recommendation Model: {rec_model}]')
+        if conv_model:
+            logger.info(f'[Conversation Model: {conv_model}]')
+        if policy_model:
+            logger.info(f'[Policy Model: {policy_model}]')
+        logger.info(f'[Evaluator: {evaluator}]')
+        logger.info("[Config]" + '\n' + json.dumps(self.opt, indent=4))
 
     @staticmethod
     def load_yaml_configs(filename):
@@ -90,14 +106,6 @@ class Config:
         with open(filename, 'r', encoding='utf-8') as f:
             config_dict.update(yaml.safe_load(f.read()))
         return config_dict
-
-    '''
-    def _init_device(self):
-        use_gpu = self.config_dict['use_gpu']
-        if use_gpu:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(self.config_dict['gpu_id'])
-        self.config_dict['device'] = torch.device("cuda" if torch.cuda.is_available() and use_gpu else "cpu")
-    '''
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):

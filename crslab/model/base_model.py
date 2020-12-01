@@ -8,7 +8,6 @@
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 from abc import ABC, abstractmethod
-import numpy as np
 import torch
 from torch import nn
 
