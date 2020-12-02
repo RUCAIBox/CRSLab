@@ -61,7 +61,6 @@ class BaseDataset(ABC):
                 logger.info(f'[Load embedding {embedding}]')
         else:
             self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok = self._load_from_restore()
-            logger.info('[Load from restore]')
 
         if save:
             data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok)
@@ -70,12 +69,12 @@ class BaseDataset(ABC):
     @abstractmethod
     def _load_data(self):
         """return train, valid, test data and tok2ind, ind2tok"""
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def _data_preprocess(self, train_data, valid_data, test_data):
         """return train, valid, test, side data"""
-        raise NotImplementedError
+        pass
 
     def _load_from_restore(self, file_name="all_data.pkl"):
         """Restore saved dataset from ``saved_dataset``.
@@ -83,9 +82,9 @@ class BaseDataset(ABC):
         Args:
             file_name (str): file for the saved dataset.
         """
-        logger.debug('Restoring dataset from [{}]'.format(file_name))
+        logger.debug(f'Restore dataset from [{file_name}]')
         if not os.path.exists(os.path.join(self.dpath, file_name)):
-            raise ValueError('filepath [{}] does not exist'.format(file_name))
+            raise ValueError(f'Filepath [{file_name}] does not exist')
         with open(os.path.join(self.dpath, file_name), 'rb') as f:
             return pkl.load(f)
 
@@ -95,4 +94,4 @@ class BaseDataset(ABC):
             os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
-        logger.info(f'[save to {file_name}]')
+        logger.info(f'[Save to {file_name}]')

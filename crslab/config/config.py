@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/1
+# @Time   : 2020/11/23, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -17,9 +17,8 @@ import yaml
 from loguru import logger
 from tqdm import tqdm
 
-
 ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
-DATA_PATH = os.path.join(ROOT_PATH, "data")
+DATA_PATH = os.path.join(ROOT_PATH, 'data')
 SAVE_PATH = os.path.join(ROOT_PATH, 'save')
 
 
@@ -54,7 +53,7 @@ class Config:
     Finally the learning_rate is equal to 0.02.
     """
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, debug=False):
         """
         Args:
             model (str/AbstractRecommender): the model name or the model class, default is None, if it is None, config
@@ -83,12 +82,17 @@ class Config:
             model_name = '_'.join(models)
         self.opt['model_name'] = model_name
 
-        log_name = self.opt.get("log_name", dataset + '_' + model_name + '_' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + ".log"
+        log_name = self.opt.get("log_name", dataset + '_' + model_name + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
+                                                                                             time.localtime())) + ".log"
         if not os.path.exists("log"):
             os.makedirs("log")
         logger.remove()
-        logger.add(os.path.join("log", log_name))
-        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True)
+        if debug:
+            level = 'DEBUG'
+        else:
+            level = 'INFO'
+        logger.add(os.path.join("log", log_name), level=level)
+        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True, level=level)
 
         logger.info(f"[Dataset: {dataset}]")
         if model:

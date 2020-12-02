@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/11/30
+# @Time   : 2020/11/24, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -28,9 +28,11 @@ class BaseSystem(ABC):
     For side data, it is judged by model
     """
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None, debug=False):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None, restore=False,
+                 save=False, debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         # data
         if debug:
             self.train_dataloader = valid_dataloader
@@ -51,7 +53,11 @@ class BaseSystem(ABC):
             self.conv_model = get_model(opt, opt['conv_model'], self.device, side_data).to(self.device)
         if 'policy_model' in opt:
             self.policy_model = get_model(opt, opt['policy_model'], self.device, side_data).to(self.device)
-        self.model_file_save_path = os.path.join(SAVE_PATH, f'{opt["model_name"]}.pth')
+        model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
+        self.model_file = os.path.join(SAVE_PATH, model_file_name)
+        if restore:
+            self.restore_model()
+        self.save = save
         self.evaluator = StandardEvaluator()
         # optim
         # gradient acumulation
@@ -75,7 +81,8 @@ class BaseSystem(ABC):
         r"""Train the model based on the train data.
 
         """
-        raise NotImplementedError('Method [next] should be implemented.')
+        if self.save:
+            self.save_model()
 
     def build_optimizer(self, opt, parameters):
         optimizer = opt['optimizer']
@@ -178,20 +185,26 @@ class BaseSystem(ABC):
         if not hasattr(self, 'scheduler') or self.scheduler is None:
             return
         self.scheduler.valid_step(metric)
+        logger.debug('[Adjust learning rate after valid epoch]')
 
     def early_stop(self, metric):
         if self.best_valid is None or self.best_valid < metric * self.val_optim:
             self.best_valid = metric
             self.drop_cnt = 0
+            if self.save:
+                self.save_model()
+            logger.info('[Get new best model]')
         else:
             self.drop_cnt += 1
             if self.drop_cnt >= self.impatience:
                 self.stop = True
+                logger.info('[Early stop]')
 
     def reset_early_stop_state(self):
         self.best_valid = None
         self.drop_cnt = 0
         self.stop = False
+        logger.debug('[Reset early stop state]')
 
     def ind2txt(self, inds):
         sentence = []
@@ -201,7 +214,7 @@ class BaseSystem(ABC):
             sentence.append(self.ind2tok.get(ind, 'unk'))
         return ' '.join(sentence)
 
-    def save_system(self):
+    def save_model(self):
         r"""Store the model parameters information and training information.
 
         Args:
@@ -209,7 +222,7 @@ class BaseSystem(ABC):
             saved_model_file (str): file name for saved pretrained model
 
         """
-        state = {'config': self.opt}
+        state = {}
         if hasattr(self, 'model'):
             state['model_state_dict'] = self.model.state_dict()
         if hasattr(self, 'rec_model'):
@@ -218,9 +231,10 @@ class BaseSystem(ABC):
             state['conv_state_dict'] = self.conv_model.state_dict()
         if hasattr(self, 'policy_model'):
             state['policy_state_dict'] = self.policy_model.state_dict()
-        torch.save(state, self.model_file_save_path)
+        torch.save(state, self.model_file)
+        logger.info(f'[Save model into {self.model_file}]')
 
-    def load_system(self):
+    def restore_model(self):
         r"""Store the model parameters information and training information.
 
         Args:
@@ -228,8 +242,7 @@ class BaseSystem(ABC):
             saved_model_file (str): file name for saved pretrained model
 
         """
-        checkpoint = torch.load(self.model_file_save_path)
-        self.opt = checkpoint['config']
+        checkpoint = torch.load(self.model_file)
         if hasattr(self, 'model'):
             self.model.load_state_dict(checkpoint['model_state_dict'])
         if hasattr(self, 'rec_model'):
@@ -238,3 +251,4 @@ class BaseSystem(ABC):
             self.conv_model.load_state_dict(checkpoint['conv_state_dict'])
         if hasattr(self, 'policy_model'):
             self.policy_model.load_state_dict(checkpoint['policy_state_dict'])
+        logger.info(f'[Restore model from {self.model_file}]')

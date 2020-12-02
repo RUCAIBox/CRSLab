@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/1
+# @Time   : 2020/11/24, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -16,12 +16,10 @@ from crslab.system.base_system import BaseSystem
 
 
 class KGSFSystem(BaseSystem):
-    r"""S3RecTrainer is designed for S3Rec, which is a self-supervised learning based sequentail recommenders.
-        It includes two training stages: pre-training ang fine-tuning.
-    """
-
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, debug=False):
-        super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, debug)
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, restore=False,
+                 save=False, debug=False):
+        super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data,
+                                         restore, save, debug)
 
         self.movie_ids = side_data['item_entity_ids']
 
@@ -164,3 +162,4 @@ class KGSFSystem(BaseSystem):
         self.pretrain()
         self.train_recommender()
         self.train_conversation()
+        super(KGSFSystem, self).fit()

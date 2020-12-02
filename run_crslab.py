@@ -3,12 +3,11 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/11/30
+# @Time   : 2020/11/24, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import argparse
-from pprint import pprint
 
 from crslab.config import Config
 from crslab.data import get_dataset, get_dataloader
@@ -17,11 +16,12 @@ from crslab.system import get_system
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config_file', type=str, default='config/kgsf/redial.yaml', help='config files')
-    parser.add_argument('--save', action='store_true', help='whether save the preprocessed dataset')
-    parser.add_argument('--restore', action='store_true', help='whether restore the preprocessed dataset')
+    parser.add_argument('-c', '--config_file', type=str, default='config/kgsf/redial.yaml', help='config file(yaml)')
+    parser.add_argument('-s', '--save', action='store_true', help='save the processed dataset and model')
+    parser.add_argument('-r', '--restore', action='store_true', help='restore the processed dataset and model')
+    parser.add_argument('-d', '--debug', action='store_true', help='use valid dataset to debug your system')
     args, _ = parser.parse_known_args()
-    config = Config(config_file=args.config_file)
+    config = Config(args.config_file, args.debug)
     # dataset
     CRS_dataset = get_dataset(config, args.restore, args.save)
     train_data = CRS_dataset.train_data
@@ -34,5 +34,6 @@ if __name__ == '__main__':
     valid_dataloader = get_dataloader(config, valid_data)
     test_dataloader = get_dataloader(config, test_data)
     # system init and fit
-    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data, debug=True)
+    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data, args.restore,
+                     args.save, args.debug)
     CRS.fit()
