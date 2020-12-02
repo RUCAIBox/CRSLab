@@ -25,7 +25,7 @@ class ConvEvaluator(BaseEvaluator):
         self.dist_cnt = 0
         self.gen_metrics = Metrics()
 
-    def evaluate(self, preds, label):
+    def gen_evaluate(self, preds, label):
         if preds:
             self.gen_metrics.add("f1", F1Metric.compute(preds, label))
             for k in range(1, 5):

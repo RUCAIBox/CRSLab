@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--restore', action='store_true', help='restore processed dataset and model')
     parser.add_argument('-d', '--debug', action='store_true', help='use valid dataset to debug your system')
     args, _ = parser.parse_known_args()
-    config = Config(args.config_file, args.debug)
+    config = Config(args.config, args.debug)
     # dataset
     CRS_dataset = get_dataset(config, args.restore, args.save)
     train_data = CRS_dataset.train_data

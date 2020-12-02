@@ -18,6 +18,7 @@ from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor
 
 class KGSFDataLoader(BaseDataLoader):
     def __init__(self, opt, dataset):
+        super().__init__(opt, dataset)
         self.n_entity = opt['n_entity']
         self.pad_token_idx = opt['pad_token_idx']
         self.pad_entity_idx = opt['pad_entity_idx']
@@ -26,7 +27,6 @@ class KGSFDataLoader(BaseDataLoader):
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
         self.word_truncate = opt.get('word_truncate', None)
-        super().__init__(opt, dataset)
 
     def get_pretrain_data(self, batch_size, shuffle=True):
         """

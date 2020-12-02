@@ -16,13 +16,13 @@ class BaseEvaluator(ABC):
     def __init__(self):
         self.optim_metrics = Metrics()
 
-    def evaluate(self, preds, label):
-        pass
-
     def rec_evaluate(self, preds, label):
         pass
 
     def gen_evaluate(self, preds, label):
+        pass
+
+    def guide_evaluate(self, preds, label):
         pass
 
     @abstractmethod

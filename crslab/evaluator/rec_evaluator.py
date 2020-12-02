@@ -20,7 +20,7 @@ class RecEvaluator(BaseEvaluator):
         super(RecEvaluator, self).__init__()
         self.rec_metrics = Metrics()
 
-    def evaluate(self, preds, label):
+    def rec_evaluate(self, preds, label):
         for k in [1, 10, 50]:
             if len(preds) >= k:
                 self.rec_metrics.add(f"recall@{k}", RecallMetric.compute(preds, label, k))

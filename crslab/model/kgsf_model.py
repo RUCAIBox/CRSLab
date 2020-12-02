@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/1
+# @Time   : 2020/11/24, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -82,7 +82,6 @@ class KGSFModel(BaseModel):
         self._build_infomax_layer()
         self._build_recommendation_layer()
         self._build_conversation_layer()
-        super(KGSFModel, self).build_model()
 
     def _init_embeddings(self):
         if self.pretrain_embedding is not None:

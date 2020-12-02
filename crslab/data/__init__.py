@@ -45,7 +45,7 @@ def get_dataloader(opt, dataset) -> BaseDataLoader:
         eval_setting (EvalSetting): An instance object of EvalSetting, used to record evaluation settings.
 
     Returns:
-        type: The dataloader class that meets the requirements in :attr:`config`.
+        type: The dataloader class that meets the requirements.txt in :attr:`config`.
     """
     model_name = opt['model_name']
     if model_name in dataloader_register_table:

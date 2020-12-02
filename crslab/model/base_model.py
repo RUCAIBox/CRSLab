@@ -8,8 +8,7 @@
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 from abc import ABC, abstractmethod
-import torch
-from loguru import logger
+
 from torch import nn
 
 
@@ -24,7 +23,7 @@ class BaseModel(ABC, nn.Module):
 
     @abstractmethod
     def build_model(self, *args, **kwargs):
-        logger.info(f"[Build model {self.opt['model_name']}]")
+        pass
 
     def forward(self, batch, mode='train'):
         r"""Calculate the training loss for a batch data.
