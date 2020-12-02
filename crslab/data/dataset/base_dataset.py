@@ -50,15 +50,15 @@ class BaseDataset(ABC):
 
         if not restore:
             train_data, valid_data, test_data, self.tok2ind, self.ind2tok = self._load_data()
-            logger.info('[Finish load data]')
+            logger.info('[Finish data load]')
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
                                                                                                      valid_data,
                                                                                                      test_data)
-            logger.info('[Finish data preprocess]')
             embedding = opt.get('embedding', None)
             if embedding:
                 self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
-                logger.info(f'[Load embedding {embedding}]')
+                logger.debug(f'[Load pretrained embedding {embedding}]')
+            logger.info('[Finish data preprocess]')
         else:
             self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok = self._load_from_restore()
 
@@ -82,7 +82,7 @@ class BaseDataset(ABC):
         Args:
             file_name (str): file for the saved dataset.
         """
-        logger.debug(f'Restore dataset from [{file_name}]')
+        logger.info(f'Restore dataset from [{file_name}]')
         if not os.path.exists(os.path.join(self.dpath, file_name)):
             raise ValueError(f'Filepath [{file_name}] does not exist')
         with open(os.path.join(self.dpath, file_name), 'rb') as f:
@@ -94,4 +94,4 @@ class BaseDataset(ABC):
             os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
-        logger.info(f'[Save to {file_name}]')
+        logger.info(f'[Save dataset to {file_name}]')

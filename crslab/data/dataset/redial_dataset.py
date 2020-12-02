@@ -52,7 +52,7 @@ class ReDialDataset(BaseDataset):
                         self.unk_token: self.unk_token_idx})
         ind2tok = {idx: word for word, idx in tok2ind.items()}
 
-        logger.info(f"[Load vocab from {self.tok2ind_file}]")
+        logger.debug(f"[Load vocab from {self.tok2ind_file}]")
         logger.debug(f"[The size of token2index dictionary is {len(tok2ind)}]")
         logger.debug(f"[The size of index2token dictionary is {len(ind2tok)}]")
 
@@ -74,13 +74,13 @@ class ReDialDataset(BaseDataset):
         # load train/valid/test data
         with open(os.path.join(self.dpath, self.train_data_file), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
-            logger.info(f"[Load train data from {self.train_data_file}]")
+            logger.debug(f"[Load train data from {self.train_data_file}]")
         with open(os.path.join(self.dpath, self.valid_data_file), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
-            logger.info(f"[Load valid data from {self.valid_data_file}]")
+            logger.debug(f"[Load valid data from {self.valid_data_file}]")
         with open(os.path.join(self.dpath, self.test_data_file), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
-            logger.info(f"[Load test data from {self.test_data_file}]")
+            logger.debug(f"[Load test data from {self.test_data_file}]")
 
         # create dictionary: tok2ind, ind2tok
         tok2ind, ind2tok = self._load_vocab()
@@ -89,14 +89,14 @@ class ReDialDataset(BaseDataset):
         self.entity2id = pkl.load(open(os.path.join(self.dpath, "entity2id.pkl"), 'rb'))  # {entity: entity_id}
         # {head_entity_id: [(relation_id, tail_entity_id)]}
         self.entity_kg = pkl.load(open(os.path.join(self.dpath, "dbpedia_subkg.pkl"), 'rb'))
-        logger.info(f"[Load entity dictionary and KG from {'entity2id.pkl'} and {'dbpedia_subkg.pkl'}]")
+        logger.debug(f"[Load entity dictionary and KG from {'entity2id.pkl'} and {'dbpedia_subkg.pkl'}]")
 
         # conceptNet
         # {concept: concept_id}
         self.word2id = json.load(open(os.path.join(self.dpath, "concept2id.json"), 'r', encoding='utf-8'))
         # {relation\t concept \t concept}
         self.word_kg = open(os.path.join(self.dpath, "conceptnet_subkg.txt"), 'r', encoding='utf-8')
-        logger.info(f"[Load word dictionary and KG from {'concept2id.json'} and {'conceptnet_subkg.txt'}]")
+        logger.debug(f"[Load word dictionary and KG from {'concept2id.json'} and {'conceptnet_subkg.txt'}]")
 
         return train_data, valid_data, test_data, tok2ind, ind2tok
 
@@ -115,13 +115,13 @@ class ReDialDataset(BaseDataset):
             'word_knowledge_graph': if necessary, word knowledge graph as side information;}
         """
         processed_train_data = self._raw_data_process(train_data)
-        logger.info("[Finish train data process]")
+        logger.debug("[Finish train data process]")
         processed_valid_data = self._raw_data_process(valid_data)
-        logger.info("[Finish valid data process]")
+        logger.debug("[Finish valid data process]")
         processed_test_data = self._raw_data_process(test_data)
-        logger.info("[Finish test data process]")
+        logger.debug("[Finish test data process]")
         processed_side_data = self._side_data_process()
-        logger.info("[Finish side data process]")
+        logger.debug("[Finish side data process]")
         return processed_train_data, processed_valid_data, processed_test_data, processed_side_data
 
     def _raw_data_process(self, raw_data):
@@ -221,11 +221,11 @@ class ReDialDataset(BaseDataset):
 
     def _side_data_process(self):
         processed_entity_kg = self._entity_kg_process()
-        logger.info("[Finish entity KG process]")
+        logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
-        logger.info("[Finish word KG process]")
+        logger.debug("[Finish word KG process]")
         movie_entity_ids = pkl.load(open(os.path.join(self.dpath, 'movie_ids.pkl'), 'rb'))
-        logger.info('[Load movie entity ids]')
+        logger.debug('[Load movie entity ids]')
 
         side_data = {
             "entity_kg": processed_entity_kg,

@@ -82,6 +82,7 @@ class KGSFModel(BaseModel):
         self._build_infomax_layer()
         self._build_recommendation_layer()
         self._build_conversation_layer()
+        super(KGSFModel, self).build_model()
 
     def _init_embeddings(self):
         if self.pretrain_embedding is not None:
