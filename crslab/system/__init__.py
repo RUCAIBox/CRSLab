@@ -14,14 +14,14 @@ system_register_table = {
 }
 
 
-def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data=None):
+def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data=None, debug=False):
     """
     return the system class
     """
     model_name = opt['model_name']
     if model_name in system_register_table:
         return system_register_table[model_name](opt, train_dataloader, valid_dataloader, test_dataloader,
-                                                 ind2token, side_data)
+                                                 ind2token, side_data, debug)
     else:
         raise NotImplementedError('The system with model [{}] in dataset [{}] has not been implemented'.
                                   format(model_name, opt['dataset']))

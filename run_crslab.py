@@ -33,12 +33,6 @@ if __name__ == '__main__':
     train_dataloader = get_dataloader(config, train_data)
     valid_dataloader = get_dataloader(config, valid_data)
     test_dataloader = get_dataloader(config, test_data)
-
-    # for i, data in enumerate(train_dataloader.get_conv_data(batch_size=4)):
-    #     pprint(data)
-    #     if i == 5:
-    #         exit()
-
     # system init and fit
-    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data)
-    CRS.fit(debug=True)
+    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data, debug=True)
+    CRS.fit()

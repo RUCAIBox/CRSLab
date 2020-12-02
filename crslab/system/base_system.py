@@ -28,13 +28,18 @@ class BaseSystem(ABC):
     For side data, it is judged by model
     """
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None, debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # data
-        self.train_dataloader = train_dataloader
-        self.valid_dataloader = valid_dataloader
-        self.test_dataloader = test_dataloader
+        if debug:
+            self.train_dataloader = valid_dataloader
+            self.valid_dataloader = valid_dataloader
+            self.test_dataloader = test_dataloader
+        else:
+            self.train_dataloader = train_dataloader
+            self.valid_dataloader = valid_dataloader
+            self.test_dataloader = test_dataloader
         self.ind2tok = ind2tok
         self.end_token_idx = opt['end_token_idx']
         # model
@@ -60,6 +65,10 @@ class BaseSystem(ABC):
         self.drop_cnt = 0
         self.val_optim = 1 if opt["val_mode"] == "max" else -1
         self.stop = False
+
+    @abstractmethod
+    def step(self, batch, stage, mode):
+        pass
 
     @abstractmethod
     def fit(self):
@@ -132,9 +141,6 @@ class BaseSystem(ABC):
             self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, states, hard_reset)
             self._number_training_updates = self.scheduler.get_initial_number_training_updates()
             logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
-
-    def reset_training_steps(self):
-        self._number_training_updates = 0
 
     def _zero_grad(self):
         if self._number_grad_accum != 0:

@@ -68,7 +68,7 @@ class KGSFModel(BaseModel):
         self.response_truncate = self.opt.get('response_truncate', 20)
         # copy mask
         dpath = os.path.join(DATA_PATH, "kgsf")
-        dfile = DownloadableFile('1zrszs2EcNlim3l7O0BH6XbalLMeUcMFv', 'redial.zip',
+        dfile = DownloadableFile('1zrszs2EcNlim3l7O0BH6XbalLMeUcMFv', 'kgsf.zip',
                                  'f627841644a184079acde1b0185e3a223945061c3a591f4bc0d7f62e7263f548',
                                  from_google=True)
         build(dpath, dfile)
@@ -76,7 +76,7 @@ class KGSFModel(BaseModel):
 
         self.build_model()
 
-    def build_model(self, pretrained_embedding=None):
+    def build_model(self):
         self._init_embeddings()
         self._build_kg_layer()
         self._build_infomax_layer()
@@ -85,13 +85,18 @@ class KGSFModel(BaseModel):
 
     def _init_embeddings(self):
         if self.pretrain_embedding is not None:
-            self.token_embedding = nn.Embedding.from_pretrained(torch.as_tensor(self.pretrain_embedding), freeze=False,
-                                                                padding_idx=self.pad_token_idx)
+            self.token_embedding = nn.Embedding.from_pretrained(
+                torch.as_tensor(self.pretrain_embedding, dtype=torch.float), freeze=False,
+                padding_idx=self.pad_token_idx)
         else:
             self.token_embedding = nn.Embedding(self.vocab_size, self.token_emb_dim, self.pad_token_idx)
+            nn.init.normal_(self.token_embedding.weight, mean=0, std=self.kg_emb_dim ** -0.5)
+            nn.init.constant_(self.token_embedding.weight[self.pad_token_idx], 0)
+
         self.word_kg_embedding = nn.Embedding(self.n_word, self.kg_emb_dim, self.pad_word_idx)
         nn.init.normal_(self.word_kg_embedding.weight, mean=0, std=self.kg_emb_dim ** -0.5)
         nn.init.constant_(self.word_kg_embedding.weight[self.pad_word_idx], 0)
+
         logger.debug('[Finish init embeddings]')
 
     def _build_kg_layer(self):
@@ -218,6 +223,17 @@ class KGSFModel(BaseModel):
 
         return rec_loss, info_loss, rec_scores
 
+    def stem_conv_parameters(self):
+        for params in [self.word_kg_embedding.parameters(), self.entity_encoder, self.entity_self_attn,
+                       self.word_encoder, self.word_self_attn, self.gate_layer,
+                       self.infomax_bias, self.infomax_norm, self.rec_bias]:
+            for p in params:
+                p.requires_grad = False
+
+    def _starts(self, batch_size):
+        """Return bsz start tokens."""
+        return self.START.detach().expand(batch_size, 1)
+
     def _KG_transformer_decode_forced(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
                                       word_reps, word_emb_attn, word_mask, response):
         batch_size, seq_len = response.shape
@@ -303,16 +319,3 @@ class KGSFModel(BaseModel):
                                                                entity_padding_mask,
                                                                conv_word_reps, conv_word_emb, word_padding_mask)
             return preds
-
-    def _starts(self, batch_size):
-        """Return bsz start tokens."""
-        return self.START.detach().expand(batch_size, 1)
-
-    def stem_conv_parameters(self):
-        for params in [self.token_embedding.parameters(), self.conv_encoder.parameters(),
-                       self.conv_entity_norm.parameters(), self.conv_word_norm.parameters(),
-                       self.conv_entity_attn_norm.parameters(), self.conv_word_attn_norm.parameters(),
-                       self.copy_norm.parameters(), self.copy_output.parameters(),
-                       self.conv_decoder.parameters()]:
-            for p in params:
-                p.requires_grad_(False)

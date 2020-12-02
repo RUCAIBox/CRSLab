@@ -9,7 +9,6 @@
 
 import torch
 from loguru import logger
-from tqdm import tqdm
 
 from crslab.evaluator.gen_metrics import PPLMetric
 from crslab.evaluator.metrics import AverageMetric
@@ -21,8 +20,8 @@ class KGSFSystem(BaseSystem):
         It includes two training stages: pre-training ang fine-tuning.
     """
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data):
-        super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data)
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, debug=False):
+        super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, debug)
 
         self.movie_ids = side_data['item_entity_ids']
 
@@ -94,45 +93,32 @@ class KGSFSystem(BaseSystem):
         else:
             raise
 
-    def pretrain(self, debug=False):
-        if debug:
-            train_dataloader = self.valid_dataloader
-        else:
-            train_dataloader = self.train_dataloader
-
+    def pretrain(self):
         self.build_optimizer(self.pretrain_optim_opt, self.model.parameters())
         self.build_lr_scheduler(self.pretrain_optim_opt)
 
         for epoch in range(self.pretrain_epoch):
             self.evaluator.reset_metrics()
             logger.info(f'[Pretrain epoch {str(epoch)}]')
-            for batch in train_dataloader.get_pretrain_data(self.pretrain_batch_size, shuffle=False):
+            for batch in self.train_dataloader.get_pretrain_data(self.pretrain_batch_size, shuffle=False):
                 self.step(batch, stage="pretrain", mode='train')
             self.evaluator.report()
 
-    def train_recommender(self, debug=False):
-        if debug:
-            train_dataloader = self.valid_dataloader
-            valid_dataloader = self.valid_dataloader
-            test_dataloader = self.test_dataloader
-        else:
-            train_dataloader = self.train_dataloader
-            valid_dataloader = self.valid_dataloader
-            test_dataloader = self.test_dataloader
-
+    def train_recommender(self):
         self.build_optimizer(self.rec_optim_opt, self.model.parameters())
         self.build_lr_scheduler(self.rec_optim_opt)
+        self.reset_early_stop_state()
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
             logger.info(f'[Recommendation epoch {str(epoch)}]')
-            for batch in train_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+            for batch in self.train_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
                 self.step(batch, stage='rec', mode='train')
             self.evaluator.report()
             # val
             with torch.no_grad():
                 self.evaluator.reset_metrics()
-                for batch in valid_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+                for batch in self.valid_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report()
                 # early stop
@@ -143,20 +129,11 @@ class KGSFSystem(BaseSystem):
         # test
         with torch.no_grad():
             self.evaluator.reset_metrics()
-            for batch in test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+            for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
                 self.step(batch, stage='rec', mode='test')
             self.evaluator.report()
 
-    def train_conversation(self, debug=False):
-        if debug:
-            train_dataloader = self.valid_dataloader
-            valid_dataloader = self.valid_dataloader
-            test_dataloader = self.test_dataloader
-        else:
-            train_dataloader = self.train_dataloader
-            valid_dataloader = self.valid_dataloader
-            test_dataloader = self.test_dataloader
-
+    def train_conversation(self):
         self.model.stem_conv_parameters()
         self.build_optimizer(self.conv_optim_opt, self.model.parameters())
         self.build_lr_scheduler(self.conv_optim_opt)
@@ -164,26 +141,26 @@ class KGSFSystem(BaseSystem):
         for epoch in range(self.conv_epoch):
             self.evaluator.reset_metrics()
             logger.info(f'[Conversation epoch {str(epoch)}]')
-            for batch in train_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+            for batch in self.train_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                 self.step(batch, stage='conv', mode='train')
             self.evaluator.report()
             # val
             with torch.no_grad():
                 self.evaluator.reset_metrics()
-                for batch in valid_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                for batch in self.valid_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                     self.step(batch, stage='conv', mode='val')
                 self.evaluator.report()
         # test
         with torch.no_grad():
             self.evaluator.reset_metrics()
-            for batch in test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+            for batch in self.test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report()
 
-    def fit(self, debug=False):
+    def fit(self):
         r"""Train the model based on the train data.
 
         """
-        self.pretrain(debug)
-        self.train_recommender(debug)
-        self.train_conversation(debug)
+        self.pretrain()
+        self.train_recommender()
+        self.train_conversation()

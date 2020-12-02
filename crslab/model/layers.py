@@ -26,10 +26,10 @@ class SelfAttentionSeq(nn.Module):
         nn.init.xavier_uniform_(self.b.data, gain=1.414)
 
     def forward(self, h, mask=None, return_logits=False):
-        '''
+        """
         For the padding tokens, its corresponding mask is True
         if mask==[1, 1, 1, ...]
-        '''
+        """
         # h: (batch, seq_len, dim), mask: (batch, seq_len)
         e = torch.matmul(torch.tanh(torch.matmul(h, self.a)), self.b)  # (batch, seq_len, 1)
         if mask is not None:
