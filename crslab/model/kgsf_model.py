@@ -84,8 +84,8 @@ class KGSFModel(BaseModel):
         self._build_conversation_layer()
 
     def _init_embeddings(self):
-        if self.pretrain_embedding:
-            self.token_embedding = nn.Embedding.from_pretrained(self.pretrain_embedding, freeze=False,
+        if self.pretrain_embedding is not None:
+            self.token_embedding = nn.Embedding.from_pretrained(torch.as_tensor(self.pretrain_embedding), freeze=False,
                                                                 padding_idx=self.pad_token_idx)
         else:
             self.token_embedding = nn.Embedding(self.vocab_size, self.token_emb_dim, self.pad_token_idx)

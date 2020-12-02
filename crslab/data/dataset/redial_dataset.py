@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/1
+# @Time   : 2020/11/23, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -23,8 +23,18 @@ from crslab.data.dataset.download import DownloadableFile, build
 
 class ReDialDataset(BaseDataset):
     def __init__(self, opt, restore=False, save=False):
+        tokenize = opt.get('tokenize', 'nltk')
+        self.train_data_file = 'train_data_' + tokenize + '.json'
+        self.valid_data_file = 'valid_data_' + tokenize + '.json'
+        self.test_data_file = 'test_data_' + tokenize + '.json'
+        self.tok2ind_file = 'token2id_' + tokenize + '.json'
+
         self.n_entity = opt.get('n_entity', 0)
         self.n_word = opt.get('n_word', 0)
+        self.pad_token_idx = opt.get('pad_token_idx', 0)
+        self.start_token_idx = opt.get('start_token_idx', 1)
+        self.end_token_idx = opt.get('end_token_idx', 2)
+        self.unk_token_idx = opt.get('unk_token_idx', 3)
 
         dpath = os.path.join(DATA_PATH, "redial")
         super().__init__(opt, dpath, restore, save)
@@ -34,21 +44,17 @@ class ReDialDataset(BaseDataset):
         self.start_token = '__start__'
         self.end_token = '__end__'
         self.unk_token = '__unk__'
-        self.pad_token_idx = 0
-        self.start_token_idx = 1
-        self.end_token_idx = 2
-        self.unk_token_idx = 3
 
-        tok2ind = json.load(open(os.path.join(self.dpath, "word2index_redial.json"), 'r', encoding='utf-8'))
+        tok2ind = json.load(open(os.path.join(self.dpath, self.tok2ind_file), 'r', encoding='utf-8'))
         tok2ind.update({self.pad_token: self.pad_token_idx,
                         self.start_token: self.start_token_idx,
                         self.end_token: self.end_token_idx,
                         self.unk_token: self.unk_token_idx})
         ind2tok = {idx: word for word, idx in tok2ind.items()}
 
-        logger.info("[Load vocab from {}]", os.path.join(self.dpath, "word2index_redial.json"))
-        logger.debug("[The size of token2index dictionary is {}]", len(tok2ind))
-        logger.debug("[The size of index2token dictionary is {}]", len(ind2tok))
+        logger.info(f"[Load vocab from {self.tok2ind_file}]")
+        logger.debug(f"[The size of token2index dictionary is {len(tok2ind)}]")
+        logger.debug(f"[The size of index2token dictionary is {len(ind2tok)}]")
 
         return tok2ind, ind2tok
 
@@ -60,39 +66,37 @@ class ReDialDataset(BaseDataset):
         """
 
         # download
-        dfile = DownloadableFile('1FykgR_dSkARAggGIuyckZ5ZbT9EMLi3c', 'redial.zip',
-                                 '7978ee519c3c347e8107135102a120e6c161c881698195dc076fe694fad47c0f',
+        dfile = DownloadableFile('1piUi21sZOKdJxrsqFQmSs_gxQjA6xBx3', 'redial.zip',
+                                 'b44b552ff097dfcbf034feaba1ca5fe86989bcf9acfba04c7fc828b9a6362810',
                                  from_google=True)
         build(self.dpath, dfile)
 
         # load train/valid/test data
-        with open(os.path.join(self.dpath, "train_data_reformulated.json"), 'r', encoding='utf-8') as f:
+        with open(os.path.join(self.dpath, self.train_data_file), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
-            logger.info("[Load train data from {}]", "train_data_reformulated.json")
-        with open(os.path.join(self.dpath, "valid_data_reformulated.json"), 'r', encoding='utf-8') as f:
+            logger.info(f"[Load train data from {self.train_data_file}]")
+        with open(os.path.join(self.dpath, self.valid_data_file), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
-            logger.info("[Load valid data from {}]", "valid_data_reformulated.json")
-        with open(os.path.join(self.dpath, "test_data_reformulated.json"), 'r', encoding='utf-8') as f:
+            logger.info(f"[Load valid data from {self.valid_data_file}]")
+        with open(os.path.join(self.dpath, self.test_data_file), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
-            logger.info("[Load test data from {}]", "test_data_reformulated.json")
+            logger.info(f"[Load test data from {self.test_data_file}]")
 
         # create dictionary: tok2ind, ind2tok
         tok2ind, ind2tok = self._load_vocab()
 
         # dbpedia
-        self.entity2id = pkl.load(open(os.path.join(self.dpath, "entity2entityId.pkl"), 'rb'))  # {entity: entity_id}
+        self.entity2id = pkl.load(open(os.path.join(self.dpath, "entity2id.pkl"), 'rb'))  # {entity: entity_id}
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = pkl.load(open(os.path.join(self.dpath, "subkg.pkl"), 'rb'))
-        logger.info("[Load entity dictionary and KG data from {} and {}]",
-                    "entity2entityId.pkl", "subkg.pkl")
+        self.entity_kg = pkl.load(open(os.path.join(self.dpath, "dbpedia_subkg.pkl"), 'rb'))
+        logger.info(f"[Load entity dictionary and KG from {'entity2id.pkl'} and {'dbpedia_subkg.pkl'}]")
 
         # conceptNet
         # {concept: concept_id}
-        self.word2id = json.load(open(os.path.join(self.dpath, "key2index_3rd.json"), 'r', encoding='utf-8'))
+        self.word2id = json.load(open(os.path.join(self.dpath, "concept2id.json"), 'r', encoding='utf-8'))
         # {relation\t concept \t concept}
         self.word_kg = open(os.path.join(self.dpath, "conceptnet_subkg.txt"), 'r', encoding='utf-8')
-        logger.info("[Load word dictionary and KG data from {} and {}]",
-                    "key2index_3rd.json", "conceptnet_subkg.txt")
+        logger.info(f"[Load word dictionary and KG from {'concept2id.json'} and {'conceptnet_subkg.txt'}]")
 
         return train_data, valid_data, test_data, tok2ind, ind2tok
 
@@ -217,9 +221,9 @@ class ReDialDataset(BaseDataset):
 
     def _side_data_process(self):
         processed_entity_kg = self._entity_kg_process()
-        logger.info("[Finish entity KG preprocess]")
+        logger.info("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
-        logger.info("[Finish word KG preprocess]")
+        logger.info("[Finish word KG process]")
         movie_entity_ids = pkl.load(open(os.path.join(self.dpath, 'movie_ids.pkl'), 'rb'))
         logger.info('[Load movie entity ids]')
 

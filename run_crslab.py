@@ -17,9 +17,9 @@ from crslab.system import get_system
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_file', type=str, default='config/kgsf/redial.yaml', help='config files')
-    parser.add_argument('--save', type=bool, default=False, help='whether save the preprocessed dataset')
-    parser.add_argument('--restore', type=bool, default=False, help='whether restore the preprocessed dataset')
+    parser.add_argument('-c', '--config_file', type=str, default='config/kgsf/redial.yaml', help='config files')
+    parser.add_argument('--save', action='store_true', help='whether save the preprocessed dataset')
+    parser.add_argument('--restore', action='store_true', help='whether restore the preprocessed dataset')
     args, _ = parser.parse_known_args()
     config = Config(config_file=args.config_file)
     # dataset
@@ -34,11 +34,10 @@ if __name__ == '__main__':
     valid_dataloader = get_dataloader(config, valid_data)
     test_dataloader = get_dataloader(config, test_data)
 
-    # for i, batch in enumerate(train_dataloader.get_conv_data(32, shuffle=True)):
-    #     pprint(batch)
+    # for i, data in enumerate(train_dataloader.get_conv_data(batch_size=4)):
+    #     pprint(data)
     #     if i == 5:
-    #         break
-    # exit()
+    #         exit()
 
     # system init and fit
     CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data)

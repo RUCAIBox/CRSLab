@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/1
+# @Time   : 2020/11/23, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -13,12 +13,13 @@ from math import ceil
 from typing import List, Optional, Union
 
 import torch
+from loguru import logger
 
 
 def padded_tensor(
         items: List[Union[List[int], torch.LongTensor]],
         pad_idx: int = 0,
-        right_padded: bool = True,
+        pad_tail: bool = True,
         max_len: Optional[int] = None,
 ) -> torch.LongTensor:
     """
@@ -34,7 +35,7 @@ def padded_tensor(
 
     :param list[iter[int]] items: List of items
     :param int pad_idx: the value to use for padding
-    :param bool right_padded:
+    :param bool pad_tail:
     :param int max_len: if None, the max length is the maximum item length
 
     :returns: (padded, lengths) tuple
@@ -64,7 +65,7 @@ def padded_tensor(
         if not isinstance(item, torch.Tensor):
             # put non-tensors into a tensor
             item = torch.tensor(item, dtype=torch.long)  # type: ignore
-        if right_padded:
+        if pad_tail:
             # place at beginning
             output[i, :length] = item
         else:
@@ -141,6 +142,7 @@ class BaseDataLoader(ABC):
         dataset = self.dataset
         if process_fn is not None:
             dataset = process_fn(*args, **kwargs)
+            logger.info('[Finish dataset process before batchify]')
 
         for batch in batch_split(dataset, batch_size, shuffle):
             yield batch_fn(batch)

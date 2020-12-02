@@ -1,10 +1,11 @@
 # dataset
 dataset: ReDial
+tokenize: nltk
 n_entity: 64363
-context_truncate: 1024
-response_truncate: 1024
 # dataloader
 pad_token_idx: 0
 pad_entity_idx: 64362
+context_truncate: 1024
+response_truncate: 1024
 # model
 model: KBRD

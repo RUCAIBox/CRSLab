@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/1
+# @Time   : 2020/11/23, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -57,10 +57,11 @@ class KGSFDataLoader(BaseDataLoader):
         batch_context_entities = []
         batch_context_words = []
         for conv_dict in batch:
-            batch_context_entities.append(conv_dict['context_entities'])
-            batch_context_words.append(conv_dict['context_words'])
+            batch_context_entities.append(
+                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
+            batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
 
-        return (padded_tensor(batch_context_words, self.pad_word_idx),
+        return (padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 get_onehot_label(batch_context_entities, self.n_entity))
 
     def rec_process_fn(self):
@@ -91,12 +92,13 @@ class KGSFDataLoader(BaseDataLoader):
         batch_context_words = []
         batch_movie = []
         for conv_dict in batch:
-            batch_context_entities.append(conv_dict['context_entities'])
-            batch_context_words.append(conv_dict['context_words'])
+            batch_context_entities.append(
+                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
+            batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
             batch_movie.append(conv_dict['item'])
 
-        return (padded_tensor(batch_context_entities, self.pad_entity_idx),
-                padded_tensor(batch_context_words, self.pad_word_idx),
+        return (padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
+                padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 get_onehot_label(batch_context_entities, self.n_entity),
                 torch.tensor(batch_movie, dtype=torch.long))
 
@@ -116,14 +118,16 @@ class KGSFDataLoader(BaseDataLoader):
         batch_context_words = []
         batch_response = []
         for conv_dict in batch:
-            batch_context_tokens.append(truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
-            batch_context_entities.append(truncate(conv_dict['context_entities'], self.entity_truncate))
-            batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate))
+            batch_context_tokens.append(
+                truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
+            batch_context_entities.append(
+                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
+            batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
             batch_response.append(truncate(conv_dict['response'], self.response_truncate))
 
-        return (padded_tensor(batch_context_tokens, self.pad_token_idx, right_padded=False),
-                padded_tensor(batch_context_entities, self.pad_entity_idx),
-                padded_tensor(batch_context_words, self.pad_word_idx),
+        return (padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),
+                padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
+                padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 padded_tensor(batch_response, self.pad_token_idx))
 
     def guide_batchify(self, *args, **kwargs):

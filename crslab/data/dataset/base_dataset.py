@@ -50,14 +50,18 @@ class BaseDataset(ABC):
 
         if not restore:
             train_data, valid_data, test_data, self.tok2ind, self.ind2tok = self._load_data()
+            logger.info('[Finish load data]')
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
                                                                                                      valid_data,
                                                                                                      test_data)
+            logger.info('[Finish data preprocess]')
             embedding = opt.get('embedding', None)
             if embedding:
                 self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
+                logger.info(f'[Load embedding {embedding}]')
         else:
             self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok = self._load_from_restore()
+            logger.info('[Load from restore]')
 
         if save:
             data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok)
@@ -91,3 +95,4 @@ class BaseDataset(ABC):
             os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
+        logger.info(f'[save to {file_name}]')

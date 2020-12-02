@@ -3,7 +3,7 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/12/1
+# @Time   : 2020/12/2
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -11,14 +11,17 @@ from copy import deepcopy
 
 import torch
 
-from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt
+from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt, truncate
 
 
 class KBRDDataLoader(BaseDataLoader):
     def __init__(self, opt, dataset):
+        super().__init__(opt, dataset)
         self.pad_token_idx = opt['pad_token_idx']
         self.pad_entity_idx = opt['pad_entity_idx']
-        super().__init__(opt, dataset)
+        self.context_truncate = opt.get('context_truncate', None)
+        self.response_truncate = opt.get('response_truncate', None)
+        self.entity_truncate = opt.get('entity_truncate', None)
 
     def rec_process_fn(self):
         """
@@ -47,11 +50,12 @@ class KBRDDataLoader(BaseDataLoader):
         batch_context_entities = []
         batch_movies = []
         for conv_dict in batch:
-            batch_context_entities.append(conv_dict['context_entities'])
+            batch_context_entities.append(
+                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
             batch_movies.append(conv_dict['movie'])
 
         return {
-            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx),
+            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
             "movie": torch.tensor(batch_movies, dtype=torch.long)
         }
 
@@ -70,13 +74,15 @@ class KBRDDataLoader(BaseDataLoader):
         batch_context_entities = []
         batch_response = []
         for conv_dict in batch:
-            batch_context_tokens.append(merge_utt(conv_dict['context_tokens']))
-            batch_context_entities.append(conv_dict['context_entities'])
-            batch_response.append(conv_dict['response'])
+            batch_context_tokens.append(
+                truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
+            batch_context_entities.append(
+                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
+            batch_response.append(truncate(conv_dict['response'], self.entity_truncate))
 
         return {
-            "context_tokens": padded_tensor(batch_context_tokens, self.pad_token_idx, right_padded=False),
-            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx),
+            "context_tokens": padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),
+            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
             "response": padded_tensor(batch_response, self.pad_token_idx)
         }
 
