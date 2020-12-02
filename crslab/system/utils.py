@@ -141,7 +141,7 @@ def nice_report(report) -> str:
 
         df = pd.DataFrame([output])
         df.columns = pd.MultiIndex.from_tuples(df.columns)
-        df = df.stack().transpose()
+        df = df.stack().transpose().droplevel(0, axis=1)
         result = "   " + df.to_string(
             na_rep="",
             line_width=line_width - 3,  # -3 for the extra spaces we add

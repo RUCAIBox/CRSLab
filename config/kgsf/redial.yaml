@@ -49,7 +49,7 @@ conv:
   lr_scheduler_decay: 0.5
   gradient_clip: 0.1
 batch_size:
-  pretrain: 1024
+  pretrain: 4096
   rec: 1024
   conv: 512
 impatience: 3
