@@ -22,7 +22,7 @@ class BaseEvaluator(ABC):
     def gen_evaluate(self, preds, label):
         pass
 
-    def guide_evaluate(self, preds, label):
+    def policy_evaluate(self, preds, label):
         pass
 
     @abstractmethod

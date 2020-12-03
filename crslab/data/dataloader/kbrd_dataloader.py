@@ -87,5 +87,5 @@ class KBRDDataLoader(BaseDataLoader):
             "response": padded_tensor(batch_response, self.pad_token_idx)
         }
 
-    def guide_batchify(self, *args, **kwargs):
+    def policy_batchify(self, *args, **kwargs):
         pass

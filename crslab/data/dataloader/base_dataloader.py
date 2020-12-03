@@ -177,8 +177,8 @@ class BaseDataLoader(ABC):
     def get_rec_data(self, batch_size, shuffle=True):
         return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn)
 
-    def get_guide_data(self, batch_size, shuffle=True):
-        return self.get_data(self.guide_batchify, batch_size, shuffle, self.guide_process_fn)
+    def get_policy_data(self, batch_size, shuffle=True):
+        return self.get_data(self.policy_batchify, batch_size, shuffle, self.policy_process_fn)
 
     def conv_process_fn(self, *args, **kwargs):
         return self.dataset
@@ -192,8 +192,8 @@ class BaseDataLoader(ABC):
     def rec_batchify(self, *args, **kwargs):
         raise NotImplementedError('dataloader must implement rec_batchify() method')
 
-    def guide_process_fn(self, *args, **kwargs):
+    def policy_process_fn(self, *args, **kwargs):
         return self.dataset
 
-    def guide_batchify(self, *args, **kwargs):
-        raise NotImplementedError('dataloader must implement guide_batchify() method')
+    def policy_batchify(self, *args, **kwargs):
+        raise NotImplementedError('dataloader must implement policy_batchify() method')
