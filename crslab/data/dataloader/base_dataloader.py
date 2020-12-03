@@ -25,8 +25,7 @@ def padded_tensor(
     """
     Create a padded matrix from an uneven list of lists.
 
-    Returns (padded, lengths), where padded is the padded matrix, and lengths
-    is a list containing the lengths of each row.
+    Returns padded matrix.
 
     Matrix is right-padded (filled to the right) by default, but can be
     left padded if the flag is set to True.
@@ -38,7 +37,7 @@ def padded_tensor(
     :param bool pad_tail:
     :param int max_len: if None, the max length is the maximum item length
 
-    :returns: (padded, lengths) tuple
+    :returns: padded
     :rtype: (Tensor[int64], list[int])
     """
 
@@ -76,6 +75,15 @@ def padded_tensor(
 
 
 def get_onehot_label(label_lists, categories) -> torch.Tensor:
+    """transform lists of label into onehot label
+
+    Args:
+        label_lists (list of list of int):
+        categories (int): #label class
+
+    Returns:
+        torch.Tensor: onehot labels
+    """
     onehot_labels = []
     for label_list in label_lists:
         onehot_label = torch.zeros(categories)
@@ -86,6 +94,16 @@ def get_onehot_label(label_lists, categories) -> torch.Tensor:
 
 
 def batch_split(dataset, batch_size, shuffle=False):
+    """split dataset to yield batch data
+
+    Args:
+        dataset (list of dict):
+        batch_size (int):
+        shuffle (bool, optional): Defaults to False.
+
+    Yields:
+        list of dict: batch data
+    """
     batch_num = ceil(len(dataset) / batch_size)
     idx_list = list(range(len(dataset)))
     if shuffle:
@@ -96,7 +114,16 @@ def batch_split(dataset, batch_size, shuffle=False):
 
 
 def truncate(vec, max_length, truncate_tail=True):
-    """Check that vector is truncated correctly."""
+    """truncate vec to make its length within max length
+
+    Args:
+        vec (list):
+        max_length (int):
+        truncate_tail (bool, optional): Defaults to True.
+
+    Returns:
+        list: truncated vec
+    """
     if max_length is None:
         return vec
     if len(vec) <= max_length:
@@ -108,37 +135,34 @@ def truncate(vec, max_length, truncate_tail=True):
 
 
 def merge_utt(conv):
+    """merge utterances in one conversation
+
+    Args:
+        conv (list of list of int): conversation consist of utterances consist of tokens
+
+    Returns:
+        list: tokens of all utterances in one conversation
+    """
     return [token for utt in conv for token in utt]
 
 
 class BaseDataLoader(ABC):
-    """:class:`BaseDataLoader` is an base object which would return a batch of data which is loaded by
-        :class:`~recbole.data.interaction.Interaction` when it is iterated.
-        And it is also the ancestor of all other dataloader.
-
-        Args:
-            opt (Config): The config of dataloader.
-            dataset (Dataset): The dataset of dataloader.
-            batch_size (int, optional): The batch_size of dataloader. Defaults to ``1``.
-            dl_format (InputType, optional): The input type of dataloader. Defaults to
-                :obj:`~recbole.utils.enum_type.InputType.POINTWISE`.
-            shuffle (bool, optional): Whether the dataloader will be shuffle after a round. Defaults to ``False``.
-
-        Attributes:
-            dataset (Dataset): The dataset of this dataloader.
-            shuffle (bool): If ``True``, dataloader will shuffle before every epoch.
-            real_time (bool): If ``True``, dataloader will do data pre-processing,
-                such as neg-sampling and data-augmentation.
-            pr (int): Pointer of dataloader.
-            step (int): The increment of :attr:`pr` for each batch.
-            batch_size (int): The max interaction number for all batch.
-        """
-
     def __init__(self, opt, dataset):
         self.opt = opt
         self.dataset = dataset
 
     def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None, *args, **kwargs):
+        """collate batch data for system to fit
+
+        Args:
+            batch_fn (func): function to collate data
+            batch_size (int):
+            shuffle (bool, optional): Defaults to True.
+            process_fn (func, optional): function to process dataset before batchify. Defaults to None.
+
+        Yields:
+            tuple or dict of torch.Tensor: batch data for system to fit
+        """
         dataset = self.dataset
         if process_fn is not None:
             dataset = process_fn(*args, **kwargs)

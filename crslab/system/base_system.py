@@ -21,18 +21,10 @@ from crslab.system.lr_scheduler import LRScheduler
 
 
 class BaseSystem(ABC):
-    r"""Trainer Class is used to manage the training and evaluation processes of recommender system models.
-    AbstractTrainer is an abstract class in which the fit() and evaluate() method should be implemented according
-    to different training and evaluation strategies.
-
-    For side data, it is judged by model
-    """
-
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None, restore=False,
                  save=False, debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
         # data
         if debug:
             self.train_dataloader = valid_dataloader
@@ -74,15 +66,19 @@ class BaseSystem(ABC):
 
     @abstractmethod
     def step(self, batch, stage, mode):
+        """calculate loss and prediction for batch data under certrain stage and mode
+
+        Args:
+            batch (list of dict or tuple): batch data
+            stage (str): recommendation/policy/conversation etc.
+            mode (str): train/valid/test
+        """
         pass
 
     @abstractmethod
     def fit(self):
-        r"""Train the model based on the train data.
-
-        """
-        if self.save:
-            self.save_model()
+        """fit the whole system"""
+        pass
 
     def build_optimizer(self, opt, parameters):
         optimizer = opt['optimizer']
@@ -172,6 +168,11 @@ class BaseSystem(ABC):
             self.scheduler.step(self._number_training_updates)
 
     def backward(self, loss):
+        """empty grad, backward loss and update params
+
+        Args:
+            loss (torch.Tensor):
+        """
         self._zero_grad()
 
         if self.update_freq > 1:
@@ -182,6 +183,11 @@ class BaseSystem(ABC):
         self._update_params()
 
     def adjust_lr(self, metric=None):
+        """adjust learning rate w/o metric by scheduler
+
+        Args:
+            metric (optional): Defaults to None.
+        """
         if not hasattr(self, 'scheduler') or self.scheduler is None:
             return
         self.scheduler.valid_step(metric)
@@ -191,8 +197,6 @@ class BaseSystem(ABC):
         if self.best_valid is None or self.best_valid < metric * self.val_optim:
             self.best_valid = metric
             self.drop_cnt = 0
-            if self.save:
-                self.save_model()
             logger.info('[Get new best model]')
         else:
             self.drop_cnt += 1
@@ -215,13 +219,7 @@ class BaseSystem(ABC):
         return ' '.join(sentence)
 
     def save_model(self):
-        r"""Store the model parameters information and training information.
-
-        Args:
-            epoch (int): the current epoch id
-            saved_model_file (str): file name for saved pretrained model
-
-        """
+        r"""Store the model parameters."""
         state = {}
         if hasattr(self, 'model'):
             state['model_state_dict'] = self.model.state_dict()
@@ -235,13 +233,7 @@ class BaseSystem(ABC):
         logger.info(f'[Save model into {self.model_file}]')
 
     def restore_model(self):
-        r"""Store the model parameters information and training information.
-
-        Args:
-            epoch (int): the current epoch id
-            saved_model_file (str): file name for saved pretrained model
-
-        """
+        r"""Store the model parameters."""
         checkpoint = torch.load(self.model_file)
         if hasattr(self, 'model'):
             self.model.load_state_dict(checkpoint['model_state_dict'])

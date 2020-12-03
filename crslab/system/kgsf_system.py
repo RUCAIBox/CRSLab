@@ -132,7 +132,7 @@ class KGSFSystem(BaseSystem):
             self.evaluator.report()
 
     def train_conversation(self):
-        self.model.stem_conv_parameters()
+        self.model.freeze_parameters()
         self.build_optimizer(self.conv_optim_opt, self.model.parameters())
         self.build_lr_scheduler(self.conv_optim_opt)
 
@@ -156,10 +156,8 @@ class KGSFSystem(BaseSystem):
             self.evaluator.report()
 
     def fit(self):
-        r"""Train the model based on the train data.
-
-        """
         self.pretrain()
         self.train_recommender()
         self.train_conversation()
-        super(KGSFSystem, self).fit()
+        if self.save:
+            self.save_model()

@@ -23,6 +23,11 @@ from crslab.model.layers import SelfAttentionSeq, GateLayer
 from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
 from crslab.model.utils import edge_to_pyg_format
 
+model_data_table = {
+    'ReDial': DownloadableFile('1zrszs2EcNlim3l7O0BH6XbalLMeUcMFv', 'kgsf.zip',
+                               'f627841644a184079acde1b0185e3a223945061c3a591f4bc0d7f62e7263f548', from_google=True)
+}
+
 
 class KGSFModel(BaseModel):
     r"""
@@ -68,9 +73,7 @@ class KGSFModel(BaseModel):
         self.response_truncate = self.opt.get('response_truncate', 20)
         # copy mask
         dpath = os.path.join(DATA_PATH, "kgsf")
-        dfile = DownloadableFile('1zrszs2EcNlim3l7O0BH6XbalLMeUcMFv', 'kgsf.zip',
-                                 'f627841644a184079acde1b0185e3a223945061c3a591f4bc0d7f62e7263f548',
-                                 from_google=True)
+        dfile = model_data_table[self.opt['dataset']]
         build(dpath, dfile)
         self.copy_mask = torch.as_tensor(np.load(os.path.join(dpath, "copy_mask.npy")).astype(bool), device=self.device)
 
@@ -110,17 +113,20 @@ class KGSFModel(BaseModel):
 
         # gate mechanism
         self.gate_layer = GateLayer(self.kg_emb_dim)
+
         logger.debug('[Finish build kg layer]')
 
     def _build_infomax_layer(self):
         self.infomax_norm = nn.Linear(self.kg_emb_dim, self.kg_emb_dim)
         self.infomax_bias = nn.Linear(self.kg_emb_dim, self.n_entity)
         self.infomax_loss = nn.MSELoss(reduction='sum')
+
         logger.debug('[Finish build infomax layer]')
 
     def _build_recommendation_layer(self):
         self.rec_bias = nn.Linear(self.kg_emb_dim, self.n_entity)
         self.rec_loss = nn.CrossEntropyLoss()
+
         logger.debug('[Finish build rec layer]')
 
     def _build_conversation_layer(self):
@@ -162,6 +168,7 @@ class KGSFModel(BaseModel):
             n_positions=self.n_positions
         )
         self.conv_loss = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.pad_token_idx)
+
         logger.debug('[Finish build conv layer]')
 
     def pretrain_infomax(self, batch):
@@ -223,11 +230,11 @@ class KGSFModel(BaseModel):
 
         return rec_loss, info_loss, rec_scores
 
-    def stem_conv_parameters(self):
-        for params in [self.word_kg_embedding.parameters(), self.entity_encoder, self.entity_self_attn,
-                       self.word_encoder, self.word_self_attn, self.gate_layer,
-                       self.infomax_bias, self.infomax_norm, self.rec_bias]:
-            for p in params:
+    def freeze_parameters(self):
+        freeze_models = [self.word_kg_embedding, self.entity_encoder, self.entity_self_attn, self.word_encoder,
+                         self.word_self_attn, self.gate_layer, self.infomax_bias, self.infomax_norm, self.rec_bias]
+        for model in freeze_models:
+            for p in model.parameters():
                 p.requires_grad = False
 
     def _starts(self, batch_size):

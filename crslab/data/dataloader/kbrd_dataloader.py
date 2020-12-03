@@ -10,6 +10,7 @@
 from copy import deepcopy
 
 import torch
+from tqdm import tqdm
 
 from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt, truncate
 
@@ -29,7 +30,7 @@ class KBRDDataLoader(BaseDataLoader):
         hence we need to augment data for each recommended movie
         """
         augment_dataset = []
-        for conv_dict in self.dataset:
+        for conv_dict in tqdm(self.dataset):
             for movie in conv_dict['items']:
                 augment_conv_dict = deepcopy(conv_dict)
                 augment_conv_dict['item'] = movie

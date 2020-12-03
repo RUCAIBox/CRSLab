@@ -13,8 +13,7 @@ from torch import nn
 
 
 class BaseModel(ABC, nn.Module):
-    r"""Base class for all models
-    """
+    """Base class for all models"""
 
     def __init__(self, opt, device):
         super(BaseModel, self).__init__()
@@ -23,14 +22,14 @@ class BaseModel(ABC, nn.Module):
 
     @abstractmethod
     def build_model(self, *args, **kwargs):
+        """build model"""
         pass
 
     def forward(self, batch, mode='train'):
-        r"""Calculate the training loss for a batch data.
+        """calculate loss and prediction for batch under certrain mode
 
         Args:
-
-        Returns:
-            torch.Tensor: Training loss, shape: []
+            batch (list of dict or tuple): batch data
+            mode (str, optional): train/valid/test. Defaults to 'train'.
         """
         pass

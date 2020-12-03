@@ -51,6 +51,6 @@ conv:
 batch_size:
   pretrain: 4096
   rec: 1024
-  conv: 512
+  conv: 256
 impatience: 3
 val_mode: max

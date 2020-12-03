@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/2
+# @Time   : 2020/11/23, 2020/12/3
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -59,12 +59,6 @@ class ReDialDataset(BaseDataset):
         return tok2ind, ind2tok
 
     def _load_data(self):
-        """
-        load raw data and necessary side information for preprocessing
-        raw: train_data/valid_data/test_data;
-        side:
-        """
-
         # download
         dfile = DownloadableFile('1piUi21sZOKdJxrsqFQmSs_gxQjA6xBx3', 'redial.zip',
                                  'b44b552ff097dfcbf034feaba1ca5fe86989bcf9acfba04c7fc828b9a6362810',
@@ -101,19 +95,6 @@ class ReDialDataset(BaseDataset):
         return train_data, valid_data, test_data, tok2ind, ind2tok
 
     def _data_preprocess(self, train_data, valid_data, test_data):
-        """
-        raw_data_output: {
-            'dialog_context': the preprocessed contextual dialog;
-            'interaction_context': if necessary, the preprocessed interaction history;
-            'entity_context': if necessary, the entities in context;
-            'word_context': if necessary, the words in context;
-            'rec_item': the recommended item in this turn;
-            'response': the ground-truth response;
-        }
-        side_data_output: {
-            'entity_knowledge_graph': if necessary, entity knowledge graph as side information;
-            'word_knowledge_graph': if necessary, word knowledge graph as side information;}
-        """
         processed_train_data = self._raw_data_process(train_data)
         logger.debug("[Finish train data process]")
         processed_valid_data = self._raw_data_process(valid_data)
@@ -125,16 +106,31 @@ class ReDialDataset(BaseDataset):
         return processed_train_data, processed_valid_data, processed_test_data, processed_side_data
 
     def _raw_data_process(self, raw_data):
+        """process raw data
+
+        Args:
+            raw_data (list of dict): {
+                'conv_id' (int):
+                'dialog' (list of dict): {
+                    'utt_id' (int):
+                    'role' (str): 'Seeker' or 'Recommender'
+                    'text' (list of str): utterance which has benn tokenized into tokens
+                    'movies' (list of str): entities of dbpedia correspoding mentioned movies in text
+                    'entity' (list of str): mentioned entities of dbpedia in text
+                    'word' (list of str): mentioned words of conceptnet in text
+                }
+            }
+
+        Returns:
+            list of dict: {
+                'context_tokens' (list of list int): the preprocessed contextual dialog;
+                'response' (list of int): the ground-truth response;
+                'items' (list of int): items to recommend in current turn;
+                'context_entities' (list of int): if necessary, the entities in context;
+                'context_words' (list of int): if necessary, the words in context;
+            }
         """
-        raw_data_output: {
-            'dialog_context': the preprocessed contextual dialog;
-            'interaction_context': if necessary, the preprocessed interaction history;
-            'entity_context': if necessary, the entities in context;
-            'word_context': if necessary, the words in context;
-            'rec_item': the recommended item in this turn;
-            'response': the ground-truth response;
-        }
-        """
+
         augmented_convs = [self._merge_conv_data(conversation["dialog"]) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
@@ -179,15 +175,15 @@ class ReDialDataset(BaseDataset):
 
     def _augment_and_add(self, raw_conv_dict):
         """
-        input: {
-                    "role": role,
-                    "text": text_token_ids,
-                    "entity": entity_ids,
-                    "movie": movie_ids,
-                    "word": word_ids
-                }
         1.augment one conversation into several instances;
         2.add start or end token;
+        input: {
+            "role": role,
+            "text": text_token_ids,
+            "entity": entity_ids,
+            "movie": movie_ids,
+            "word": word_ids
+        }
         """
         augmented_conv_dicts = []
         context_tokens, context_entities, context_words = [], [], []
@@ -220,6 +216,15 @@ class ReDialDataset(BaseDataset):
         return augmented_conv_dicts
 
     def _side_data_process(self):
+        """process side data
+
+        Returns:
+            dict: {
+                'entity_kg' (list of tuple): entity knowledge graph;
+                'word_kg' (list of tuple): word knowledge graph;
+                'item_entity_ids' (list of int): entity id of each item
+            }
+        """
         processed_entity_kg = self._entity_kg_process()
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
@@ -264,9 +269,7 @@ class ReDialDataset(BaseDataset):
         return list(edges)
 
     def _word_kg_process(self):
-        """
-        return [(head_word, tail_word)]
-        """
+        """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
         for line in self.word_kg:
             kg = line.strip().split('\t')

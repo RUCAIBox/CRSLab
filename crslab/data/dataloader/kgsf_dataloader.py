@@ -29,30 +29,17 @@ class KGSFDataLoader(BaseDataLoader):
         self.word_truncate = opt.get('word_truncate', None)
 
     def get_pretrain_data(self, batch_size, shuffle=True):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "items": [id1, id2, ..., ],  # [int]
-                }
-        output:
-            a list: [batch1, batch2, ... ],
-            each batch is the input for model (context_entities, context_words);
-        """
         return self.get_data(self.pretrain_batchify, batch_size, shuffle)
 
     def pretrain_batchify(self, batch):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "items": id,  # int
-                }
-        output: torch.tensors (context_words, movie)
+        """collate batch data for pretrain
+
+        Args:
+            batch (list of dict):
+
+        Returns:
+            torch.LongTensor: padded context words
+            torch.Tensor: one-hot label for context entities
         """
         batch_context_entities = []
         batch_context_words = []
@@ -78,40 +65,42 @@ class KGSFDataLoader(BaseDataLoader):
         return augment_dataset
 
     def rec_batchify(self, batch):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "item": id,  # int
-                }
-        output: torch.tensors (context_entities, context_words, movie)
+        """collate batch data for rec
+
+        Args:
+            batch (list of dict):
+
+        Returns:
+            torch.LongTensor: padded context entities
+            torch.LongTensor: padded context words
+            torch.Tensor: one-hot label for context entities
+            torch.LongTensor: label for items to rec
         """
         batch_context_entities = []
         batch_context_words = []
-        batch_movie = []
+        batch_item = []
         for conv_dict in batch:
             batch_context_entities.append(
                 truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
             batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
-            batch_movie.append(conv_dict['item'])
+            batch_item.append(conv_dict['item'])
 
         return (padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
                 padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 get_onehot_label(batch_context_entities, self.n_entity),
-                torch.tensor(batch_movie, dtype=torch.long))
+                torch.tensor(batch_item, dtype=torch.long))
 
     def conv_batchify(self, batch):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "items": [id1, id2, ..., ],  # [int]
-                }
-        output: torch.tensors (context_tokens, context_entities, context_words, response)
+        """collate batch data for conversation
+
+        Args:
+            batch (list of batch):
+
+        Returns:
+            torch.LongTensor: padded context tokens
+            torch.LongTensor: padded context entities
+            torch.LongTensor: padded context words
+            torch.LongTensor: padded response
         """
         batch_context_tokens = []
         batch_context_entities = []

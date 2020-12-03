@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/11/29
+# @Time   : 2020/11/23, 2020/12/2
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -24,26 +24,6 @@ def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, ad
 
 
 class BaseDataset(ABC):
-    """:class:`Dataset` stores the original dataset in memory.
-    It provides many useful functions for data preprocessing. Finally, the dataset are preprocessed as
-    {
-        'dialog_context': the preprocessed contextual dialog;
-        'interaction_context': if necessary, the preprocessed interaction history;
-        'entity_context': if necessary, the entities in context;
-        'word_context': if necessary, the words in context;
-        'rec_item': the recommended item in this turn;
-        'response': the ground-truth response;
-        'guiding_thread': the guiding topic;
-        'entity_knowledge_graph': if necessary, entity knowledge graph as side information;
-        'word_knowledge_graph': if necessary, word knowledge graph as side information;
-    }
-
-    Args:
-        opt (Config): Global configuration object.
-
-    Attributes:
-    """
-
     def __init__(self, opt, dpath, restore=False, save=False):
         self.opt = opt
         self.dpath = dpath
@@ -73,8 +53,31 @@ class BaseDataset(ABC):
 
     @abstractmethod
     def _data_preprocess(self, train_data, valid_data, test_data):
-        """return train, valid, test, side data"""
+        """preprocess train, valid, test data after load
+
+        Args:
+            train_data (list of dict):
+            valid_data (list of dict):
+            test_data (list of dict):
+
+        Returns:
+            list of dict: 
+                train/valid/test_data: {
+                    'context_tokens' (list of list int): the preprocessed contextual dialog;
+                    'response' (list of int): the ground-truth response;
+                    'items' (list of int): items to recommend in current turn;
+                    'context_entities' (list of int): if necessary, the entities in context;
+                    'context_words' (list of int): if necessary, the words in context;
+                    'context_interactions' (): if necessary, the preprocessed interaction history;
+                }
+                side_data: {
+                    'entity_kg' (list of tuple): if necessary, entity knowledge graph;
+                    'word_kg' (list of tuple): if necessary, word knowledge graph;
+                    'item_entity_ids' (list of int): if necessary, entity id of each item
+                }
+        """
         pass
+
 
     def _load_from_restore(self, file_name="all_data.pkl"):
         """Restore saved dataset from ``saved_dataset``.
@@ -89,6 +92,12 @@ class BaseDataset(ABC):
             return pkl.load(f)
 
     def _save_to_one(self, data, file_name="all_data.pkl"):
+        """save all data and vocab into one file
+
+        Args:
+            data (tuple): all data and vocab
+            file_name (str, optional): Defaults to "all_data.pkl".
+        """
         save_path = os.path.join(self.dpath, file_name)
         if not os.path.exists(save_path):
             os.makedirs(save_path)

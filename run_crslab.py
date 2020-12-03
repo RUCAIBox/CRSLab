@@ -13,13 +13,18 @@ from crslab.config import Config
 from crslab.data import get_dataset, get_dataloader
 from crslab.system import get_system
 
+
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=str, default='config/kgsf/redial.yaml', help='config file(yaml) path')
-    parser.add_argument('-s', '--save', action='store_true', help='save processed dataset and model')
-    parser.add_argument('-r', '--restore', action='store_true', help='restore processed dataset and model')
-    parser.add_argument('-d', '--debug', action='store_true', help='use valid dataset to debug your system')
+    parser.add_argument('-c', '--config', type=str,
+                        default='config/kgsf/redial.yaml', help='config file(yaml) path')
+    parser.add_argument('-s', '--save', action='store_true',
+                        help='save processed dataset and model')
+    parser.add_argument('-r', '--restore', action='store_true',
+                        help='restore processed dataset and model')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='use valid dataset to debug your system')
     args, _ = parser.parse_known_args()
     config = Config(args.config, args.debug)
     # dataset
