@@ -33,18 +33,18 @@ n_positions: 1024
 # optim
 pretrain:
   epoch: 3
-  pretrain: 4096
+  batch_size: 4096
   optimizer: adam
   learning_rate: !!float 3e-3
 rec:
   epoch: 5
-  rec: 1024
+  batch_size: 1024
   regular_weight: 0.025
   optimizer: adam
   learning_rate: !!float 3e-3
 conv:
-  epoch: 30
-  conv: 256
+  epoch: 10
+  batch_size: 256
   optimizer: adam
   learning_rate: !!float 3e-3
   lr_scheduler: reduceonplateau

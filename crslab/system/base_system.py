@@ -127,7 +127,7 @@ class BaseSystem(ABC):
         self.optimizer = optim_class[optimizer](parameters, **kwargs)
         logger.info("[Build optimizer: {}]", opt["optimizer"])
 
-    def build_lr_scheduler(self, opt, states=None, hard_reset=False):
+    def build_lr_scheduler(self, opt, state=None):
         """
         Create the learning rate scheduler, and assign it to self.scheduler. This
         scheduler will be updated upon a call to receive_metrics. May also create
@@ -138,12 +138,23 @@ class BaseSystem(ABC):
         :param bool hard_reset: If true, the LR scheduler should ignore the
             state dictionary.
         """
-        if states is None:
-            states = {}
+        if state is None:
+            state = {}
         if opt.get('lr_scheduler', None):
-            self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, states, hard_reset)
+            self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, state)
             self._number_training_updates = self.scheduler.get_initial_number_training_updates()
             logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
+
+    def reset_early_stop_state(self):
+        self.best_valid = None
+        self.drop_cnt = 0
+        self.stop = False
+        logger.debug('[Reset early stop state]')
+
+    def init_optim(self, opt, parameters):
+        self.build_optimizer(opt, parameters)
+        self.build_lr_scheduler(opt)
+        self.reset_early_stop_state()
 
     def _zero_grad(self):
         if self._number_grad_accum != 0:
@@ -203,12 +214,6 @@ class BaseSystem(ABC):
             if self.drop_cnt >= self.impatience:
                 self.stop = True
                 logger.info('[Early stop]')
-
-    def reset_early_stop_state(self):
-        self.best_valid = None
-        self.drop_cnt = 0
-        self.stop = False
-        logger.debug('[Reset early stop state]')
 
     def ind2txt(self, inds):
         sentence = []

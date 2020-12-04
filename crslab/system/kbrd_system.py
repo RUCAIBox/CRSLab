@@ -49,8 +49,8 @@ class KBRDSystem(BaseSystem):
             self.evaluator.gen_evaluate(p_str, [r_str])
 
     def step(self, batch, stage, mode):
-        assert stage in ['rec', 'conv']
-        assert mode in ['train', 'valid', 'test']
+        assert stage in ('rec', 'conv')
+        assert mode in ('train', 'valid', 'test')
 
         for k, v in batch.items():
             if isinstance(v, torch.Tensor):
@@ -79,9 +79,7 @@ class KBRDSystem(BaseSystem):
                 self.conv_evaluate(preds, batch['response'])
 
     def train_recommender(self):
-        self.build_optimizer(self.rec_optim_opt, self.model.parameters())
-        self.build_lr_scheduler(self.rec_optim_opt)
-        self.reset_early_stop_state()
+        self.init_optim(self.rec_optim_opt, self.model.parameters())
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
@@ -108,9 +106,7 @@ class KBRDSystem(BaseSystem):
             self.evaluator.report()
 
     def train_conversation(self):
-        self.build_optimizer(self.conv_optim_opt, self.model.parameters())
-        self.build_lr_scheduler(self.conv_optim_opt)
-        self.reset_early_stop_state()
+        self.init_optim(self.conv_optim_opt, self.model.parameters())
 
         for epoch in range(self.conv_epoch):
             self.evaluator.reset_metrics()

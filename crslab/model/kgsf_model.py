@@ -56,9 +56,9 @@ class KGSFModel(BaseModel):
         self.pad_word_idx = self.opt['pad_word_idx']
         self.pad_entity_idx = self.opt['pad_entity_idx']
         entity_edges, word_edges = side_data['entity_kg'], side_data['word_kg']
-        self.edge_idx, self.edge_type = edge_to_pyg_format(entity_edges, device)
-        self.edge_idx = self.edge_idx.to(self.device)
-        self.edge_type = self.edge_type.to(self.device)
+        self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
+        self.entity_edge_idx = self.entity_edge_idx.to(self.device)
+        self.entity_edge_type = self.entity_edge_type.to(self.device)
         self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(self.device)
         self.num_bases = self.opt['num_bases']
         # transformer
@@ -184,7 +184,7 @@ class KGSFModel(BaseModel):
         if loss_mask.item() == 0:
             return None
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edges[0], self.entity_edges[1])
+        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
         word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
 
         word_representations = word_graph_representations[words]
@@ -196,7 +196,7 @@ class KGSFModel(BaseModel):
         loss = self.infomax_loss(info_predict, entity_labels) / loss_mask
         return loss
 
-    def recommender(self, batch, mode='train'):
+    def recommend(self, batch, mode='train'):
         """
         context_entities: (batch_size, entity_length)
         context_words: (batch_size, word_length)
@@ -204,7 +204,7 @@ class KGSFModel(BaseModel):
         """
         context_entities, context_words, entities, movie = batch
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edges[0], self.entity_edges[1])
+        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
         word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
 
         entity_padding_mask = context_entities.eq(self.pad_entity_idx)  # (bs, entity_len)
@@ -243,8 +243,8 @@ class KGSFModel(BaseModel):
         """Return bsz start tokens."""
         return self.START.detach().expand(batch_size, 1)
 
-    def _KG_transformer_decode_forced(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
-                                      word_reps, word_emb_attn, word_mask, response):
+    def _decode_forced_with_kg(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
+                               word_reps, word_emb_attn, word_mask, response):
         batch_size, seq_len = response.shape
         start = self._starts(batch_size)
         inputs = torch.cat((start, response[:, :-1]), dim=-1).long()
@@ -263,8 +263,8 @@ class KGSFModel(BaseModel):
         preds = sum_logits.argmax(dim=-1)
         return sum_logits, preds
 
-    def _KG_transformer_decode_greedy(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
-                                      word_reps, word_emb_attn, word_mask):
+    def _decode_greedy_with_kg(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
+                               word_reps, word_emb_attn, word_mask):
         batch_size = token_encoding[0].shape[0]
         inputs = self._starts(batch_size).long()
         incr_state = None
@@ -290,10 +290,10 @@ class KGSFModel(BaseModel):
         logits = torch.cat(logits, dim=1)
         return logits, inputs
 
-    def conversation(self, batch, mode='train'):
+    def converse(self, batch, mode='train'):
         context_tokens, context_entities, context_words, response = batch
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edges[0], self.entity_edges[1])
+        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
         word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
 
         entity_padding_mask = context_entities.eq(self.pad_entity_idx)  # (bs, entity_len)
@@ -312,10 +312,10 @@ class KGSFModel(BaseModel):
         conv_entity_reps = self.conv_entity_norm(entity_representations)
         conv_word_reps = self.conv_word_norm(word_representations)
         if mode != 'test':
-            logits, preds = self._KG_transformer_decode_forced(tokens_encoding, conv_entity_reps, conv_entity_emb,
-                                                               entity_padding_mask,
-                                                               conv_word_reps, conv_word_emb, word_padding_mask,
-                                                               response)
+            logits, preds = self._decode_forced_with_kg(tokens_encoding, conv_entity_reps, conv_entity_emb,
+                                                        entity_padding_mask,
+                                                        conv_word_reps, conv_word_emb, word_padding_mask,
+                                                        response)
 
             logits = logits.view(-1, logits.shape[-1])
             response = response.view(-1)
@@ -324,7 +324,7 @@ class KGSFModel(BaseModel):
             loss = self.conv_loss(logits, response)
             return loss / torch.sum(response_mask), preds
         else:
-            logits, preds = self._KG_transformer_decode_greedy(tokens_encoding, conv_entity_reps, conv_entity_emb,
-                                                               entity_padding_mask,
-                                                               conv_word_reps, conv_word_emb, word_padding_mask)
+            logits, preds = self._decode_greedy_with_kg(tokens_encoding, conv_entity_reps, conv_entity_emb,
+                                                        entity_padding_mask,
+                                                        conv_word_reps, conv_word_emb, word_padding_mask)
             return preds

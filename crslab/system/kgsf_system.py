@@ -59,7 +59,7 @@ class KGSFSystem(BaseSystem):
                 info_loss = info_loss.item()
                 self.evaluator.optim_metrics.add("info_loss", AverageMetric(info_loss))
         elif stage == 'rec':
-            rec_loss, info_loss, rec_predict = self.model.recommender(batch, mode)
+            rec_loss, info_loss, rec_predict = self.model.recommend(batch, mode)
             if info_loss:
                 loss = rec_loss + 0.025 * info_loss
             else:
@@ -90,8 +90,7 @@ class KGSFSystem(BaseSystem):
             raise
 
     def pretrain(self):
-        self.build_optimizer(self.pretrain_optim_opt, self.model.parameters())
-        self.build_lr_scheduler(self.pretrain_optim_opt)
+        self.init_optim(self.pretrain_optim_opt, self.model.parameters())
 
         for epoch in range(self.pretrain_epoch):
             self.evaluator.reset_metrics()
@@ -101,9 +100,7 @@ class KGSFSystem(BaseSystem):
             self.evaluator.report()
 
     def train_recommender(self):
-        self.build_optimizer(self.rec_optim_opt, self.model.parameters())
-        self.build_lr_scheduler(self.rec_optim_opt)
-        self.reset_early_stop_state()
+        self.init_optim(self.rec_optim_opt, self.model.parameters())
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
@@ -131,8 +128,7 @@ class KGSFSystem(BaseSystem):
 
     def train_conversation(self):
         self.model.freeze_parameters()
-        self.build_optimizer(self.conv_optim_opt, self.model.parameters())
-        self.build_lr_scheduler(self.conv_optim_opt)
+        self.init_optim(self.conv_optim_opt, self.model.parameters())
 
         for epoch in range(self.conv_epoch):
             self.evaluator.reset_metrics()
