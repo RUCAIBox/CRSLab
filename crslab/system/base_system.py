@@ -15,7 +15,7 @@ from loguru import logger
 from torch import optim
 
 from crslab.config.config import SAVE_PATH
-from crslab.evaluator import StandardEvaluator
+from crslab.evaluator import StandardEvaluator, get_evaluator
 from crslab.model import get_model
 from crslab.system.lr_scheduler import LRScheduler
 
@@ -50,7 +50,7 @@ class BaseSystem(ABC):
         if restore:
             self.restore_model()
         self.save = save
-        self.evaluator = StandardEvaluator()
+        self.evaluator = get_evaluator(opt.get('evaluator', 'standard'))
         # optim
         # gradient acumulation
         self.update_freq = opt.get('update_freq', 1)
@@ -69,7 +69,7 @@ class BaseSystem(ABC):
         """calculate loss and prediction for batch data under certrain stage and mode
 
         Args:
-            batch (list of dict or tuple): batch data
+            batch (dict or tuple): batch data
             stage (str): recommendation/policy/conversation etc.
             mode (str): train/valid/test
         """

@@ -10,9 +10,11 @@
 from loguru import logger
 
 from .kgsf_model import KGSFModel
+from .kbrd_model import KBRDModel
 
 Model_register_table = {
-    'KGSF': KGSFModel
+    'KGSF': KGSFModel,
+    'KBRD': KBRDModel
 }
 
 

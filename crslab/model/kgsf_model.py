@@ -56,8 +56,10 @@ class KGSFModel(BaseModel):
         self.pad_word_idx = self.opt['pad_word_idx']
         self.pad_entity_idx = self.opt['pad_entity_idx']
         entity_edges, word_edges = side_data['entity_kg'], side_data['word_kg']
-        self.entity_edges = edge_to_pyg_format(entity_edges, device)
-        self.word_edges = edge_to_pyg_format(word_edges, device, 'GCN')
+        self.edge_idx, self.edge_type = edge_to_pyg_format(entity_edges, device)
+        self.edge_idx = self.edge_idx.to(self.device)
+        self.edge_type = self.edge_type.to(self.device)
+        self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(self.device)
         self.num_bases = self.opt['num_bases']
         # transformer
         self.n_heads = self.opt['n_heads']

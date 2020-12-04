@@ -51,13 +51,12 @@ class KBRDDataLoader(BaseDataLoader):
         batch_context_entities = []
         batch_movies = []
         for conv_dict in batch:
-            batch_context_entities.append(
-                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
-            batch_movies.append(conv_dict['movie'])
+            batch_context_entities.append(conv_dict['context_entities'])
+            batch_movies.append(conv_dict['item'])
 
         return {
-            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
-            "movie": torch.tensor(batch_movies, dtype=torch.long)
+            "context_entities": batch_context_entities,
+            "item": torch.tensor(batch_movies, dtype=torch.long)
         }
 
     def conv_batchify(self, batch):
@@ -77,13 +76,12 @@ class KBRDDataLoader(BaseDataLoader):
         for conv_dict in batch:
             batch_context_tokens.append(
                 truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
-            batch_context_entities.append(
-                truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
+            batch_context_entities.append(conv_dict['context_entities'])
             batch_response.append(truncate(conv_dict['response'], self.entity_truncate))
 
         return {
             "context_tokens": padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),
-            "context_entities": padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
+            "context_entities": batch_context_entities,
             "response": padded_tensor(batch_response, self.pad_token_idx)
         }
 

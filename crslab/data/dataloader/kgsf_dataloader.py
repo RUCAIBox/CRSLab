@@ -94,7 +94,7 @@ class KGSFDataLoader(BaseDataLoader):
         """collate batch data for conversation
 
         Args:
-            batch (list of batch):
+            batch (list of dict):
 
         Returns:
             torch.LongTensor: padded context tokens

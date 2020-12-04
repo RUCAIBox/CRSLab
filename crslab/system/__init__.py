@@ -9,9 +9,11 @@
 from loguru import logger
 
 from .kgsf_system import KGSFSystem
+from .kbrd_system import KBRDSystem
 
 system_register_table = {
-    'KGSF': KGSFSystem
+    'KGSF': KGSFSystem,
+    'KBRD': KBRDSystem
 }
 
 

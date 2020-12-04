@@ -1,11 +1,44 @@
 # dataset
 dataset: ReDial
 tokenize: nltk
+pad_token_idx: 0
+start_token_idx: 1
+end_token_idx: 2
 n_entity: 64363
 # dataloader
-pad_token_idx: 0
 pad_entity_idx: 64362
 context_truncate: 1024
 response_truncate: 1024
 # model
 model: KBRD
+vocab_size: 23929
+token_emb_dim: 300
+n_relation: 35
+kg_emb_dim: 128
+num_bases: 8
+n_heads: 2
+n_layers: 2
+ffn_size: 300
+dropout: 0.1
+attention_dropout: 0.0
+relu_dropout: 0.1
+learn_positional_embeddings: false
+embeddings_scale: true
+reduction: false
+n_positions: 1024
+# optim
+rec:
+  epoch: 5
+  batch_size: 4096
+  optimizer: adam
+  learning_rate: !!float 3e-3
+conv:
+  epoch: 10
+  batch_size: 128
+  optimizer: adam
+  learning_rate: !!float 1e-3
+  lr_scheduler: reduceonplateau
+  lr_scheduler_patience: 3
+  lr_scheduler_decay: 0.5
+impatience: 5
+val_mode: min

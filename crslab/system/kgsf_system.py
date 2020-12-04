@@ -26,12 +26,12 @@ class KGSFSystem(BaseSystem):
         self.pretrain_optim_opt = self.opt['pretrain']
         self.rec_optim_opt = self.opt['rec']
         self.conv_optim_opt = self.opt['conv']
-        self.pretrain_epoch = self.opt['pretrain']['epoch']
-        self.rec_epoch = self.opt['rec']['epoch']
-        self.conv_epoch = self.opt['conv']['epoch']
-        self.pretrain_batch_size = self.opt['batch_size']['pretrain']
-        self.rec_batch_size = self.opt['batch_size']['rec']
-        self.conv_batch_size = self.opt['batch_size']['conv']
+        self.pretrain_epoch = self.pretrain_optim_opt['epoch']
+        self.rec_epoch = self.rec_optim_opt['epoch']
+        self.conv_epoch = self.conv_optim_opt['epoch']
+        self.pretrain_batch_size = self.pretrain_optim_opt['batch_size']
+        self.rec_batch_size = self.rec_optim_opt['batch_size']
+        self.conv_batch_size = self.conv_optim_opt['batch_size']
 
     def rec_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()
@@ -51,10 +51,6 @@ class KGSFSystem(BaseSystem):
             self.evaluator.gen_evaluate(p_str, [r_str])
 
     def step(self, batch, stage, mode):
-        """
-        stage: ['pretrain', 'rec', 'conv']
-        mode: ['train', 'val', 'test]
-        """
         batch = [ele.to(self.device) for ele in batch]
         if stage == 'pretrain':
             info_loss = self.model.pretrain_infomax(batch)
@@ -79,15 +75,17 @@ class KGSFSystem(BaseSystem):
                 self.evaluator.optim_metrics.add("info_loss", AverageMetric(info_loss))
         elif stage == "conv":
             if mode != "test":
-                gen_loss, pred = self.model.conversation(batch, mode)
+                gen_loss, pred = self.model.converse(batch, mode)
                 if mode == 'train':
                     self.backward(gen_loss)
+                else:
+                    self.conv_evaluate(pred, batch[-1])
                 gen_loss = gen_loss.item()
                 self.evaluator.optim_metrics.add("gen_loss", AverageMetric(gen_loss))
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
-                pred = self.model.conversation(batch, mode)
-            self.conv_evaluate(pred, batch[-1])
+                pred = self.model.converse(batch, mode)
+                self.conv_evaluate(pred, batch[-1])
         else:
             raise
 
