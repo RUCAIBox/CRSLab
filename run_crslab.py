@@ -8,6 +8,7 @@
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import argparse
+from pprint import pprint
 
 from crslab.config import Config
 from crslab.data import get_dataset, get_dataloader
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/kgsf/redial.yaml', help='config file(yaml) path')
+                        default='config/kbrd/redial.yaml', help='config file(yaml) path')
     parser.add_argument('-s', '--save', action='store_true',
                         help='save processed dataset and model')
     parser.add_argument('-r', '--restore', action='store_true',

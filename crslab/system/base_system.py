@@ -239,6 +239,8 @@ class BaseSystem(ABC):
 
     def restore_model(self):
         r"""Store the model parameters."""
+        if not os.path.exists(self.model_file):
+            raise ValueError(f'Saved model [{self.model_file}] does not exist')
         checkpoint = torch.load(self.model_file)
         if hasattr(self, 'model'):
             self.model.load_state_dict(checkpoint['model_state_dict'])

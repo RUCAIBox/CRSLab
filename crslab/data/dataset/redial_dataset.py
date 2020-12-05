@@ -198,8 +198,8 @@ class ReDialDataset(BaseDataset):
                     "context_tokens": copy(context_tokens),
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
-                    "response": copy(response_add_SE),
-                    "items": copy(movies)
+                    "response": response_add_SE,
+                    "items": movies
                 }
                 augmented_conv_dicts.append(conv_dict)
 

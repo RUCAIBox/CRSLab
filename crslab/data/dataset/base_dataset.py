@@ -10,17 +10,19 @@
 import os
 import pickle as pkl
 from abc import ABC, abstractmethod
+from copy import copy
 
 import numpy as np
 from loguru import logger
 
 
 def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
+    res = copy(vec)
     if add_start:
-        vec.insert(0, start_token_idx)
+        res.insert(0, start_token_idx)
     if add_end:
-        vec.append(end_token_idx)
-    return vec
+        res.append(end_token_idx)
+    return res
 
 
 class BaseDataset(ABC):
@@ -78,18 +80,18 @@ class BaseDataset(ABC):
         """
         pass
 
-
     def _load_from_restore(self, file_name="all_data.pkl"):
         """Restore saved dataset from ``saved_dataset``.
 
         Args:
             file_name (str): file for the saved dataset.
         """
-        logger.info(f'Restore dataset from [{file_name}]')
         if not os.path.exists(os.path.join(self.dpath, file_name)):
-            raise ValueError(f'Filepath [{file_name}] does not exist')
+            raise ValueError(f'Saved dataset [{file_name}] does not exist')
         with open(os.path.join(self.dpath, file_name), 'rb') as f:
-            return pkl.load(f)
+            dataset = pkl.load(f)
+        logger.info(f'Restore dataset from [{file_name}]')
+        return dataset
 
     def _save_to_one(self, data, file_name="all_data.pkl"):
         """save all data and vocab into one file
@@ -98,9 +100,9 @@ class BaseDataset(ABC):
             data (tuple): all data and vocab
             file_name (str, optional): Defaults to "all_data.pkl".
         """
+        if not os.path.exists(self.dpath):
+            os.makedirs(self.dpath)
         save_path = os.path.join(self.dpath, file_name)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
         with open(save_path, 'wb') as f:
             pkl.dump(data, f)
         logger.info(f'[Save dataset to {file_name}]')
