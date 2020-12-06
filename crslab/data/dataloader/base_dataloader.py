@@ -14,6 +14,7 @@ from typing import List, Optional, Union
 
 import torch
 from loguru import logger
+from tqdm import tqdm
 
 
 def padded_tensor(
@@ -167,6 +168,7 @@ class BaseDataLoader(ABC):
         if process_fn is not None:
             dataset = process_fn(*args, **kwargs)
             logger.info('[Finish dataset process before batchify]')
+        logger.debug(f'[Dataset size: {len(dataset)}]')
 
         for batch in batch_split(dataset, batch_size, shuffle):
             yield batch_fn(batch)
@@ -197,3 +199,10 @@ class BaseDataLoader(ABC):
 
     def policy_batchify(self, *args, **kwargs):
         raise NotImplementedError('dataloader must implement policy_batchify() method')
+
+    def retain_recommender_target(self):
+        dataset = []
+        for conv_dict in tqdm(self.dataset):
+            if conv_dict['role'] == 'Recommender':
+                dataset.append(conv_dict)
+        return dataset

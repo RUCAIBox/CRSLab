@@ -29,7 +29,7 @@ class KGSFDataLoader(BaseDataLoader):
         self.word_truncate = opt.get('word_truncate', None)
 
     def get_pretrain_data(self, batch_size, shuffle=True):
-        return self.get_data(self.pretrain_batchify, batch_size, shuffle)
+        return self.get_data(self.pretrain_batchify, batch_size, shuffle, self.retain_recommender_target)
 
     def pretrain_batchify(self, batch):
         """collate batch data for pretrain
@@ -58,10 +58,11 @@ class KGSFDataLoader(BaseDataLoader):
         """
         augment_dataset = []
         for conv_dict in tqdm(self.dataset):
-            for movie in conv_dict['items']:
-                augment_conv_dict = deepcopy(conv_dict)
-                augment_conv_dict['item'] = movie
-                augment_dataset.append(augment_conv_dict)
+            if conv_dict['role'] == 'Recommender':
+                for movie in conv_dict['items']:
+                    augment_conv_dict = deepcopy(conv_dict)
+                    augment_conv_dict['item'] = movie
+                    augment_dataset.append(augment_conv_dict)
         return augment_dataset
 
     def rec_batchify(self, batch):
@@ -89,6 +90,9 @@ class KGSFDataLoader(BaseDataLoader):
                 padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 get_onehot_label(batch_context_entities, self.n_entity),
                 torch.tensor(batch_item, dtype=torch.long))
+
+    def conv_process_fn(self, *args, **kwargs):
+        return self.retain_recommender_target()
 
     def conv_batchify(self, batch):
         """collate batch data for conversation

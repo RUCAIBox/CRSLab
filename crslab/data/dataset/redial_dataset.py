@@ -123,6 +123,7 @@ class ReDialDataset(BaseDataset):
 
         Returns:
             list of dict: {
+                'role' (str): 'Seeker' or 'Recommender';
                 'context_tokens' (list of list int): the preprocessed contextual dialog;
                 'response' (list of int): the ground-truth response;
                 'items' (list of int): items to recommend in current turn;
@@ -195,6 +196,7 @@ class ReDialDataset(BaseDataset):
                                                           start_token_idx=self.start_token_idx, add_end=True,
                                                           end_token_idx=self.end_token_idx)
                 conv_dict = {
+                    "role": conv['role'],
                     "context_tokens": copy(context_tokens),
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),

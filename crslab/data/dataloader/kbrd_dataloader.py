@@ -31,10 +31,11 @@ class KBRDDataLoader(BaseDataLoader):
         """
         augment_dataset = []
         for conv_dict in tqdm(self.dataset):
-            for movie in conv_dict['items']:
-                augment_conv_dict = deepcopy(conv_dict)
-                augment_conv_dict['item'] = movie
-                augment_dataset.append(augment_conv_dict)
+            if conv_dict['role'] == 'Recommender':
+                for movie in conv_dict['items']:
+                    augment_conv_dict = deepcopy(conv_dict)
+                    augment_conv_dict['item'] = movie
+                    augment_dataset.append(augment_conv_dict)
         return augment_dataset
 
     def rec_batchify(self, batch):
@@ -58,6 +59,9 @@ class KBRDDataLoader(BaseDataLoader):
             "context_entities": batch_context_entities,
             "item": torch.tensor(batch_movies, dtype=torch.long)
         }
+
+    def conv_process_fn(self, *args, **kwargs):
+        return self.retain_recommender_target()
 
     def conv_batchify(self, batch):
         """

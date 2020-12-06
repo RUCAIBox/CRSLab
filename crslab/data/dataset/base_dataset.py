@@ -65,6 +65,7 @@ class BaseDataset(ABC):
         Returns:
             list of dict: 
                 train/valid/test_data: {
+                    'role' (str): 'Seeker' or 'Recommender';
                     'context_tokens' (list of list int): the preprocessed contextual dialog;
                     'response' (list of int): the ground-truth response;
                     'items' (list of int): items to recommend in current turn;
