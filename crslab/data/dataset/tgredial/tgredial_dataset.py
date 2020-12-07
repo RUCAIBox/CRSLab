@@ -19,24 +19,17 @@ from crslab.config.config import DATA_PATH
 from crslab.data.dataloader.base_dataloader import add_start_end_token_idx
 from crslab.data.dataset.base_dataset import BaseDataset
 from crslab.data.dataset.download import DownloadableFile, build
+from .resource import resources
 
 
 class TGReDialDataset(BaseDataset):
     def __init__(self, opt, restore=False, save=False):
         tokenize = opt.get('tokenize', 'pkuseg')
-        self.train_data_file = 'train_data_' + tokenize + '.json'
-        self.valid_data_file = 'valid_data_' + tokenize + '.json'
-        self.test_data_file = 'test_data_' + tokenize + '.json'
-        self.tok2ind_file = 'token2id_' + tokenize + '.json'
+        resource = resources[tokenize]
 
-        self.n_entity = opt.get('n_entity', 0)
-        self.n_word = opt.get('n_word', 0)
-        self.pad_token_idx = opt.get('pad_token_idx', 0)
-        self.start_token_idx = opt.get('start_token_idx', 1)
-        self.end_token_idx = opt.get('end_token_idx', 2)
-        self.unk_token_idx = opt.get('unk_token_idx', 3)
-
-        dpath = os.path.join(DATA_PATH, "tgredial")
+        dpath = os.path.join(DATA_PATH, 'tgredial', tokenize)
+        dfile = resource['file']
+        build(dpath, dfile, version=resource['version'])
         super().__init__(opt, dpath, restore, save)
 
     def _load_vocab(self):
@@ -63,7 +56,6 @@ class TGReDialDataset(BaseDataset):
         dfile = DownloadableFile('1q3ipHbZy6erCldC22dZSkQeUrQXTTzID', 'tg-redial.zip',
                                  '5b1e5159b1af3ed9bc42183b8c445be170c45d5d0e5cd5d1bf8bc45c7ad7dca2',
                                  from_google=True)
-        build(self.dpath, dfile)
 
         # load train/valid/test data
         with open(os.path.join(self.dpath, self.train_data_file), 'r', encoding='utf-8') as f:
@@ -122,10 +114,10 @@ class TGReDialDataset(BaseDataset):
             raw_data (list of dict): {
                 'conv_id' (int):
                 'dialog' (list of dict): {
-                    'utt_id' (int):
+                    'utt_id' (int): id of current utterance
                     'role' (str): 'Seeker' or 'Recommender'
                     'text' (list of str): utterance which has benn tokenized into tokens
-                    'movies' (list of str): entities of dbpedia correspoding mentioned movies in text
+                    'movies' (list of str): mentioned movies in text
                     'entity' (list of str): mentioned entities of dbpedia in text
                     'word' (list of str): mentioned words of conceptnet in text
                 }
@@ -133,11 +125,11 @@ class TGReDialDataset(BaseDataset):
 
         Returns:
             list of dict: {
-                'context_tokens' (list of list int): the preprocessed contextual dialog;
-                'response' (list of int): the ground-truth response;
-                'items' (list of int): items to recommend in current turn;
-                'context_entities' (list of int): if necessary, the entities in context;
-                'context_words' (list of int): if necessary, the words in context;
+                'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
+                'response' (list of int): token ids of the ground-truth response;
+                'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
+                'context_entities' (list of int): if necessary, id of entities in context;
+                'context_words' (list of int): if necessary, id of words in context;
             }
         """
 

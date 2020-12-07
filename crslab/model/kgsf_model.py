@@ -42,7 +42,7 @@ class KGSFModel(BaseModel):
     def __init__(self, opt, device, vocab, side_data):
         super(KGSFModel, self).__init__(opt, device)
         # vocab
-        self.vocab_size = len(vocab['ind2tok'])
+        self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
         self.end_token_idx = vocab['end']

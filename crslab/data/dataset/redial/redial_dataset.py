@@ -77,6 +77,7 @@ class ReDialDataset(BaseDataset):
         vocab = {
             'tok2ind': self.tok2ind,
             'ind2tok': self.ind2tok,
+            'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
             'n_word': self.n_word,
         }
@@ -105,7 +106,7 @@ class ReDialDataset(BaseDataset):
                     'utt_id' (int):
                     'role' (str): 'Seeker' or 'Recommender'
                     'text' (list of str): utterance which has benn tokenized into tokens
-                    'movies' (list of str): entities of dbpedia correspoding mentioned movies in text
+                    'movies' (list of str): mentioned movies in text
                     'entity' (list of str): mentioned entities of dbpedia in text
                     'word' (list of str): mentioned words of conceptnet in text
                 }
@@ -114,11 +115,11 @@ class ReDialDataset(BaseDataset):
         Returns:
             list of dict: {
                 'role' (str): 'Seeker' or 'Recommender';
-                'context_tokens' (list of list int): the preprocessed contextual dialog;
-                'response' (list of int): the ground-truth response;
-                'items' (list of int): items to recommend in current turn;
-                'context_entities' (list of int): if necessary, the entities in context;
-                'context_words' (list of int): if necessary, the words in context;
+                'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
+                'response' (list of int): token ids of the ground-truth response;
+                'items' (list of int): items mentioned in current turn;
+                'context_entities' (list of int): id of entities in context;
+                'context_words' (list of int): id of words in context;
             }
         """
 
@@ -205,18 +206,6 @@ class ReDialDataset(BaseDataset):
         return augmented_conv_dicts
 
     def _side_data_process(self):
-        """process side data
-
-        Returns:
-            dict: {
-                'entity_kg' (dict): {
-                    'edge': edges of entity kg;
-                    'n_relation': #relation;
-                }
-                'word_kg' (list of tuple): edges of word knowledge graph;
-                'item_entity_ids' (list of int): entity id of each item;
-            }
-        """
         processed_entity_kg = self._entity_kg_process()
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()

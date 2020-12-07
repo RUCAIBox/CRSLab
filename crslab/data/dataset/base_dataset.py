@@ -35,12 +35,12 @@ class BaseDataset(ABC):
             self.train_data, self.valid_data, self.test_data, self.side_data, vocab = self._load_from_restore()
 
         if save:
-            data = (self.train_data, self.valid_data, self.test_data, self.side_data, vocab)
+            data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.vocab)
             self._save_to_one(data)
 
     @abstractmethod
     def _load_data(self):
-        """return train, valid, test data and tok2ind, ind2tok"""
+        """return train, valid, test data and vocab(all kinds of size and idx)"""
         pass
 
     @abstractmethod
@@ -56,17 +56,20 @@ class BaseDataset(ABC):
             list of dict: 
                 train/valid/test_data: {
                     'role' (str): 'Seeker' or 'Recommender';
-                    'context_tokens' (list of list int): the preprocessed contextual dialog;
-                    'response' (list of int): the ground-truth response;
-                    'items' (list of int): items to recommend in current turn;
-                    'context_entities' (list of int): if necessary, the entities in context;
-                    'context_words' (list of int): if necessary, the words in context;
+                    'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
+                    'response' (list of int): token ids of the ground-truth response;
+                    'items' (list of int): items mentioned in current turn, we only keep those in entity kg for comparison;
+                    'context_entities' (list of int): if necessary, id of entities in context;
+                    'context_words' (list of int): if necessary, id of words in context;
                     'context_interactions' (): if necessary, the preprocessed interaction history;
                 }
                 side_data: {
-                    'entity_kg' (list of tuple): if necessary, entity knowledge graph;
-                    'word_kg' (list of tuple): if necessary, word knowledge graph;
-                    'item_entity_ids' (list of int): if necessary, entity id of each item
+                    'entity_kg' (dict): {
+                        'edge': edges of entity kg;
+                        'n_relation': #relation;
+                    } if necessary
+                    'word_kg' (list of tuple): if necessary, edges of word knowledge graph;
+                    'item_entity_ids' (list of int): if necessary, entity id of each item;
                 }
         """
         pass

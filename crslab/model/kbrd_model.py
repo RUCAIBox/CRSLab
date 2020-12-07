@@ -27,7 +27,7 @@ class KBRDModel(BaseModel):
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
         self.end_token_idx = vocab['end']
-        self.vocab_size = len(vocab['ind2tok'])
+        self.vocab_size = vocab['vocab_size']
         self.token_emb_dim = opt.get('token_emb_dim', 300)
         self.pretrain_embedding = side_data.get('embedding', None)
 
