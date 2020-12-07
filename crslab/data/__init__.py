@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/1
+# @Time   : 2020/11/24, 2020/12/6
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -12,6 +12,7 @@ from crslab.data.dataset import *
 
 dataset_register_table = {
     'ReDial': ReDialDataset,
+    'TGReDial': TGReDialDataset
 }
 
 dataloader_register_table = {
@@ -36,7 +37,7 @@ def get_dataset(opt, restore, save) -> BaseDataset:
         raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
 
 
-def get_dataloader(opt, dataset) -> BaseDataLoader:
+def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
     """Return a dataloader class according to :attr:`config`.
 
     Args:
@@ -49,6 +50,6 @@ def get_dataloader(opt, dataset) -> BaseDataLoader:
     """
     model_name = opt['model_name']
     if model_name in dataloader_register_table:
-        return dataloader_register_table[model_name](opt, dataset)
+        return dataloader_register_table[model_name](opt, dataset, vocab)
     else:
         raise NotImplementedError(f'The dataloader [{model_name}] has not been implemented')

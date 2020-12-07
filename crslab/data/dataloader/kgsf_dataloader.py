@@ -13,16 +13,18 @@ import torch
 from tqdm import tqdm
 
 from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, get_onehot_label, truncate, \
-    merge_utt
+    merge_utt, add_start_end_token_idx
 
 
 class KGSFDataLoader(BaseDataLoader):
-    def __init__(self, opt, dataset):
+    def __init__(self, opt, dataset, vocab):
         super().__init__(opt, dataset)
-        self.n_entity = opt['n_entity']
-        self.pad_token_idx = opt['pad_token_idx']
-        self.pad_entity_idx = opt['pad_entity_idx']
-        self.pad_word_idx = opt['pad_word_idx']
+        self.n_entity = vocab['n_entity']
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
+        self.pad_entity_idx = vocab['pad_entity']
+        self.pad_word_idx = vocab['pad_word']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
@@ -116,7 +118,10 @@ class KGSFDataLoader(BaseDataLoader):
             batch_context_entities.append(
                 truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
             batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
-            batch_response.append(truncate(conv_dict['response'], self.response_truncate))
+            batch_response.append(
+                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2), add_start=True,
+                                        start_token_idx=self.start_token_idx, add_end=True,
+                                        end_token_idx=self.end_token_idx))
 
         return (padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),
                 padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),

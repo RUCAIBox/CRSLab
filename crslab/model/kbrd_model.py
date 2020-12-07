@@ -21,23 +21,24 @@ from crslab.model.utils import edge_to_pyg_format
 
 
 class KBRDModel(BaseModel):
-    def __init__(self, opt, device, side_data):
+    def __init__(self, opt, device, vocab, side_data):
         super(KBRDModel, self).__init__(opt, device)
 
-        self.pad_token_idx = opt['pad_token_idx']
-        self.start_token_idx = opt['start_token_idx']
-        self.end_token_idx = opt['end_token_idx']
-        self.vocab_size = opt['vocab_size']
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
+        self.vocab_size = len(vocab['ind2tok'])
         self.token_emb_dim = opt.get('token_emb_dim', 300)
         self.pretrain_embedding = side_data.get('embedding', None)
 
-        self.n_entity = opt['n_entity']
-        self.n_relation = opt['n_relation']
-        self.kg_emb_dim = opt.get('kg_emb_dim', 300)
-        self.num_bases = opt.get('num_bases', 8)
-        self.edge_idx, self.edge_type = edge_to_pyg_format(side_data['entity_kg'], 'RGCN')
+        self.n_entity = vocab['n_entity']
+        entity_kg = side_data['entity_kg']
+        self.n_relation = entity_kg['n_relation']
+        self.edge_idx, self.edge_type = edge_to_pyg_format(entity_kg['edge'], 'RGCN')
         self.edge_idx = self.edge_idx.to(self.device)
         self.edge_type = self.edge_type.to(self.device)
+        self.num_bases = opt.get('num_bases', 8)
+        self.kg_emb_dim = opt.get('kg_emb_dim', 300)
         self.user_emb_dim = self.kg_emb_dim
 
         self.n_heads = opt.get('n_heads', 2)

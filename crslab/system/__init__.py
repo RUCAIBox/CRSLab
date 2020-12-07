@@ -8,8 +8,8 @@
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 from loguru import logger
 
-from .kgsf_system import KGSFSystem
 from .kbrd_system import KBRDSystem
+from .kgsf_system import KGSFSystem
 
 system_register_table = {
     'KGSF': KGSFSystem,
@@ -17,7 +17,7 @@ system_register_table = {
 }
 
 
-def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, ind2token, side_data=None, restore=False,
+def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data=None, restore=False,
                save=False, debug=False):
     """
     return the system class
@@ -25,7 +25,7 @@ def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok
     model_name = opt['model_name']
     if model_name in system_register_table:
         system = system_register_table[model_name](opt, train_dataloader, valid_dataloader, test_dataloader,
-                                                   ind2token, side_data, restore, save, debug)
+                                                   vocab, side_data, restore, save, debug)
         logger.info(f'[Build system {model_name}]')
         return system
     else:

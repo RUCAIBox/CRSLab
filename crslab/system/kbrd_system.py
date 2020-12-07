@@ -17,9 +17,9 @@ from crslab.system.base_system import BaseSystem
 
 
 class KBRDSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data, restore=False,
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  save=False, debug=False):
-        super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data,
+        super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
                                          restore, save, debug)
 
         self.movie_ids = side_data['item_entity_ids']

@@ -1,23 +1,13 @@
 # dataset
 dataset: ReDial
 tokenize: nltk
-n_entity: 64363
-n_word: 29309
-pad_token_idx: 0
-start_token_idx: 1
-end_token_idx: 2
-unk_token_idx: 3
 embedding: word2vec.npy
 # dataloader
-pad_entity_idx: 64362
-pad_word_idx: 0
 context_truncate: 256
 response_truncate: 30
 # model
 model: KGSF
-vocab_size: 23929
 token_emb_dim: 300
-n_relation: 35
 kg_emb_dim: 128
 num_bases: 8
 n_heads: 2
@@ -32,18 +22,18 @@ reduction: false
 n_positions: 1024
 # optim
 pretrain:
-  epoch: 3
+  epoch: 1
   batch_size: 4096
   optimizer: adam
   learning_rate: !!float 3e-3
 rec:
-  epoch: 5
+  epoch: 1
   batch_size: 1024
   regular_weight: 0.025
   optimizer: adam
   learning_rate: !!float 3e-3
 conv:
-  epoch: 10
+  epoch: 1
   batch_size: 256
   optimizer: adam
   learning_rate: !!float 3e-3

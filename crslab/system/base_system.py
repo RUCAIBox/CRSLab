@@ -15,13 +15,13 @@ from loguru import logger
 from torch import optim
 
 from crslab.config.config import SAVE_PATH
-from crslab.evaluator import StandardEvaluator, get_evaluator
+from crslab.evaluator import get_evaluator
 from crslab.model import get_model
 from crslab.system.lr_scheduler import LRScheduler
 
 
 class BaseSystem(ABC):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, ind2tok, side_data=None, restore=False,
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data=None, restore=False,
                  save=False, debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -34,17 +34,17 @@ class BaseSystem(ABC):
             self.train_dataloader = train_dataloader
             self.valid_dataloader = valid_dataloader
             self.test_dataloader = test_dataloader
-        self.ind2tok = ind2tok
-        self.end_token_idx = opt['end_token_idx']
+        self.ind2tok = vocab['ind2tok']
+        self.end_token_idx = vocab['end']
         # model
         if 'model' in opt:
-            self.model = get_model(opt, opt['model'], self.device, side_data).to(self.device)
+            self.model = get_model(opt, opt['model'], self.device, vocab, side_data).to(self.device)
         if 'rec_model' in opt:
-            self.rec_model = get_model(opt, opt['rec_model'], self.device, side_data).to(self.device)
+            self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab, side_data).to(self.device)
         if 'conv_model' in opt:
-            self.conv_model = get_model(opt, opt['conv_model'], self.device, side_data).to(self.device)
+            self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab, side_data).to(self.device)
         if 'policy_model' in opt:
-            self.policy_model = get_model(opt, opt['policy_model'], self.device, side_data).to(self.device)
+            self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab, side_data).to(self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
         if restore:

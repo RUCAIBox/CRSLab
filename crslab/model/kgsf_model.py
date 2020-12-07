@@ -39,28 +39,30 @@ class KGSFModel(BaseModel):
         which would affect the pre-training speed.
     """
 
-    def __init__(self, opt, device, side_data):
+    def __init__(self, opt, device, vocab, side_data):
         super(KGSFModel, self).__init__(opt, device)
         # vocab
-        self.vocab_size = self.opt['vocab_size']
-        self.pad_token_idx = self.opt['pad_token_idx']
-        self.start_token_idx = self.opt['start_token_idx']
-        self.end_token_idx = self.opt['end_token_idx']
-        self.token_emb_dim = self.opt['token_emb_dim']
+        self.vocab_size = len(vocab['ind2tok'])
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
+        self.token_emb_dim = opt['token_emb_dim']
         self.pretrain_embedding = side_data.get('embedding', None)
         # kg
-        self.n_word = self.opt['n_word']
-        self.n_entity = self.opt['n_entity']
-        self.n_relation = self.opt['n_relation']
-        self.kg_emb_dim = self.opt['kg_emb_dim']
-        self.pad_word_idx = self.opt['pad_word_idx']
-        self.pad_entity_idx = self.opt['pad_entity_idx']
-        entity_edges, word_edges = side_data['entity_kg'], side_data['word_kg']
+        self.n_word = vocab['n_word']
+        self.n_entity = vocab['n_entity']
+        self.pad_word_idx = vocab['pad_word']
+        self.pad_entity_idx = vocab['pad_entity']
+        entity_kg = side_data['entity_kg']
+        self.n_relation = entity_kg['n_relation']
+        entity_edges = entity_kg['edge']
         self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
         self.entity_edge_idx = self.entity_edge_idx.to(self.device)
         self.entity_edge_type = self.entity_edge_type.to(self.device)
+        word_edges = side_data['word_kg']
         self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(self.device)
         self.num_bases = self.opt['num_bases']
+        self.kg_emb_dim = self.opt['kg_emb_dim']
         # transformer
         self.n_heads = self.opt['n_heads']
         self.n_layers = self.opt['n_layers']

@@ -3,18 +3,28 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/2
+# @Time   : 2020/11/23, 2020/12/7
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import random
 from abc import ABC
+from copy import copy
 from math import ceil
 from typing import List, Optional, Union
 
 import torch
 from loguru import logger
 from tqdm import tqdm
+
+
+def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
+    res = copy(vec)
+    if add_start and start_token_idx:
+        res.insert(0, start_token_idx)
+    if add_end and end_token_idx:
+        res.append(end_token_idx)
+    return res
 
 
 def padded_tensor(
@@ -94,26 +104,6 @@ def get_onehot_label(label_lists, categories) -> torch.Tensor:
     return torch.stack(onehot_labels, dim=0)
 
 
-def batch_split(dataset, batch_size, shuffle=False):
-    """split dataset to yield batch data
-
-    Args:
-        dataset (list of dict):
-        batch_size (int):
-        shuffle (bool, optional): Defaults to False.
-
-    Yields:
-        list of dict: batch data
-    """
-    batch_num = ceil(len(dataset) / batch_size)
-    idx_list = list(range(len(dataset)))
-    if shuffle:
-        random.shuffle(idx_list)
-    for start_idx in range(batch_num):
-        batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
-        yield [dataset[idx] for idx in batch_idx]
-
-
 def truncate(vec, max_length, truncate_tail=True):
     """truncate vec to make its length within max length
 
@@ -152,7 +142,7 @@ class BaseDataLoader(ABC):
         self.opt = opt
         self.dataset = dataset
 
-    def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None, *args, **kwargs):
+    def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None):
         """collate batch data for system to fit
 
         Args:
@@ -166,11 +156,18 @@ class BaseDataLoader(ABC):
         """
         dataset = self.dataset
         if process_fn is not None:
-            dataset = process_fn(*args, **kwargs)
+            dataset = process_fn()
             logger.info('[Finish dataset process before batchify]')
         logger.debug(f'[Dataset size: {len(dataset)}]')
 
-        for batch in batch_split(dataset, batch_size, shuffle):
+        batch_num = ceil(len(dataset) / batch_size)
+        idx_list = list(range(len(dataset)))
+        if shuffle:
+            random.shuffle(idx_list)
+
+        for start_idx in tqdm(range(batch_num)):
+            batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
+            batch = [dataset[idx] for idx in batch_idx]
             yield batch_fn(batch)
 
     def get_conv_data(self, batch_size, shuffle=True):
@@ -182,22 +179,22 @@ class BaseDataLoader(ABC):
     def get_policy_data(self, batch_size, shuffle=True):
         return self.get_data(self.policy_batchify, batch_size, shuffle, self.policy_process_fn)
 
-    def conv_process_fn(self, *args, **kwargs):
+    def conv_process_fn(self):
         return self.dataset
 
-    def conv_batchify(self, *args, **kwargs):
+    def conv_batchify(self, batch):
         raise NotImplementedError('dataloader must implement conv_batchify() method')
 
-    def rec_process_fn(self, *args, **kwargs):
+    def rec_process_fn(self):
         return self.dataset
 
-    def rec_batchify(self, *args, **kwargs):
+    def rec_batchify(self, batch):
         raise NotImplementedError('dataloader must implement rec_batchify() method')
 
-    def policy_process_fn(self, *args, **kwargs):
+    def policy_process_fn(self):
         return self.dataset
 
-    def policy_batchify(self, *args, **kwargs):
+    def policy_batchify(self, batch):
         raise NotImplementedError('dataloader must implement policy_batchify() method')
 
     def retain_recommender_target(self):

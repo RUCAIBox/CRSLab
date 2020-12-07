@@ -1,8 +1,19 @@
+# -*- encoding: utf-8 -*-
+# @Time    :   2020/12/7
+# @Author  :   Xiaolei Wang
+# @email   :   wxl1999@foxmail.com
+
+# UPDATE
+# @Time    :   2020/12/7
+# @Author  :   Xiaolei Wang
+# @email   :   wxl1999@foxmail.com
+
 import datetime
 import hashlib
 import os
 import shutil
 import time
+
 import requests
 import tqdm
 from loguru import logger
@@ -78,7 +89,7 @@ def download(url, path, fname, redownload=False, num_retries=5):
     """
     outfile = os.path.join(path, fname)
     download = not os.path.isfile(outfile) or redownload
-    # logging.info(f"Downloading {url} to {outfile}")
+    logger.info(f"Downloading {url} to {outfile}")
     retry = num_retries
     exp_backoff = [2 ** r for r in reversed(range(retry))]
 
@@ -135,13 +146,13 @@ def download(url, path, fname, redownload=False, num_retries=5):
                 retry -= 1
                 pbar.clear()
                 if retry > 0:
-                    # pl = 'y' if retry == 1 else 'ies'
-                    # logging.debug(
-                    #     f'Connection error, retrying. ({retry} retr{pl} left)'
-                    # )
+                    pl = 'y' if retry == 1 else 'ies'
+                    logger.debug(
+                        f'Connection error, retrying. ({retry} retr{pl} left)'
+                    )
                     time.sleep(exp_backoff[retry])
                 else:
-                    # logging.error('Retried too many times, stopped retrying.')
+                    logger.error('Retried too many times, stopped retrying.')
                     pass
             finally:
                 if response:
@@ -211,7 +222,7 @@ def untar(path, fname, deleteTar=True):
     :param bool deleteTar:
         If true, the archive will be deleted after extraction.
     """
-    # logging.debug(f'unpacking {fname}')
+    logger.debug(f'unpacking {fname}')
     fullpath = os.path.join(path, fname)
     shutil.unpack_archive(fullpath, path)
     if deleteTar:
@@ -234,33 +245,51 @@ def remove_dir(path):
     shutil.rmtree(path, ignore_errors=True)
 
 
-def mark_done(path):
+def check_build(path, version_string=None):
+    """
+    Check if '.built' flag has been set for that task.
+
+    If a version_string is provided, this has to match, or the version is regarded as
+    not built.
+    """
+    if version_string:
+        fname = os.path.join(path, '.built')
+        if not os.path.isfile(fname):
+            return False
+        else:
+            with open(fname, 'r') as read:
+                text = read.read().split('\n')
+            return len(text) > 1 and text[1] == version_string
+    else:
+        return os.path.isfile(os.path.join(path, '.built'))
+
+
+def mark_done(path, version_string=None):
     """
     Mark this path as prebuilt.
 
-    Marks the path as done by adding a '.built' file with the current timestamp.
+    Marks the path as done by adding a '.built' file with the current timestamp
+    plus a version description string if specified.
 
     :param str path:
         The file path to mark as built.
+
+    :param str version_string:
+        The version of this dataset.
     """
     with open(os.path.join(path, '.built'), 'w') as write:
         write.write(str(datetime.datetime.today()))
+        if version_string:
+            write.write('\n' + version_string)
 
 
-def built(path):
-    """
-    Check if '.built' flag has been set for that task.
-    """
-    return os.path.isfile(os.path.join(path, '.built'))
-
-
-def build(dpath, dfile):
-    if not built(dpath):
+def build(dpath, dfile, version=None):
+    if not check_build(dpath, version):
         logger.info('[Building data: ' + dpath + ']')
-        if built(dpath):
+        if check_build(dpath):
             remove_dir(dpath)
         make_dir(dpath)
         # Download the data.
         downloadable_file = dfile
         downloadable_file.download_file(dpath)
-        mark_done(dpath)
+        mark_done(dpath, version)

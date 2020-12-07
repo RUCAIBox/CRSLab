@@ -12,14 +12,17 @@ from copy import deepcopy
 import torch
 from tqdm import tqdm
 
-from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt, truncate
+from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt, truncate, \
+    add_start_end_token_idx
 
 
 class KBRDDataLoader(BaseDataLoader):
-    def __init__(self, opt, dataset):
+    def __init__(self, opt, dataset, vocab):
         super().__init__(opt, dataset)
-        self.pad_token_idx = opt['pad_token_idx']
-        self.pad_entity_idx = opt['pad_entity_idx']
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
+        self.pad_entity_idx = vocab['pad_entity']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
@@ -81,7 +84,10 @@ class KBRDDataLoader(BaseDataLoader):
             batch_context_tokens.append(
                 truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
             batch_context_entities.append(conv_dict['context_entities'])
-            batch_response.append(truncate(conv_dict['response'], self.entity_truncate))
+            batch_response.append(
+                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2), add_start=True,
+                                        start_token_idx=self.start_token_idx, add_end=True,
+                                        end_token_idx=self.end_token_idx))
 
         return {
             "context_tokens": padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),

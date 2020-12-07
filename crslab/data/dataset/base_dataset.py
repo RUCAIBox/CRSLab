@@ -10,19 +10,9 @@
 import os
 import pickle as pkl
 from abc import ABC, abstractmethod
-from copy import copy
 
 import numpy as np
 from loguru import logger
-
-
-def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
-    res = copy(vec)
-    if add_start:
-        res.insert(0, start_token_idx)
-    if add_end:
-        res.append(end_token_idx)
-    return res
 
 
 class BaseDataset(ABC):
@@ -31,7 +21,7 @@ class BaseDataset(ABC):
         self.dpath = dpath
 
         if not restore:
-            train_data, valid_data, test_data, self.tok2ind, self.ind2tok = self._load_data()
+            train_data, valid_data, test_data, self.vocab = self._load_data()
             logger.info('[Finish data load]')
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
                                                                                                      valid_data,
@@ -42,10 +32,10 @@ class BaseDataset(ABC):
                 logger.debug(f'[Load pretrained embedding {embedding}]')
             logger.info('[Finish data preprocess]')
         else:
-            self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok = self._load_from_restore()
+            self.train_data, self.valid_data, self.test_data, self.side_data, vocab = self._load_from_restore()
 
         if save:
-            data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.tok2ind, self.ind2tok)
+            data = (self.train_data, self.valid_data, self.test_data, self.side_data, vocab)
             self._save_to_one(data)
 
     @abstractmethod
