@@ -9,7 +9,7 @@
 
 from abc import ABC, abstractmethod
 
-from crslab.evaluator.metrics import Metrics
+from crslab.evaluator.metrics.base_metrics import Metrics
 
 
 class BaseEvaluator(ABC):

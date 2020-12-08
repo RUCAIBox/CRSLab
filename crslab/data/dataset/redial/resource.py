@@ -1,4 +1,4 @@
-from ..download import DownloadableFile
+from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {

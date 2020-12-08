@@ -10,8 +10,8 @@
 import torch
 from loguru import logger
 
-from crslab.evaluator.gen_metrics import PPLMetric
-from crslab.evaluator.metrics import AverageMetric
+from crslab.evaluator.metrics.base_metrics import AverageMetric
+from crslab.evaluator.metrics.gen_metrics import PPLMetric
 from crslab.system.base_system import BaseSystem
 
 
@@ -110,7 +110,7 @@ class KGSFSystem(BaseSystem):
                 self.step(batch, stage='rec', mode='train')
             self.evaluator.report()
             # val
-            logger.info(['Valid'])
+            logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
@@ -122,7 +122,7 @@ class KGSFSystem(BaseSystem):
                 if self.stop:
                     break
         # test
-        logger.info(['Test'])
+        logger.info('[Test]')
         with torch.no_grad():
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
@@ -141,7 +141,7 @@ class KGSFSystem(BaseSystem):
                 self.step(batch, stage='conv', mode='train')
             self.evaluator.report()
             # val
-            logger.info(['Valid'])
+            logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):

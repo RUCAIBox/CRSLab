@@ -1,4 +1,4 @@
-from crslab.evaluator.metrics import AverageMetric
+from crslab.evaluator.metrics.base_metrics import AverageMetric
 
 
 class RecallMetric(AverageMetric):

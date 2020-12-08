@@ -16,7 +16,7 @@ from typing import Union, Tuple
 
 import torch
 
-from crslab.evaluator.metrics import Metric
+from crslab.evaluator.metrics.base_metrics import Metric
 
 
 def _line_width():

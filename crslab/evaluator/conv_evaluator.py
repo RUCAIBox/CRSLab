@@ -13,8 +13,8 @@ from loguru import logger
 from nltk import ngrams
 
 from crslab.evaluator.base_evaluator import BaseEvaluator
-from crslab.evaluator.gen_metrics import F1Metric, BleuMetric
-from crslab.evaluator.metrics import aggregate_unnamed_reports, Metrics, AverageMetric
+from crslab.evaluator.metrics.base_metrics import aggregate_unnamed_reports, Metrics, AverageMetric
+from crslab.evaluator.metrics.gen_metrics import F1Metric, BleuMetric
 from crslab.system.utils import nice_report
 
 

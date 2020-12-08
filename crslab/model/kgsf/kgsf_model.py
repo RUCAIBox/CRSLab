@@ -17,28 +17,15 @@ from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
 from crslab.config.config import DATA_PATH
-from crslab.data import DownloadableFile, build
 from crslab.model.base_model import BaseModel
 from crslab.model.layers import SelfAttentionSeq, GateLayer
 from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
 from crslab.model.utils import edge_to_pyg_format
-
-model_data_table = {
-    'ReDial': DownloadableFile('1zrszs2EcNlim3l7O0BH6XbalLMeUcMFv', 'kgsf.zip',
-                               'f627841644a184079acde1b0185e3a223945061c3a591f4bc0d7f62e7263f548', from_google=True)
-}
+from .resource import resources
+from ...download import build
 
 
 class KGSFModel(BaseModel):
-    r"""
-    S3Rec is the first work to incorporate self-supervised learning in
-    sequential recommendation.
-
-    NOTE:
-        Under this framework, we need reconstruct the pretraining data,
-        which would affect the pre-training speed.
-    """
-
     def __init__(self, opt, device, vocab, side_data):
         super(KGSFModel, self).__init__(opt, device)
         # vocab
@@ -76,8 +63,9 @@ class KGSFModel(BaseModel):
         self.n_positions = self.opt['n_positions']
         self.response_truncate = self.opt.get('response_truncate', 20)
         # copy mask
-        dpath = os.path.join(DATA_PATH, "kgsf")
-        dfile = model_data_table[self.opt['dataset']]
+        dataset = self.opt['dataset']
+        dpath = os.path.join(DATA_PATH, "kgsf", dataset)
+        dfile = resources[dataset]['file']
         build(dpath, dfile)
         self.copy_mask = torch.as_tensor(np.load(os.path.join(dpath, "copy_mask.npy")).astype(bool), device=self.device)
 

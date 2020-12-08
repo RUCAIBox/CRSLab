@@ -9,8 +9,8 @@
 
 from loguru import logger
 
-from .kbrd_model import KBRDModel
-from .kgsf_model import KGSFModel
+from crslab.model.kbrd.kbrd_model import KBRDModel
+from crslab.model.kgsf.kgsf_model import KGSFModel
 
 Model_register_table = {
     'KGSF': KGSFModel,

@@ -6,7 +6,7 @@ from typing import List, Optional
 from nltk import ngrams
 from nltk.translate.bleu_score import sentence_bleu
 
-from crslab.evaluator.metrics import AverageMetric, SumMetric
+from crslab.evaluator.metrics.base_metrics import AverageMetric, SumMetric
 
 re_art = re.compile(r'\b(a|an|the)\b')
 re_punc = re.compile(r'[!"#$%&()*+,-./:;<=>?@\[\]\\^`{|}~_\']')

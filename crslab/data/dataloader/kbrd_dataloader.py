@@ -12,8 +12,8 @@ from copy import deepcopy
 import torch
 from tqdm import tqdm
 
-from crslab.data.dataloader.base_dataloader import BaseDataLoader, padded_tensor, merge_utt, truncate, \
-    add_start_end_token_idx
+from crslab.data.dataloader.base_dataloader import BaseDataLoader
+from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
 
 
 class KBRDDataLoader(BaseDataLoader):

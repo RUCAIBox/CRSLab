@@ -10,8 +10,8 @@
 from loguru import logger
 
 from crslab.evaluator.base_evaluator import BaseEvaluator
-from crslab.evaluator.metrics import Metrics, aggregate_unnamed_reports
-from crslab.evaluator.rec_metrics import RecallMetric
+from crslab.evaluator.metrics.base_metrics import Metrics, aggregate_unnamed_reports
+from crslab.evaluator.metrics.rec_metrics import RecallMetric
 from crslab.system.utils import nice_report
 
 

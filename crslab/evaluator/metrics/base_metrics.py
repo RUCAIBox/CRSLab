@@ -8,15 +8,10 @@
 # @Email  : francis_kun_zhou@163.com
 
 import functools
-import math
-import re
 from abc import ABC, abstractmethod
-from collections import Counter, defaultdict
 from typing import Any, Union, List, Optional, Dict
 
 import torch
-from nltk.translate.bleu_score import sentence_bleu
-from nltk.util import ngrams
 
 TScalar = Union[int, float, torch.Tensor]
 TVector = Union[List[TScalar], torch.Tensor]

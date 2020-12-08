@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from crslab.config.config import DATA_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
-from crslab.data.dataset.download import build
+from crslab.download import build
 from .resource import resources
 
 
