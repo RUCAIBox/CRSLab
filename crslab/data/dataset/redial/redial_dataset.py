@@ -27,8 +27,6 @@ class ReDialDataset(BaseDataset):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        self.pad_entity_idx = self.special_token_idx['pad_entity']
-        self.pad_word_idx = self.special_token_idx['pad_word']
 
         dpath = os.path.join(DATA_PATH, 'redial', tokenize)
         dfile = resource['file']
@@ -40,7 +38,7 @@ class ReDialDataset(BaseDataset):
         self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
 
-        logger.debug(f"[Load vocab from {'token2id.json'}]")
+        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
         logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
         logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
 
@@ -48,31 +46,33 @@ class ReDialDataset(BaseDataset):
         # load train/valid/test data
         with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
-            logger.debug(f"[Load train data from {'train_data.json'}]")
+            logger.debug(f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
         with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
-            logger.debug(f"[Load valid data from {'valid_data.json'}]")
+            logger.debug(f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
         with open(os.path.join(self.dpath, 'test_data.json'), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
-            logger.debug(f"[Load test data from {'test_data.json'}]")
+            logger.debug(f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
 
         self._load_vocab()
 
         # dbpedia
         self.entity2id = json.load(
-            open(os.path.join(self.dpath, "entity2id.json"), 'r', encoding='utf-8'))  # {entity: entity_id}
-        self.n_entity = len(self.entity2id) + 1
+            open(os.path.join(self.dpath, 'entity2id.json'), 'r', encoding='utf-8'))  # {entity: entity_id}
+        self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = json.load(open(os.path.join(self.dpath, "dbpedia_subkg.json"), 'r', encoding='utf-8'))
-        logger.debug(f"[Load entity dictionary and KG from {'entity2id.json'} and {'dbpedia_subkg.json'}]")
+        self.entity_kg = json.load(open(os.path.join(self.dpath, 'dbpedia_subkg.json'), 'r', encoding='utf-8'))
+        logger.debug(
+            f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'entity2id.json')} and {os.path.join(self.dpath, 'dbpedia_subkg.json')}]")
 
         # conceptNet
         # {concept: concept_id}
-        self.word2id = json.load(open(os.path.join(self.dpath, "concept2id.json"), 'r', encoding='utf-8'))
-        self.n_word = len(self.word2id) + 1
+        self.word2id = json.load(open(os.path.join(self.dpath, 'concept2id.json'), 'r', encoding='utf-8'))
+        self.n_word = max(self.word2id.values()) + 1
         # {relation\t concept \t concept}
-        self.word_kg = open(os.path.join(self.dpath, "conceptnet_subkg.txt"), 'r', encoding='utf-8')
-        logger.debug(f"[Load word dictionary and KG from {'concept2id.json'} and {'conceptnet_subkg.txt'}]")
+        self.word_kg = open(os.path.join(self.dpath, 'conceptnet_subkg.txt'), 'r', encoding='utf-8')
+        logger.debug(
+            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'concept2id.json')} and {os.path.join(self.dpath, 'conceptnet_subkg.txt')}]")
 
         vocab = {
             'tok2ind': self.tok2ind,

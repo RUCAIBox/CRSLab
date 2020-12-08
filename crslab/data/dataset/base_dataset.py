@@ -56,12 +56,16 @@ class BaseDataset(ABC):
             list of dict: 
                 train/valid/test_data: {
                     'role' (str): 'Seeker' or 'Recommender';
+                    'user_profile' (list of list of int): id of tokens of sentences of user profile
                     'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
                     'response' (list of int): token ids of the ground-truth response;
-                    'items' (list of int): items mentioned in current turn, we only keep those in entity kg for comparison;
+                    'interaction_history' (list of int): id of items which have interaction of the user in current turn;
+                    'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
                     'context_entities' (list of int): if necessary, id of entities in context;
                     'context_words' (list of int): if necessary, id of words in context;
-                    'context_interactions' (): if necessary, the preprocessed interaction history;
+                    'context_policy' (list of list of list): policy of each context turn, ont turn may have several policies, where first is action and second is keyword;
+                    'target' (list): policy of current turn;
+                    'final' (list): final goal for current turn;
                 }
                 side_data: {
                     'entity_kg' (dict): {

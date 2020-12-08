@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/12/6, 2020/12/6
+# @Time   : 2020/12/6, 2020/12/8
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com
 
@@ -16,9 +16,8 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.config.config import DATA_PATH
-from crslab.data.dataloader.base_dataloader import add_start_end_token_idx
 from crslab.data.dataset.base_dataset import BaseDataset
-from crslab.data.dataset.download import DownloadableFile, build
+from crslab.data.dataset.download import build
 from .resource import resources
 
 
@@ -26,75 +25,80 @@ class TGReDialDataset(BaseDataset):
     def __init__(self, opt, restore=False, save=False):
         tokenize = opt.get('tokenize', 'pkuseg')
         resource = resources[tokenize]
+        self.special_token_idx = resource['special_token_idx']
+        self.unk_token_idx = self.special_token_idx['unk']
+        self.pad_topic_idx = self.special_token_idx['pad_topic']
 
         dpath = os.path.join(DATA_PATH, 'tgredial', tokenize)
         dfile = resource['file']
         build(dpath, dfile, version=resource['version'])
+
         super().__init__(opt, dpath, restore, save)
 
     def _load_vocab(self):
-        self.pad_token = '__pad__'
-        self.start_token = '__start__'
-        self.end_token = '__end__'
-        self.unk_token = '__unk__'
+        self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
+        self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
 
-        tok2ind = json.load(open(os.path.join(self.dpath, self.tok2ind_file), 'r', encoding='utf-8'))
-        tok2ind.update({self.pad_token: self.pad_token_idx,
-                        self.start_token: self.start_token_idx,
-                        self.end_token: self.end_token_idx,
-                        self.unk_token: self.unk_token_idx})
-        ind2tok = {idx: word for word, idx in tok2ind.items()}
-
-        logger.debug(f"[Load vocab from {self.tok2ind_file}]")
-        logger.debug(f"[The size of token2index dictionary is {len(tok2ind)}]")
-        logger.debug(f"[The size of index2token dictionary is {len(ind2tok)}]")
-
-        return tok2ind, ind2tok
+        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
+        logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
+        logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
 
     def _load_data(self):
-        # download
-        dfile = DownloadableFile('1q3ipHbZy6erCldC22dZSkQeUrQXTTzID', 'tg-redial.zip',
-                                 '5b1e5159b1af3ed9bc42183b8c445be170c45d5d0e5cd5d1bf8bc45c7ad7dca2',
-                                 from_google=True)
-
         # load train/valid/test data
-        with open(os.path.join(self.dpath, self.train_data_file), 'r', encoding='utf-8') as f:
+        with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
-            logger.debug(f"[Load train data from {self.train_data_file}]")
-        with open(os.path.join(self.dpath, self.valid_data_file), 'r', encoding='utf-8') as f:
+            logger.debug(f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
+        with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
-            logger.debug(f"[Load valid data from {self.valid_data_file}]")
-        with open(os.path.join(self.dpath, self.test_data_file), 'r', encoding='utf-8') as f:
+            logger.debug(f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
+        with open(os.path.join(self.dpath, 'test_data.json'), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
-            logger.debug(f"[Load test data from {self.test_data_file}]")
+            logger.debug(f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
 
-        # load dictionary: tok2ind, ind2tok
-        tok2ind, ind2tok = self._load_vocab()
+        self._load_vocab()
 
         # cn-dbpedia
         self.entity2id = json.load(
-            open(os.path.join(self.dpath, "entity2id.json"), encoding='utf-8'))  # {entity: entity_id}
+            open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8'))  # {entity: entity_id}
+        self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = [triple.strip().split('\t') for triple in
-                          open(os.path.join(self.dpath, "cn-dbpedia.txt"), encoding='utf-8')]
-        logger.debug(f"[Load entity dictionary and KG from {'entity2id.json'} and {'subkg_2nd.txt'}]")
+        self.entity_kg = open(os.path.join(self.dpath, 'cn-dbpedia.txt'), encoding='utf-8')
+        logger.debug(
+            f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'entity2id.json')} and {os.path.join(self.dpath, 'cn-dbpedia.txt')}]")
 
         # hownet
         # {concept: concept_id}
-        self.word2id = json.load(open(os.path.join(self.dpath, "word2id.json"), 'r', encoding='utf-8'))
+        self.word2id = json.load(open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8'))
+        self.n_word = max(self.word2id.values()) + 1
         # {relation\t concept \t concept}
-        self.word_kg = open(os.path.join(self.dpath, "hownet.txt"), encoding='utf-8')
-        logger.debug(f"[Load word dictionary and KG from {'word2id.json'} and {'hownet.txt'}]")
+        self.word_kg = open(os.path.join(self.dpath, 'hownet.txt'), encoding='utf-8')
+        logger.debug(
+            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'hownet.txt')}]")
 
         # topic dictionary
-        self.topic2id = json.load(open(os.path.join(self.dpath, "topic2id.json"), 'r', encoding='utf-8'))
-        logger.debug(f"[Load topic dictionary from {'topic2id.json'}]")
+        self.topic2id = json.load(open(os.path.join(self.dpath, 'topic2id.json'), 'r', encoding='utf-8'))
+        self.n_topic = len(self.topic2id) + 1
+        logger.debug(f"[Load topic dictionary from {os.path.join(self.dpath, 'topic2id.json')}]")
 
         # user interaction history dictionary
-        self.user_utt2history = json.load(open(os.path.join(self.dpath, "user2history.json"), 'r', encoding='utf-8'))
-        logger.debug(f"[Load user id and utterance to history dictionary from {'user2history.json'}]")
+        self.conv2history = json.load(open(os.path.join(self.dpath, 'user2history.json'), 'r', encoding='utf-8'))
+        logger.debug(f"[Load user interaction history from {os.path.join(self.dpath, 'user2history.json')}]")
 
-        return train_data, valid_data, test_data, tok2ind, ind2tok
+        # user profile
+        self.user2profile = json.load(open(os.path.join(self.dpath, 'user2profile.json'), 'r', encoding='utf-8'))
+        logger.debug(f"[Load user profile from {os.path.join(self.dpath, 'user2profile.json')}")
+
+        vocab = {
+            'tok2ind': self.tok2ind,
+            'ind2tok': self.ind2tok,
+            'vocab_size': len(self.tok2ind),
+            'n_entity': self.n_entity,
+            'n_word': self.n_word,
+            'n_topic': self.n_topic
+        }
+        vocab.update(self.special_token_idx)
+
+        return train_data, valid_data, test_data, vocab
 
     def _data_preprocess(self, train_data, valid_data, test_data):
         processed_train_data = self._raw_data_process(train_data)
@@ -113,100 +117,111 @@ class TGReDialDataset(BaseDataset):
         Args:
             raw_data (list of dict): {
                 'conv_id' (int):
-                'dialog' (list of dict): {
-                    'utt_id' (int): id of current utterance
+                'messages' (list of dict): {
+                    'local_id' (int): id of current utterance
                     'role' (str): 'Seeker' or 'Recommender'
                     'text' (list of str): utterance which has benn tokenized into tokens
-                    'movies' (list of str): mentioned movies in text
-                    'entity' (list of str): mentioned entities of dbpedia in text
-                    'word' (list of str): mentioned words of conceptnet in text
+                    'movie' (list of str): mentioned movies in text
+                    'entity' (list of str): mentioned entities of cn-dbpedia in text
+                    'word' (list of str): mentioned words of hownet in text
+                    'target' (list of str): topic in current turn
+                    'final' (list): final goal for current turn
                 }
             }
 
         Returns:
             list of dict: {
+                'role' (str): 'Seeker' or 'Recommender';
+                'user_profile' (list of list of int): id of tokens of sentences of user profile
                 'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
                 'response' (list of int): token ids of the ground-truth response;
+                'interaction_history' (list of int): id of items which have interaction of the user in current turn;
                 'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
                 'context_entities' (list of int): if necessary, id of entities in context;
                 'context_words' (list of int): if necessary, id of words in context;
+                'context_policy' (list of list of list): policy of each context turn, ont turn may have several policies, where first is action and second is keyword;
+                'target' (list): policy of current turn;
+                'final' (list): final goal for current turn;
             }
         """
-
-        augmented_convs = [self._merge_conv_data(conversation["messages"]) for conversation in tqdm(raw_data)]
+        augmented_convs = [self._convert_to_id(conversation) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
             augmented_conv_dicts.extend(self._augment_and_add(conv))
         return augmented_conv_dicts
 
-    def _merge_conv_data(self, dialog):
+    def _convert_to_id(self, conversation):
         """
-        1.merge the continue utterances based on roles;
-        2.convert token/word/entity/movie into ids;
+        convert token/word/entity/movie into ids;
         """
-        # {"utt_id": 0,
-        # "role": "Seeker",
-        # "text": ["Hi", "I", "am", "looking", "for", "a", "movie", "like", "@111776"],
-        # "movies": ["<http://dbpedia.org/resource/Super_Troopers>"],
-        # "entity": [],
-        # "word": ["am", "looking", "for", "a", "movie", "like", "@111776"]}
         augmented_convs = []
         last_role = None
-        for utt in dialog:
+        for utt in conversation['messages']:
+            assert utt['role'] != last_role
+
             text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
             movie_ids = [self.entity2id[movie] for movie in utt['movie'] if movie in self.entity2id]
             entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
             word_ids = [self.word2id[word] for word in utt['word'] if word in self.word2id]
+            policy = []
+            for action, kw in zip(utt['target'][1::2], utt['target'][2::2]):
+                if kw is None or action == '推荐电影':
+                    policy.append([action, self.pad_topic_idx])
+                    continue
+                if isinstance(kw, str):
+                    kw = [kw]
+                kw = [self.topic2id.get(k, self.pad_topic_idx) for k in kw]
+                policy.append([action, kw])
+            kws = [self.topic2id[kw] if kw is not None else self.pad_topic_idx for kw in utt['final'][1]]
+            final = [utt['final'][0], kws]
+            conv_utt_id = str(conversation['conv_id']) + '/' + str(utt['local_id'])
+            interaction_history = self.conv2history.get(conv_utt_id, [])
+            user_profile = self.user2profile[conversation['user_id']]
+            user_profile = [[self.tok2ind.get(token, self.unk_token_idx) for token in sent] for sent in user_profile]
 
-            if utt["role"] == last_role:
-                augmented_convs[-1]["text"] += text_token_ids
-                augmented_convs[-1]["movie"] += movie_ids
-                augmented_convs[-1]["entity"] += entity_ids
-                augmented_convs[-1]["word"] += word_ids
-            else:
-                augmented_convs.append({
-                    "role": utt["role"],
-                    "text": text_token_ids,
-                    "entity": entity_ids,
-                    "movie": movie_ids,
-                    "word": word_ids
-                })
+            augmented_convs.append({
+                "role": utt["role"],
+                "text": text_token_ids,
+                "entity": entity_ids,
+                "movie": movie_ids,
+                "word": word_ids,
+                'policy': policy,
+                'final': final,
+                'interaction_history': interaction_history,
+                'user_profile': user_profile
+            })
             last_role = utt["role"]
 
         return augmented_convs
 
     def _augment_and_add(self, raw_conv_dict):
         """
-        1.augment one conversation into several instances;
-        2.add start or end token;
-        input: {
-            "role": role,
-            "text": text_token_ids,
-            "entity": entity_ids,
-            "movie": movie_ids,
-            "word": word_ids
-        }
+        augment one conversation into several instances;
         """
         augmented_conv_dicts = []
-        context_tokens, context_entities, context_words = [], [], []
+        context_tokens, context_entities, context_words, policy_seq = [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
-            text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
+            text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
+                                                             conv['policy']
             if len(context_tokens) > 0:
-                response_add_SE = add_start_end_token_idx(text_tokens, add_start=True,
-                                                          start_token_idx=self.start_token_idx, add_end=True,
-                                                          end_token_idx=self.end_token_idx)
                 conv_dict = {
                     'role': conv['role'],
+                    'user_profile': conv['user_profile'],
                     "context_tokens": copy(context_tokens),
+                    "response": text_tokens,
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
-                    "response": response_add_SE,
-                    "items": movies
+                    'interaction_history': conv['interaction_history'],
+                    "items": movies,
+                    'context_policy': copy(policy_seq),
+                    'target': policies,
+                    'final': conv['final'],
                 }
                 augmented_conv_dicts.append(conv_dict)
 
             context_tokens.append(text_tokens)
+            policy_seq.append(policies)
             for entity in entities + movies:
                 if entity not in entity_set:
                     entity_set.add(entity)
@@ -232,17 +247,17 @@ class TGReDialDataset(BaseDataset):
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
         logger.debug("[Finish word KG process]")
-        # movie_entity_ids = pkl.load(open(os.path.join(self.dpath, 'movie_entity_ids.pkl'), 'rb'))
-        # logger.debug('[Load movie entity ids]')
+        movie_entity_ids = json.load(open(os.path.join(self.dpath, 'movie_ids.json'), 'r', encoding='utf-8'))
+        logger.debug('[Load movie entity ids]')
 
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,
-            # "item_entity_ids": movie_entity_ids,
+            "item_entity_ids": movie_entity_ids,
         }
         return side_data
 
-    def _entity_kg_process(self, SELF_LOOP_ID=185):
+    def _entity_kg_process(self):
         """get cn-dbpedia edge information
 
         Args:
@@ -251,15 +266,16 @@ class TGReDialDataset(BaseDataset):
             list: edge list [(head_entity_id, tail_entity_id, new_relation_id)]
         """
         edge_list = []  # [(entity, entity, relation)]
-        for entity in tqdm(range(self.n_entity)):
-            # add self loop
-            edge_list.append((entity, entity, SELF_LOOP_ID))
-            if entity not in self.entity_kg:
-                continue
-            for tail_and_relation in self.entity_kg[entity]:
-                if entity != tail_and_relation[1] and tail_and_relation[0] != SELF_LOOP_ID:
-                    edge_list.append((entity, tail_and_relation[1], tail_and_relation[0]))
-                    edge_list.append((tail_and_relation[1], entity, tail_and_relation[0]))
+        for line in self.entity_kg:
+            triple = line.strip().split('\t')
+            e0 = self.entity2id[triple[0]]
+            e1 = self.entity2id[triple[2]]
+            r = triple[1]
+            edge_list.append((e0, e1, r))
+            edge_list.append((e1, e0, r))
+            edge_list.append((e0, e0, 'SELF_LOOP'))
+            if e1 != e0:
+                edge_list.append((e1, e1, 'SELF_LOOP'))
 
         relation_cnt, relation2id, edges = defaultdict(int), dict(), set()
         for h, t, r in edge_list:
@@ -269,15 +285,19 @@ class TGReDialDataset(BaseDataset):
                 if r not in relation2id:
                     relation2id[r] = len(relation2id)
                 edges.add((h, t, relation2id[r]))
-        return list(edges)
+
+        return {
+            'edge': list(edges),
+            'n_relation': len(relation2id)
+        }
 
     def _word_kg_process(self):
         """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
-        for line in tqdm(self.word_kg):
-            kg = line.strip().split('\t')
-            e0 = self.word2id[kg[0]]
-            e1 = self.word2id[kg[2]]
+        for line in self.word_kg:
+            triple = line.strip().split('\t')
+            e0 = self.word2id[triple[0]]
+            e1 = self.word2id[triple[2]]
             edges.add((e0, e1))
             edges.add((e1, e0))
         # edge_set = [[co[0] for co in list(edges)], [co[1] for co in list(edges)]]
