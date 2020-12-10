@@ -32,7 +32,7 @@ class BaseDataset(ABC):
                 logger.debug(f'[Load pretrained embedding {embedding}]')
             logger.info('[Finish data preprocess]')
         else:
-            self.train_data, self.valid_data, self.test_data, self.side_data, vocab = self._load_from_restore()
+            self.train_data, self.valid_data, self.test_data, self.side_data, self.vocab = self._load_from_restore()
 
         if save:
             data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.vocab)
@@ -40,7 +40,7 @@ class BaseDataset(ABC):
 
     @abstractmethod
     def _load_data(self):
-        """return train, valid, test data and vocab(all kinds of size and idx)"""
+        """return train, valid, test data and vocab(all kinds of size and idx and map between token and idx)"""
         pass
 
     @abstractmethod
