@@ -62,7 +62,7 @@ class BaseSystem(ABC):
         self.best_valid = None
         self.impatience = opt.get('impatience', 3)
         self.drop_cnt = 0
-        self.val_optim = 1 if opt["val_mode"] == "max" else -1
+        self.valid_optim = 1 if opt["val_mode"] == "max" else -1
         self.stop = False
 
     @abstractmethod
@@ -206,7 +206,7 @@ class BaseSystem(ABC):
         logger.debug('[Adjust learning rate after valid epoch]')
 
     def early_stop(self, metric):
-        if self.best_valid is None or self.best_valid < metric * self.val_optim:
+        if self.best_valid is None or metric * self.valid_optim > self.best_valid * self.valid_optim:
             self.best_valid = metric
             self.drop_cnt = 0
             logger.info('[Get new best model]')
