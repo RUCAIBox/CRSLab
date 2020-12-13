@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -157,3 +157,12 @@ def nice_report(report) -> str:
                 for k, v in output.items()
             }
         )
+
+
+def ind2txt(inds, ind2tok, end_token_idx, unk_token='unk'):
+    sentence = []
+    for ind in inds:
+        if ind == end_token_idx:
+            break
+        sentence.append(ind2tok.get(ind, unk_token))
+    return ' '.join(sentence)

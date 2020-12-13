@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/4
+# @Time    :   2020/12/13
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -14,6 +14,7 @@ from loguru import logger
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.evaluator.metrics.gen_metrics import PPLMetric
 from crslab.system.base_system import BaseSystem
+from crslab.system.utils import ind2txt
 
 
 class KBRDSystem(BaseSystem):
@@ -22,6 +23,8 @@ class KBRDSystem(BaseSystem):
         super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
                                          restore, save, debug)
 
+        self.ind2tok = vocab['ind2tok']
+        self.end_token_idx = vocab['end']
         self.movie_ids = side_data['item_entity_ids']
 
         self.rec_optim_opt = opt['rec']
@@ -44,8 +47,8 @@ class KBRDSystem(BaseSystem):
         prediction = prediction.cpu().detach()
         response = response.cpu().detach()
         for p, r in zip(prediction, response):
-            p_str = self.ind2txt(p)
-            r_str = self.ind2txt(r)
+            p_str = ind2txt(p, self.ind2tok, self.end_token_idx)
+            r_str = ind2txt(r, self.ind2tok, self.end_token_idx)
             self.evaluator.gen_evaluate(p_str, [r_str])
 
     def step(self, batch, stage, mode):

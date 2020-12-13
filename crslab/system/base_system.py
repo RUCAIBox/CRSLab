@@ -34,17 +34,18 @@ class BaseSystem(ABC):
             self.train_dataloader = train_dataloader
             self.valid_dataloader = valid_dataloader
             self.test_dataloader = test_dataloader
-        self.ind2tok = vocab['ind2tok']
-        self.end_token_idx = vocab['end']
         # model
         if 'model' in opt:
             self.model = get_model(opt, opt['model'], self.device, vocab, side_data).to(self.device)
         if 'rec_model' in opt:
-            self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab, side_data).to(self.device)
+            self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab['rec'], side_data['rec']).to(
+                self.device)
         if 'conv_model' in opt:
-            self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab, side_data).to(self.device)
+            self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab['conv'], side_data['conv']).to(
+                self.device)
         if 'policy_model' in opt:
-            self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab, side_data).to(self.device)
+            self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab['policy'],
+                                          side_data['policy']).to(self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
         if restore:
@@ -214,14 +215,6 @@ class BaseSystem(ABC):
             if self.drop_cnt >= self.impatience:
                 self.stop = True
                 logger.info('[Early stop]')
-
-    def ind2txt(self, inds):
-        sentence = []
-        for ind in inds:
-            if ind == self.end_token_idx:
-                break
-            sentence.append(self.ind2tok.get(ind, 'unk'))
-        return ' '.join(sentence)
 
     def save_model(self):
         r"""Store the model parameters."""

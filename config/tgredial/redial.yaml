@@ -1,0 +1,51 @@
+# dataset
+dataset: ReDial
+tokenize:
+  rec: bert
+  conv: gpt2
+# dataloader
+context_truncate: 256
+response_truncate: 30
+scale: 0.01
+# model
+rec_model: TGRec
+conv_model: TGConv
+#policy_model: TGPolicy
+hidden_dropout_prob: 0.2
+initializer_range: 0.02
+hidden_size: 50
+max_history_items: 100
+num_attention_heads: 1
+attention_probs_dropout_prob: 0.2
+hidden_act: gelu
+num_hidden_layers: 2
+# optim
+rec:
+  epoch: 1
+  batch_size: 8
+  optimizer: AdamW
+  weight_decay: !!float 0.0000
+  adam_beta1: 0.9
+  adam_beta2: 0.99
+  lr_bert: !!float 1e-5
+  lr_sasrec: !!float 1e-3
+conv:
+  epoch: 1
+  batch_size: 8
+  optimizer: AdamW
+  lr: !!float 1.5e-4
+  warmup_steps: 2000
+  gradient_clip: 1.0
+  WarmupLinearSchedule: True
+  temperature: 1.0
+  topk: 8
+  topp: 0
+  repetition_penalty: 1.0
+  gradient_accumulation: 1
+policy:
+  epoch: 1
+  batch_size: 8
+  optimizer: AdamW
+  lr: !!float 1e-5
+impatience: 3
+val_mode: max

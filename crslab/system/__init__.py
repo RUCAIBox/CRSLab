@@ -3,17 +3,20 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+
 from loguru import logger
 
 from .kbrd_system import KBRDSystem
 from .kgsf_system import KGSFSystem
+from .tgredial_system import TGReDialSystem
 
 system_register_table = {
     'KGSF': KGSFSystem,
-    'KBRD': KBRDSystem
+    'KBRD': KBRDSystem,
+    'TGRec_TGConv': TGReDialSystem
 }
 
 

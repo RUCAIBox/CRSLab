@@ -3,18 +3,22 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 from loguru import logger
 
-from crslab.model.kbrd.kbrd_model import KBRDModel
-from crslab.model.kgsf.kgsf_model import KGSFModel
+from .kbrd import *
+from .kgsf import *
+from .tgredial import *
 
 Model_register_table = {
     'KGSF': KGSFModel,
-    'KBRD': KBRDModel
+    'KBRD': KBRDModel,
+    'TGRec': TGRecModel,
+    'TGConv': TGConvModel,
+    'TGPolicy': TGPolicyModel
 }
 
 

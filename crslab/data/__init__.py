@@ -18,12 +18,12 @@ dataset_register_table = {
 dataloader_register_table = {
     'KGSF': KGSFDataLoader,
     'KBRD': KBRDDataLoader,
-    # 'TGReDial': TGReDialDataLoader,
-    # 'TGRec': TGReDialDataLoader,
-    # 'TGConv': TGReDialDataLoader,
-    # 'TGPolicy': TGReDialDataLoader,
-    # 'TGRec_TGConv': TGReDialDataLoader,
-    # 'TGRec_TGConv_TGPolicy': TGReDialDataLoader,
+    'TGReDial': TGReDialDataLoader,
+    'TGRec': TGReDialDataLoader,
+    'TGConv': TGReDialDataLoader,
+    'TGPolicy': TGReDialDataLoader,
+    'TGRec_TGConv': TGReDialDataLoader,
+    'TGRec_TGConv_TGPolicy': TGReDialDataLoader,
 }
 
 

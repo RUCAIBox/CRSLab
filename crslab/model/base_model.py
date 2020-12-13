@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/11/30
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 from abc import ABC, abstractmethod
@@ -17,6 +17,7 @@ class BaseModel(ABC, nn.Module):
     """Base class for all models"""
 
     def __init__(self, opt, device, dpath=None, resource=None):
+        super(BaseModel, self).__init__()
         self.opt = opt
         self.device = device
 
@@ -25,7 +26,6 @@ class BaseModel(ABC, nn.Module):
             dfile = resource['file']
             build(dpath, dfile, version=resource['version'])
 
-        super(BaseModel, self).__init__()
         self.build_model()
 
     @abstractmethod
