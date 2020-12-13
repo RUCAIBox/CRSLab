@@ -1,6 +1,6 @@
 # dataset
 dataset: ReDial
-tokenize: nltk
+tokenize: gpt2
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
@@ -27,7 +27,7 @@ rec:
   learning_rate: !!float 3e-3
 conv:
   epoch: 1
-  batch_size: 128
+  batch_size: 64
   optimizer: adam
   learning_rate: !!float 1e-3
   lr_scheduler: reduceonplateau

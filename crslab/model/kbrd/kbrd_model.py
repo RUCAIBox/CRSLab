@@ -22,7 +22,6 @@ from crslab.model.utils import edge_to_pyg_format
 
 class KBRDModel(BaseModel):
     def __init__(self, opt, device, vocab, side_data):
-        super(KBRDModel, self).__init__(opt, device)
         # vocab
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
@@ -35,8 +34,8 @@ class KBRDModel(BaseModel):
         entity_kg = side_data['entity_kg']
         self.n_relation = entity_kg['n_relation']
         self.edge_idx, self.edge_type = edge_to_pyg_format(entity_kg['edge'], 'RGCN')
-        self.edge_idx = self.edge_idx.to(self.device)
-        self.edge_type = self.edge_type.to(self.device)
+        self.edge_idx = self.edge_idx.to(device)
+        self.edge_type = self.edge_type.to(device)
         self.num_bases = opt.get('num_bases', 8)
         self.kg_emb_dim = opt.get('kg_emb_dim', 300)
         self.user_emb_dim = self.kg_emb_dim
@@ -53,7 +52,7 @@ class KBRDModel(BaseModel):
         self.n_positions = opt.get('n_positions', 1024)
         self.longest_label = opt.get('longest_label', 1)
 
-        self.build_model()
+        super(KBRDModel, self).__init__(opt, device)
 
     def build_model(self, *args, **kwargs):
         self._build_embedding()

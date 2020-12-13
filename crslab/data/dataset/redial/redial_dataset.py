@@ -15,7 +15,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config.config import DATA_PATH
+from crslab.config.config import DATASET_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 
@@ -25,7 +25,7 @@ class ReDialDataset(BaseDataset):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        dpath = os.path.join(DATA_PATH, "redial", tokenize)
+        dpath = os.path.join(DATASET_PATH, "redial", tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_vocab(self):

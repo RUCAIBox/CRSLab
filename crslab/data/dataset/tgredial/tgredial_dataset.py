@@ -15,7 +15,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config.config import DATA_PATH
+from crslab.config.config import DATASET_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 
@@ -26,7 +26,7 @@ class TGReDialDataset(BaseDataset):
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
         self.pad_topic_idx = self.special_token_idx['pad_topic']
-        dpath = os.path.join(DATA_PATH, 'tgredial', tokenize)
+        dpath = os.path.join(DATASET_PATH, 'tgredial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_vocab(self):
@@ -277,10 +277,9 @@ class TGReDialDataset(BaseDataset):
         for h, t, r in edge_list:
             relation_cnt[r] += 1
         for h, t, r in edge_list:
-            if relation_cnt[r] > 1000:
-                if r not in relation2id:
-                    relation2id[r] = len(relation2id)
-                edges.add((h, t, relation2id[r]))
+            if r not in relation2id:
+                relation2id[r] = len(relation2id)
+            edges.add((h, t, relation2id[r]))
 
         return {
             'edge': list(edges),

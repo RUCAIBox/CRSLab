@@ -16,18 +16,16 @@ from loguru import logger
 from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
-from crslab.config.config import DATA_PATH
+from crslab.config.config import MODEL_PATH
 from crslab.model.base_model import BaseModel
 from crslab.model.layers import SelfAttentionSeq, GateLayer
 from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
 from crslab.model.utils import edge_to_pyg_format
 from .resource import resources
-from ...download import build
 
 
 class KGSFModel(BaseModel):
     def __init__(self, opt, device, vocab, side_data):
-        super(KGSFModel, self).__init__(opt, device)
         # vocab
         self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
@@ -44,32 +42,29 @@ class KGSFModel(BaseModel):
         self.n_relation = entity_kg['n_relation']
         entity_edges = entity_kg['edge']
         self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
-        self.entity_edge_idx = self.entity_edge_idx.to(self.device)
-        self.entity_edge_type = self.entity_edge_type.to(self.device)
+        self.entity_edge_idx = self.entity_edge_idx.to(device)
+        self.entity_edge_type = self.entity_edge_type.to(device)
         word_edges = side_data['word_kg']
-        self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(self.device)
-        self.num_bases = self.opt['num_bases']
-        self.kg_emb_dim = self.opt['kg_emb_dim']
+        self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(device)
+        self.num_bases = opt['num_bases']
+        self.kg_emb_dim = opt['kg_emb_dim']
         # transformer
-        self.n_heads = self.opt['n_heads']
-        self.n_layers = self.opt['n_layers']
-        self.ffn_size = self.opt['ffn_size']
-        self.dropout = self.opt['dropout']
-        self.attention_dropout = self.opt['attention_dropout']
-        self.relu_dropout = self.opt['relu_dropout']
-        self.learn_positional_embeddings = self.opt['learn_positional_embeddings']
-        self.embeddings_scale = self.opt['embeddings_scale']
-        self.reduction = self.opt['reduction']
-        self.n_positions = self.opt['n_positions']
-        self.response_truncate = self.opt.get('response_truncate', 20)
-        # copy mask
-        dataset = self.opt['dataset']
-        dpath = os.path.join(DATA_PATH, "kgsf", dataset)
-        dfile = resources[dataset]['file']
-        build(dpath, dfile)
-        self.copy_mask = torch.as_tensor(np.load(os.path.join(dpath, "copy_mask.npy")).astype(bool), device=self.device)
-
-        self.build_model()
+        self.n_heads = opt['n_heads']
+        self.n_layers = opt['n_layers']
+        self.ffn_size = opt['ffn_size']
+        self.dropout = opt['dropout']
+        self.attention_dropout = opt['attention_dropout']
+        self.relu_dropout = opt['relu_dropout']
+        self.learn_positional_embeddings = opt['learn_positional_embeddings']
+        self.embeddings_scale = opt['embeddings_scale']
+        self.reduction = opt['reduction']
+        self.n_positions = opt['n_positions']
+        self.response_truncate = opt.get('response_truncate', 20)
+        # resource
+        dataset = opt['dataset']
+        dpath = os.path.join(MODEL_PATH, "kgsf", dataset)
+        resource = resources[dataset]
+        super(KGSFModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         self._init_embeddings()
@@ -147,6 +142,8 @@ class KGSFModel(BaseModel):
 
         self.copy_norm = nn.Linear(self.ffn_size * 3, self.token_emb_dim)
         self.copy_output = nn.Linear(self.token_emb_dim, self.vocab_size)
+        self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
+                                         device=self.device)
 
         self.conv_decoder = TransformerDecoderKG(
             self.n_heads, self.n_layers, self.token_emb_dim, self.ffn_size, self.vocab_size,

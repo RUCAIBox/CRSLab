@@ -7,3 +7,4 @@ numpy
 nltk
 requests
 torch-geometric
+transformers

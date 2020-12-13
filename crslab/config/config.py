@@ -19,6 +19,8 @@ from tqdm import tqdm
 
 ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
 DATA_PATH = os.path.join(ROOT_PATH, 'data')
+DATASET_PATH = os.path.join(DATA_PATH, 'dataset')
+MODEL_PATH = os.path.join(DATA_PATH, 'model')
 SAVE_PATH = os.path.join(ROOT_PATH, 'save')
 
 

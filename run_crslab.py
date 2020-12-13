@@ -23,9 +23,9 @@ if __name__ == '__main__':
     parser.add_argument('-rd', '--restore_data', action='store_true',
                         help='restore processed dataset')
     parser.add_argument('-ss', '--save_system', action='store_true',
-                        help='save processed model')
+                        help='save trained system')
     parser.add_argument('-rs', '--restore_system', action='store_true',
-                        help='restore processed model')
+                        help='restore trained system')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='use valid dataset to debug your system')
     args, _ = parser.parse_known_args()
