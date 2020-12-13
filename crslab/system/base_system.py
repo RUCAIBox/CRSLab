@@ -16,8 +16,10 @@ from torch import optim
 
 from crslab.config.config import SAVE_PATH
 from crslab.evaluator import get_evaluator
+from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.model import get_model
 from crslab.system.lr_scheduler import LRScheduler
+from crslab.system.utils import compute_grad_norm
 
 
 class BaseSystem(ABC):
@@ -52,18 +54,6 @@ class BaseSystem(ABC):
             self.restore_model()
         self.save = save
         self.evaluator = get_evaluator(opt.get('evaluator', 'standard'))
-        # optim
-        # gradient acumulation
-        self.update_freq = opt.get('update_freq', 1)
-        self._number_grad_accum = 0
-        # LR scheduler
-        self._number_training_updates = 0
-        # early stop
-        self.best_valid = None
-        self.impatience = opt.get('impatience', 3)
-        self.drop_cnt = 0
-        self.valid_optim = 1 if opt["val_mode"] == "max" else -1
-        self.stop = False
 
     @abstractmethod
     def step(self, batch, stage, mode):
@@ -81,36 +71,36 @@ class BaseSystem(ABC):
         """fit the whole system"""
         pass
 
-    def build_optimizer(self, opt, parameters):
-        optimizer = opt['optimizer']
+    def build_optimizer(self, parameters):
+        optimizer = self.optim_opt['optimizer']
         # set up optimizer args
-        lr = opt["learning_rate"]
+        lr = self.optim_opt["learning_rate"]
         kwargs = {'lr': lr}
-        if opt.get('weight_decay', 0):
-            kwargs['weight_decay'] = opt['weight_decay']
-        if opt.get('momentum', 0) > 0 and opt['optimizer'] in ['sgd', 'rmsprop', 'qhm']:
+        if self.optim_opt.get('weight_decay', 0):
+            kwargs['weight_decay'] = self.optim_opt['weight_decay']
+        if self.optim_opt.get('momentum', 0) > 0 and self.optim_opt['optimizer'] in ['sgd', 'rmsprop', 'qhm']:
             # turn on momentum for optimizers that use it
-            kwargs['momentum'] = opt['momentum']
-            if opt['optimizer'] == 'sgd' and opt.get('nesterov', True):
+            kwargs['momentum'] = self.optim_opt['momentum']
+            if self.optim_opt['optimizer'] == 'sgd' and self.optim_opt.get('nesterov', True):
                 # for sgd, maybe nesterov
-                kwargs['nesterov'] = opt.get('nesterov', True)
-            elif opt['optimizer'] == 'qhm':
+                kwargs['nesterov'] = self.optim_opt.get('nesterov', True)
+            elif self.optim_opt['optimizer'] == 'qhm':
                 # qhm needs a nu
-                kwargs['nu'] = opt.get('nus', (0.7,))[0]
-        elif opt['optimizer'] == 'adam':
+                kwargs['nu'] = self.optim_opt.get('nus', (0.7,))[0]
+        elif self.optim_opt['optimizer'] == 'adam':
             # turn on amsgrad for `adam`
             # amsgrad paper: https://openreview.net/forum?id=ryQu7f-RZ
             kwargs['amsgrad'] = True
-        elif opt['optimizer'] == 'qhadam':
+        elif self.optim_opt['optimizer'] == 'qhadam':
             # set nus for qhadam
-            kwargs['nus'] = opt.get('nus', (0.7, 1.0))
-        elif opt['optimizer'] == 'adafactor':
+            kwargs['nus'] = self.optim_opt.get('nus', (0.7, 1.0))
+        elif self.optim_opt['optimizer'] == 'adafactor':
             # adafactor params
-            kwargs['beta1'] = opt.get('betas', (0.9, 0.999))[0]
-            kwargs['eps'] = opt['adafactor_eps']
-            kwargs['warmup_init'] = opt.get('warmup_updates', -1) > 0
+            kwargs['beta1'] = self.optim_opt.get('betas', (0.9, 0.999))[0]
+            kwargs['eps'] = self.optim_opt['adafactor_eps']
+            kwargs['warmup_init'] = self.optim_opt.get('warmup_updates', -1) > 0
 
-        if opt['optimizer'] in [
+        if self.optim_opt['optimizer'] in [
             'adam',
             'sparseadam',
             'fused_adam',
@@ -119,16 +109,16 @@ class BaseSystem(ABC):
             'fused_lamb',
         ]:
             # set betas for optims that use it
-            kwargs['betas'] = opt.get('betas', (0.9, 0.999))
+            kwargs['betas'] = self.optim_opt.get('betas', (0.9, 0.999))
             # set adam optimizer, but only if user specified it
-            if opt.get('adam_eps'):
-                kwargs['eps'] = opt['adam_eps']
+            if self.optim_opt.get('adam_eps'):
+                kwargs['eps'] = self.optim_opt['adam_eps']
 
         optim_class = {k.lower(): v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()}
         self.optimizer = optim_class[optimizer](parameters, **kwargs)
-        logger.info("[Build optimizer: {}]", opt["optimizer"])
+        logger.info("[Build optimizer: {}]", self.optim_opt["optimizer"])
 
-    def build_lr_scheduler(self, opt, state=None):
+    def build_lr_scheduler(self, state=None):
         """
         Create the learning rate scheduler, and assign it to self.scheduler. This
         scheduler will be updated upon a call to receive_metrics. May also create
@@ -141,21 +131,39 @@ class BaseSystem(ABC):
         """
         if state is None:
             state = {}
-        if opt.get('lr_scheduler', None):
-            self.scheduler = LRScheduler.lr_scheduler_factory(opt, self.optimizer, state)
+        if self.optim_opt.get('lr_scheduler', None):
+            self.scheduler = LRScheduler.lr_scheduler_factory(self.optim_opt, self.optimizer, state)
             self._number_training_updates = self.scheduler.get_initial_number_training_updates()
-            logger.info(f"[Build scheduler {opt['lr_scheduler']}]")
+            logger.info(f"[Build scheduler {self.optim_opt['lr_scheduler']}]")
 
     def reset_early_stop_state(self):
         self.best_valid = None
         self.drop_cnt = 0
         self.stop = False
+        self.valid_mode = 1 if self.optim_opt['valid_mode'] == "max" else -1
+        self.impatience = self.optim_opt.get('impatience', 3)
         logger.debug('[Reset early stop state]')
 
     def init_optim(self, opt, parameters):
-        self.build_optimizer(opt, parameters)
-        self.build_lr_scheduler(opt)
-        self.reset_early_stop_state()
+        self.optim_opt = opt
+
+        # gradient acumulation
+        self.update_freq = opt.get('update_freq', 1)
+        self._number_grad_accum = 0
+
+        self.gradient_clip = opt.get('gradient_clip', -1)
+
+        self.build_optimizer(parameters)
+
+        # LR scheduler
+        self._number_training_updates = 0
+        self.build_lr_scheduler()
+
+        # early stop
+        self.need_early_stop = opt.get('early_stop', False)
+        if self.need_early_stop:
+            logger.debug('[Enable early stop]')
+            self.reset_early_stop_state()
 
     def _zero_grad(self):
         if self._number_grad_accum != 0:
@@ -170,6 +178,20 @@ class BaseSystem(ABC):
             # self._number_grad_accum is updated in backward function
             if self._number_grad_accum != 0:
                 return
+
+        if self.gradient_clip > 0:
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(), self.gradient_clip
+            )
+            self.evaluator.optim_metrics.add('grad norm', AverageMetric(grad_norm))
+            self.evaluator.optim_metrics.add(
+                'clip ratio',
+                AverageMetric(float(grad_norm > self.gradient_clip)),
+            )
+        else:
+            parameters = self.model.parameters()
+            grad_norm = compute_grad_norm(parameters)
+            self.evaluator.optim_metrics.add('grad norm', AverageMetric(grad_norm))
 
         self.optimizer.step()
 
@@ -206,7 +228,7 @@ class BaseSystem(ABC):
         logger.debug('[Adjust learning rate after valid epoch]')
 
     def early_stop(self, metric):
-        if self.best_valid is None or metric * self.valid_optim > self.best_valid * self.valid_optim:
+        if self.best_valid is None or metric * self.valid_mode > self.best_valid * self.valid_mode:
             self.best_valid = metric
             self.drop_cnt = 0
             logger.info('[Get new best model]')

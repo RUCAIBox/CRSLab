@@ -52,10 +52,11 @@ class StandardEvaluator(BaseEvaluator):
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):
-        super(StandardEvaluator, self).reset_metrics()
         # rec
         self.rec_metrics.clear()
         # conv
         self.gen_metrics.clear()
         self.dist_cnt = 0
         self.dist_set.clear()
+        # optim
+        self.optim_metrics.clear()

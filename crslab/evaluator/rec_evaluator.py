@@ -19,6 +19,7 @@ class RecEvaluator(BaseEvaluator):
     def __init__(self):
         super(RecEvaluator, self).__init__()
         self.rec_metrics = Metrics()
+        self.optim_metrics = Metrics()
 
     def rec_evaluate(self, preds, label):
         for k in [1, 10, 50]:
@@ -30,5 +31,5 @@ class RecEvaluator(BaseEvaluator):
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):
-        super(RecEvaluator, self).reset_metrics()
         self.rec_metrics.clear()
+        self.optim_metrics.clear()

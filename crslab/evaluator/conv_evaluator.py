@@ -24,6 +24,7 @@ class ConvEvaluator(BaseEvaluator):
         self.dist_set = defaultdict(set)
         self.dist_cnt = 0
         self.gen_metrics = Metrics()
+        self.optim_metrics = Metrics()
 
     def gen_evaluate(self, preds, label):
         if preds:
@@ -41,7 +42,7 @@ class ConvEvaluator(BaseEvaluator):
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):
-        super(ConvEvaluator, self).reset_metrics()
         self.gen_metrics.clear()
         self.dist_cnt = 0
         self.dist_set.clear()
+        self.optim_metrics.clear()

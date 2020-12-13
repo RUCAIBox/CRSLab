@@ -9,13 +9,8 @@
 
 from abc import ABC, abstractmethod
 
-from crslab.evaluator.metrics.base_metrics import Metrics
-
 
 class BaseEvaluator(ABC):
-    def __init__(self):
-        self.optim_metrics = Metrics()
-
     def rec_evaluate(self, preds, label):
         pass
 
@@ -31,4 +26,4 @@ class BaseEvaluator(ABC):
 
     @abstractmethod
     def reset_metrics(self):
-        self.optim_metrics.clear()
+        pass

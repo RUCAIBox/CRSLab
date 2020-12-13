@@ -47,5 +47,3 @@ policy:
   batch_size: 8
   optimizer: AdamW
   lr: !!float 1e-5
-impatience: 3
-val_mode: max

@@ -33,6 +33,9 @@ rec:
   regular_weight: 0.025
   optimizer: adam
   learning_rate: !!float 3e-3
+  early_stop: true
+  impatience: 3
+  valid_mode: max
 conv:
   epoch: 1
   batch_size: 256
@@ -42,5 +45,3 @@ conv:
   lr_scheduler_patience: 3
   lr_scheduler_decay: 0.5
   gradient_clip: 0.1
-impatience: 3
-val_mode: max

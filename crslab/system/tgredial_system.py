@@ -28,12 +28,11 @@ class TGReDialSystem(BaseSystem):
                  restore=False,
                  save=False,
                  debug=False):
-        super(TGReDialSystem,
-              self).__init__(opt, train_dataloader, valid_dataloader,
-                             test_dataloader, vocab, side_data, restore, save,
-                             debug)
+        super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
+                                             test_dataloader, vocab, side_data, restore, save,
+                                             debug)
 
-        self.dataset_name = self.opt['dataset']
+        self.dataset = self.opt['dataset']
 
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
@@ -42,11 +41,9 @@ class TGReDialSystem(BaseSystem):
         self.rec_optim_opt = self.opt['rec']
         self.conv_optim_opt = self.opt['conv']
         self.policy_optim_opt = self.opt['policy']
-
         self.rec_epoch = self.rec_optim_opt['epoch']
         self.conv_epoch = self.conv_optim_opt['epoch']
         self.policy_epoch = self.policy_optim_opt['epoch']
-
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
         self.policy_batch_size = self.policy_optim_opt['batch_size']
@@ -64,12 +61,12 @@ class TGReDialSystem(BaseSystem):
 
     def rec_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()
-        if self.dataset_name == 'ReDial':
+        if self.dataset == 'ReDial':
             rec_predict = rec_predict[:, self.movie_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
         movie_label = movie_label.cpu().detach()
         for rec_rank, movie in zip(rec_ranks, movie_label):
-            if self.dataset_name == 'ReDial':
+            if self.dataset == 'ReDial':
                 movie = self.movie_ids.index(movie.item())
             self.evaluator.rec_evaluate(rec_rank, movie)
 

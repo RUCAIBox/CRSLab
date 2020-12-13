@@ -33,5 +33,3 @@ conv:
   lr_scheduler: reduceonplateau
   lr_scheduler_patience: 3
   lr_scheduler_decay: 0.5
-impatience: 5
-val_mode: min
