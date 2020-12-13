@@ -19,6 +19,8 @@ class BaseDataLoader(ABC):
     def __init__(self, opt, dataset):
         self.opt = opt
         self.dataset = dataset
+        self.scale = opt.get('scale', 1)
+        assert 0 < self.scale <= 1
 
     def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None):
         """collate batch data for system to fit
@@ -36,6 +38,7 @@ class BaseDataLoader(ABC):
         if process_fn is not None:
             dataset = process_fn()
             logger.info('[Finish dataset process before batchify]')
+        dataset = dataset[:ceil(len(dataset) * self.scale)]
         logger.debug(f'[Dataset size: {len(dataset)}]')
 
         batch_num = ceil(len(dataset) / batch_size)
