@@ -17,22 +17,16 @@ from tqdm import tqdm
 
 from crslab.config.config import DATA_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
-from crslab.download import build
 from .resource import resources
 
 
 class ReDialDataset(BaseDataset):
-    def __init__(self, opt, restore=False, save=False):
-        tokenize = opt.get('tokenize', 'nltk')
+    def __init__(self, opt, tokenize, restore=False, save=False):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-
-        dpath = os.path.join(DATA_PATH, 'redial', tokenize)
-        dfile = resource['file']
-        build(dpath, dfile, version=resource['version'])
-
-        super().__init__(opt, dpath, restore, save)
+        dpath = os.path.join(DATA_PATH, "redial", tokenize)
+        super().__init__(opt, dpath, resource, restore, save)
 
     def _load_vocab(self):
         self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
@@ -117,7 +111,8 @@ class ReDialDataset(BaseDataset):
                 'role' (str): 'Seeker' or 'Recommender';
                 'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
                 'response' (list of int): token ids of the ground-truth response;
-                'items' (list of int): items mentioned in current turn;
+                'context_items' (list of int): id of items mentioned in context;
+                'items' (list of int): id of items mentioned in current turn;
                 'context_entities' (list of int): id of entities in context;
                 'context_words' (list of int): id of words in context;
             }
@@ -134,12 +129,6 @@ class ReDialDataset(BaseDataset):
         1.merge the continue utterances based on roles;
         2.convert token/word/entity/movie into ids;
         """
-        # {"utt_id": 0,
-        # "role": "Seeker",
-        # "text": ["Hi", "I", "am", "looking", "for", "a", "movie", "like", "@111776"],
-        # "movies": ["<http://dbpedia.org/resource/Super_Troopers>"],
-        # "entity": [],
-        # "word": ["am", "looking", "for", "a", "movie", "like", "@111776"]}
         augmented_convs = []
         last_role = None
         for utt in dialog:
@@ -178,7 +167,7 @@ class ReDialDataset(BaseDataset):
         }
         """
         augmented_conv_dicts = []
-        context_tokens, context_entities, context_words = [], [], []
+        context_tokens, context_entities, context_words, context_items = [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
             text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
@@ -189,11 +178,13 @@ class ReDialDataset(BaseDataset):
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
                     "response": text_tokens,
-                    "items": movies
+                    "context_items": copy(context_items),
+                    "items": movies,
                 }
                 augmented_conv_dicts.append(conv_dict)
 
             context_tokens.append(text_tokens)
+            context_items += movies
             for entity in entities + movies:
                 if entity not in entity_set:
                     entity_set.add(entity)

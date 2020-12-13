@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -17,27 +17,47 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/kbrd/redial.yaml', help='config file(yaml) path')
-    parser.add_argument('-s', '--save', action='store_true',
-                        help='save processed dataset and model')
-    parser.add_argument('-r', '--restore', action='store_true',
-                        help='restore processed dataset and model')
+                        default='config/kgsf/tgredial.yaml', help='config file(yaml) path')
+    parser.add_argument('-sd', '--save_data', action='store_true',
+                        help='save processed dataset')
+    parser.add_argument('-rd', '--restore_data', action='store_true',
+                        help='restore processed dataset')
+    parser.add_argument('-ss', '--save_system', action='store_true',
+                        help='save processed model')
+    parser.add_argument('-rs', '--restore_system', action='store_true',
+                        help='restore processed model')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='use valid dataset to debug your system')
     args, _ = parser.parse_known_args()
-    config = Config(args.config, args.debug)
-    # dataset
-    CRS_dataset = get_dataset(config, args.restore, args.save)
-    train_data = CRS_dataset.train_data
-    valid_data = CRS_dataset.valid_data
-    test_data = CRS_dataset.test_data
-    side_data = CRS_dataset.side_data
-    vocab = CRS_dataset.vocab
-    # dataloader
-    train_dataloader = get_dataloader(config, train_data, vocab)
-    valid_dataloader = get_dataloader(config, valid_data, vocab)
-    test_dataloader = get_dataloader(config, test_data, vocab)
+    opt = Config(args.config, args.debug)
+    # dataset and dataloader
+    if isinstance(opt['tokenize'], str):
+        CRS_dataset = get_dataset(opt, opt['tokenize'], args.restore_data, args.save_data)
+        side_data = CRS_dataset.side_data
+        vocab = CRS_dataset.vocab
+
+        train_dataloader = get_dataloader(opt, CRS_dataset.train_data, vocab)
+        valid_dataloader = get_dataloader(opt, CRS_dataset.valid_data, vocab)
+        test_dataloader = get_dataloader(opt, CRS_dataset.test_data, vocab)
+    else:
+        train_dataloader = {}
+        valid_dataloader = {}
+        test_dataloader = {}
+        vocab = {}
+        side_data = {}
+
+        for task, tokenize in opt['tokenize'].items():
+            dataset = get_dataset(opt, tokenize, args.restore_data, args.save_data)
+            train_data = dataset.train_data
+            valid_data = dataset.valid_data
+            test_data = dataset.test_data
+            side_data[task] = dataset.side_data
+            vocab[task] = dataset.vocab
+
+            train_dataloader[task] = get_dataloader(opt, train_data, vocab[task])
+            valid_dataloader[task] = get_dataloader(opt, valid_data, vocab[task])
+            test_dataloader[task] = get_dataloader(opt, test_data, vocab[task])
     # system init and fit
-    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args.restore,
-                     args.save, args.debug)
+    CRS = get_system(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args.restore_system,
+                     args.save_system, args.debug)
     CRS.fit()

@@ -17,23 +17,17 @@ from tqdm import tqdm
 
 from crslab.config.config import DATA_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
-from crslab.download import build
 from .resource import resources
 
 
 class TGReDialDataset(BaseDataset):
-    def __init__(self, opt, restore=False, save=False):
-        tokenize = opt.get('tokenize', 'pkuseg')
+    def __init__(self, opt, tokenize, restore=False, save=False):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
         self.pad_topic_idx = self.special_token_idx['pad_topic']
-
         dpath = os.path.join(DATA_PATH, 'tgredial', tokenize)
-        dfile = resource['file']
-        build(dpath, dfile, version=resource['version'])
-
-        super().__init__(opt, dpath, restore, save)
+        super().__init__(opt, dpath, resource, restore, save)
 
     def _load_vocab(self):
         self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
@@ -172,8 +166,8 @@ class TGReDialDataset(BaseDataset):
                     kw = [kw]
                 kw = [self.topic2id.get(k, self.pad_topic_idx) for k in kw]
                 policy.append([action, kw])
-            kws = [self.topic2id[kw] if kw is not None else self.pad_topic_idx for kw in utt['final'][1]]
-            final = [utt['final'][0], kws]
+            final_kws = [self.topic2id[kw] if kw is not None else self.pad_topic_idx for kw in utt['final'][1]]
+            final = [utt['final'][0], final_kws]
             conv_utt_id = str(conversation['conv_id']) + '/' + str(utt['local_id'])
             interaction_history = self.conv2history.get(conv_utt_id, [])
             user_profile = self.user2profile[conversation['user_id']]
@@ -199,7 +193,7 @@ class TGReDialDataset(BaseDataset):
         augment one conversation into several instances;
         """
         augmented_conv_dicts = []
-        context_tokens, context_entities, context_words, policy_seq = [], [], [], []
+        context_tokens, context_entities, context_words, context_policy, context_items = [], [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
             text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
@@ -213,15 +207,17 @@ class TGReDialDataset(BaseDataset):
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
                     'interaction_history': conv['interaction_history'],
+                    'context_items': copy(context_items),
                     "items": movies,
-                    'context_policy': copy(policy_seq),
+                    'context_policy': copy(context_policy),
                     'target': policies,
                     'final': conv['final'],
                 }
                 augmented_conv_dicts.append(conv_dict)
 
             context_tokens.append(text_tokens)
-            policy_seq.append(policies)
+            context_policy.append(policies)
+            context_items += movies
             for entity in entities + movies:
                 if entity not in entity_set:
                     entity_set.add(entity)

@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/2
+# @Time   : 2020/11/23, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -65,6 +65,9 @@ class Config:
         """
         self.opt = self.load_yaml_configs(config_file)
         dataset = self.opt['dataset']
+        tokenize = self.opt['tokenize']
+        if isinstance(tokenize, dict):
+            tokenize = ', '.join(tokenize.values())
         model = self.opt.get('model', None)
         rec_model = self.opt.get('rec_model', None)
         conv_model = self.opt.get('conv_model', None)
@@ -94,7 +97,7 @@ class Config:
         logger.add(os.path.join("log", log_name), level=level)
         logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True, level=level)
 
-        logger.info(f"[Dataset: {dataset}]")
+        logger.info(f"[Dataset: {dataset} tokenized in {tokenize}]")
         if model:
             logger.info(f'[Model: {model}]')
         if rec_model:

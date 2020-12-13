@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/2
+# @Time   : 2020/11/23, 2020/12/12
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -14,13 +14,19 @@ from abc import ABC, abstractmethod
 import numpy as np
 from loguru import logger
 
+from crslab.download import build
+
 
 class BaseDataset(ABC):
-    def __init__(self, opt, dpath, restore=False, save=False):
+    def __init__(self, opt, dpath, resource, restore=False, save=False):
         self.opt = opt
         self.dpath = dpath
 
         if not restore:
+            # download
+            dfile = resource['file']
+            build(dpath, dfile, version=resource['version'])
+            # load and process
             train_data, valid_data, test_data, self.vocab = self._load_data()
             logger.info('[Finish data load]')
             self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
@@ -60,7 +66,8 @@ class BaseDataset(ABC):
                     'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
                     'response' (list of int): token ids of the ground-truth response;
                     'interaction_history' (list of int): id of items which have interaction of the user in current turn;
-                    'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
+                    'context_items' (list of int): item ids mentioned in context
+                    'items' (list of int): item ids mentioned in current turn, we only keep those in entity kg for comparison;
                     'context_entities' (list of int): if necessary, id of entities in context;
                     'context_words' (list of int): if necessary, id of words in context;
                     'context_policy' (list of list of list): policy of each context turn, ont turn may have several policies, where first is action and second is keyword;

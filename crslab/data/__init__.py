@@ -3,9 +3,9 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/6
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/11/24, 2020/12/6, 2020/12/9
+# @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
 from crslab.data.dataloader import *
 from crslab.data.dataset import *
@@ -17,37 +17,25 @@ dataset_register_table = {
 
 dataloader_register_table = {
     'KGSF': KGSFDataLoader,
-    'KBRD': KBRDDataLoader
+    'KBRD': KBRDDataLoader,
+    # 'TGReDial': TGReDialDataLoader,
+    # 'TGRec': TGReDialDataLoader,
+    # 'TGConv': TGReDialDataLoader,
+    # 'TGPolicy': TGReDialDataLoader,
+    # 'TGRec_TGConv': TGReDialDataLoader,
+    # 'TGRec_TGConv_TGPolicy': TGReDialDataLoader,
 }
 
 
-def get_dataset(opt, restore, save) -> BaseDataset:
-    """Create dataset according to :attr:`config['model']`.
-
-    Args:
-        opt (Config): An instance object of Config, used to record parameter information.
-
-    Returns:
-        Dataset: Constructed dataset.
-    """
+def get_dataset(opt, tokenize, restore, save) -> BaseDataset:
     dataset = opt['dataset']
     if dataset in dataset_register_table:
-        return dataset_register_table[dataset](opt, restore, save)
+        return dataset_register_table[dataset](opt, tokenize, restore, save)
     else:
         raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
 
 
 def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
-    """Return a dataloader class according to :attr:`config`.
-
-    Args:
-        name (str): The stage of dataloader. It can only take two values: 'train' or 'evaluation'.
-        opt (Config): An instance object of Config, used to record parameter information.
-        eval_setting (EvalSetting): An instance object of EvalSetting, used to record evaluation settings.
-
-    Returns:
-        type: The dataloader class that meets the requirements.txt in :attr:`config`.
-    """
     model_name = opt['model_name']
     if model_name in dataloader_register_table:
         return dataloader_register_table[model_name](opt, dataset, vocab)
