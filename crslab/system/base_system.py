@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/13
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -13,13 +13,19 @@ from abc import ABC, abstractmethod
 import torch
 from loguru import logger
 from torch import optim
+from transformers import AdamW, Adafactor
 
 from crslab.config.config import SAVE_PATH
 from crslab.evaluator import get_evaluator
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.model import get_model
-from crslab.system.lr_scheduler import LRScheduler
+from crslab.system import lr_scheduler
 from crslab.system.utils import compute_grad_norm
+
+optim_class = {}
+optim_class.update({k: v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()})
+optim_class.update({'AdamW': AdamW, 'Adafactor': Adafactor})
+lr_scheduler_class = {k: v for k, v in lr_scheduler.__dict__.items() if not k.startswith('__') and k[0].isupper()}
 
 
 class BaseSystem(ABC):
@@ -39,21 +45,92 @@ class BaseSystem(ABC):
         # model
         if 'model' in opt:
             self.model = get_model(opt, opt['model'], self.device, vocab, side_data).to(self.device)
-        if 'rec_model' in opt:
-            self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab['rec'], side_data['rec']).to(
-                self.device)
-        if 'conv_model' in opt:
-            self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab['conv'], side_data['conv']).to(
-                self.device)
-        if 'policy_model' in opt:
-            self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab['policy'],
-                                          side_data['policy']).to(self.device)
+        else:
+            if 'rec_model' in opt:
+                self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab['rec'], side_data['rec']).to(
+                    self.device)
+            if 'conv_model' in opt:
+                self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab['conv'], side_data['conv']).to(
+                    self.device)
+            if 'policy_model' in opt:
+                self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab['policy'],
+                                              side_data['policy']).to(self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
         if restore:
             self.restore_model()
         self.save = save
         self.evaluator = get_evaluator(opt.get('evaluator', 'standard'))
+
+        self.need_early_stop = opt.get('early_stop', False)
+
+    def init_optim(self, opt, parameters):
+        self.optim_opt = opt
+        parameters = list(parameters)
+        if isinstance(parameters[0], dict):
+            for i, d in enumerate(parameters):
+                parameters[i]['params'] = list(d['params'])
+
+        # gradient acumulation
+        self.update_freq = opt.get('update_freq', 1)
+        self._number_grad_accum = 0
+
+        self.gradient_clip = opt.get('gradient_clip', -1)
+
+        self.build_optimizer(parameters)
+        self.build_lr_scheduler()
+
+        if isinstance(parameters[0], dict):
+            self.parameters = []
+            for d in parameters:
+                self.parameters.extend(d['params'])
+        else:
+            self.parameters = parameters
+
+        # early stop
+        if self.need_early_stop:
+            logger.debug('[Enable early stop]')
+            self.reset_early_stop_state()
+
+    def build_optimizer(self, parameters):
+        optimizer_opt = self.optim_opt['optimizer']
+        optimizer = optimizer_opt.pop('name')
+        self.optimizer = optim_class[optimizer](parameters, **optimizer_opt)
+        logger.info(f"[Build optimizer: {optimizer}]")
+
+    def build_lr_scheduler(self, *args, **kwargs):
+        """
+        Create the learning rate scheduler, and assign it to self.scheduler. This
+        scheduler will be updated upon a call to receive_metrics. May also create
+        self.warmup_scheduler, if appropriate.
+
+        :param state_dict states: Possible state_dict provided by model
+            checkpoint, for restoring LR state
+        :param bool hard_reset: If true, the LR scheduler should ignore the
+            state dictionary.
+        """
+        if self.optim_opt.get('lr_scheduler', None):
+            lr_scheduler_opt = self.optim_opt['lr_scheduler']
+            lr_scheduler = lr_scheduler_opt.pop('name')
+            self.scheduler = lr_scheduler_class[lr_scheduler](self.optimizer, **lr_scheduler_opt)
+            logger.info(f"[Build scheduler {lr_scheduler}]")
+
+    def reset_early_stop_state(self):
+        self.best_valid = None
+        self.drop_cnt = 0
+        self.impatience = self.optim_opt.get('impatience', 3)
+        if self.optim_opt['stop_mode'] == 'max':
+            self.stop_mode = 1
+        elif self.optim_opt['stop_mode'] == 'min':
+            self.stop_mode = -1
+        else:
+            raise
+        logger.debug('[Reset early stop state]')
+
+    @abstractmethod
+    def fit(self):
+        """fit the whole system"""
+        pass
 
     @abstractmethod
     def step(self, batch, stage, mode):
@@ -66,104 +143,20 @@ class BaseSystem(ABC):
         """
         pass
 
-    @abstractmethod
-    def fit(self):
-        """fit the whole system"""
-        pass
+    def backward(self, loss):
+        """empty grad, backward loss and update params
 
-    def build_optimizer(self, parameters):
-        optimizer = self.optim_opt['optimizer']
-        # set up optimizer args
-        lr = self.optim_opt["learning_rate"]
-        kwargs = {'lr': lr}
-        if self.optim_opt.get('weight_decay', 0):
-            kwargs['weight_decay'] = self.optim_opt['weight_decay']
-        if self.optim_opt.get('momentum', 0) > 0 and self.optim_opt['optimizer'] in ['sgd', 'rmsprop', 'qhm']:
-            # turn on momentum for optimizers that use it
-            kwargs['momentum'] = self.optim_opt['momentum']
-            if self.optim_opt['optimizer'] == 'sgd' and self.optim_opt.get('nesterov', True):
-                # for sgd, maybe nesterov
-                kwargs['nesterov'] = self.optim_opt.get('nesterov', True)
-            elif self.optim_opt['optimizer'] == 'qhm':
-                # qhm needs a nu
-                kwargs['nu'] = self.optim_opt.get('nus', (0.7,))[0]
-        elif self.optim_opt['optimizer'] == 'adam':
-            # turn on amsgrad for `adam`
-            # amsgrad paper: https://openreview.net/forum?id=ryQu7f-RZ
-            kwargs['amsgrad'] = True
-        elif self.optim_opt['optimizer'] == 'qhadam':
-            # set nus for qhadam
-            kwargs['nus'] = self.optim_opt.get('nus', (0.7, 1.0))
-        elif self.optim_opt['optimizer'] == 'adafactor':
-            # adafactor params
-            kwargs['beta1'] = self.optim_opt.get('betas', (0.9, 0.999))[0]
-            kwargs['eps'] = self.optim_opt['adafactor_eps']
-            kwargs['warmup_init'] = self.optim_opt.get('warmup_updates', -1) > 0
-
-        if self.optim_opt['optimizer'] in [
-            'adam',
-            'sparseadam',
-            'fused_adam',
-            'adamax',
-            'qhadam',
-            'fused_lamb',
-        ]:
-            # set betas for optims that use it
-            kwargs['betas'] = self.optim_opt.get('betas', (0.9, 0.999))
-            # set adam optimizer, but only if user specified it
-            if self.optim_opt.get('adam_eps'):
-                kwargs['eps'] = self.optim_opt['adam_eps']
-
-        optim_class = {k.lower(): v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()}
-        self.optimizer = optim_class[optimizer](parameters, **kwargs)
-        logger.info("[Build optimizer: {}]", self.optim_opt["optimizer"])
-
-    def build_lr_scheduler(self, state=None):
+        Args:
+            loss (torch.Tensor):
         """
-        Create the learning rate scheduler, and assign it to self.scheduler. This
-        scheduler will be updated upon a call to receive_metrics. May also create
-        self.warmup_scheduler, if appropriate.
+        self._zero_grad()
 
-        :param state_dict states: Possible state_dict provided by model
-            checkpoint, for restoring LR state
-        :param bool hard_reset: If true, the LR scheduler should ignore the
-            state dictionary.
-        """
-        if state is None:
-            state = {}
-        if self.optim_opt.get('lr_scheduler', None):
-            self.scheduler = LRScheduler.lr_scheduler_factory(self.optim_opt, self.optimizer, state)
-            self._number_training_updates = self.scheduler.get_initial_number_training_updates()
-            logger.info(f"[Build scheduler {self.optim_opt['lr_scheduler']}]")
+        if self.update_freq > 1:
+            self._number_grad_accum = (self._number_grad_accum + 1) % self.update_freq
+            loss /= self.update_freq
+        loss.backward()
 
-    def reset_early_stop_state(self):
-        self.best_valid = None
-        self.drop_cnt = 0
-        self.stop = False
-        self.valid_mode = 1 if self.optim_opt['valid_mode'] == "max" else -1
-        self.impatience = self.optim_opt.get('impatience', 3)
-        logger.debug('[Reset early stop state]')
-
-    def init_optim(self, opt, parameters):
-        self.optim_opt = opt
-
-        # gradient acumulation
-        self.update_freq = opt.get('update_freq', 1)
-        self._number_grad_accum = 0
-
-        self.gradient_clip = opt.get('gradient_clip', -1)
-
-        self.build_optimizer(parameters)
-
-        # LR scheduler
-        self._number_training_updates = 0
-        self.build_lr_scheduler()
-
-        # early stop
-        self.need_early_stop = opt.get('early_stop', False)
-        if self.need_early_stop:
-            logger.debug('[Enable early stop]')
-            self.reset_early_stop_state()
+        self._update_params()
 
     def _zero_grad(self):
         if self._number_grad_accum != 0:
@@ -181,40 +174,21 @@ class BaseSystem(ABC):
 
         if self.gradient_clip > 0:
             grad_norm = torch.nn.utils.clip_grad_norm_(
-                self.model.parameters(), self.gradient_clip
+                self.parameters, self.gradient_clip
             )
             self.evaluator.optim_metrics.add('grad norm', AverageMetric(grad_norm))
             self.evaluator.optim_metrics.add(
-                'clip ratio',
+                'grad clip ratio',
                 AverageMetric(float(grad_norm > self.gradient_clip)),
             )
         else:
-            parameters = self.model.parameters()
-            grad_norm = compute_grad_norm(parameters)
+            grad_norm = compute_grad_norm(self.parameters)
             self.evaluator.optim_metrics.add('grad norm', AverageMetric(grad_norm))
 
         self.optimizer.step()
 
-        # keep track up number of steps, compute warmup factor
-        self._number_training_updates += 1
-
         if hasattr(self, 'scheduler'):
-            self.scheduler.step(self._number_training_updates)
-
-    def backward(self, loss):
-        """empty grad, backward loss and update params
-
-        Args:
-            loss (torch.Tensor):
-        """
-        self._zero_grad()
-
-        if self.update_freq > 1:
-            self._number_grad_accum = (self._number_grad_accum + 1) % self.update_freq
-            loss /= self.update_freq
-        loss.backward()
-
-        self._update_params()
+            self.scheduler.train_step()
 
     def adjust_lr(self, metric=None):
         """adjust learning rate w/o metric by scheduler
@@ -228,15 +202,18 @@ class BaseSystem(ABC):
         logger.debug('[Adjust learning rate after valid epoch]')
 
     def early_stop(self, metric):
-        if self.best_valid is None or metric * self.valid_mode > self.best_valid * self.valid_mode:
+        if not self.need_early_stop:
+            return False
+        if self.best_valid is None or metric * self.stop_mode > self.best_valid * self.stop_mode:
             self.best_valid = metric
             self.drop_cnt = 0
             logger.info('[Get new best model]')
+            return False
         else:
             self.drop_cnt += 1
             if self.drop_cnt >= self.impatience:
-                self.stop = True
                 logger.info('[Early stop]')
+                return True
 
     def save_model(self):
         r"""Store the model parameters."""

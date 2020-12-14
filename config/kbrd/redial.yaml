@@ -4,6 +4,7 @@ tokenize: gpt2
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
+scale: 0.01
 # model
 model: KBRD
 token_emb_dim: 300
@@ -23,13 +24,18 @@ n_positions: 1024
 rec:
   epoch: 1
   batch_size: 4096
-  optimizer: adam
-  learning_rate: !!float 3e-3
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
 conv:
   epoch: 1
   batch_size: 64
-  optimizer: adam
-  learning_rate: !!float 1e-3
-  lr_scheduler: reduceonplateau
-  lr_scheduler_patience: 3
-  lr_scheduler_decay: 0.5
+  early_stop: True
+  stop_mode: min
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5

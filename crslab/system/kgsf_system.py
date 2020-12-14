@@ -121,8 +121,7 @@ class KGSFSystem(BaseSystem):
                 self.evaluator.report()
                 # early stop
                 metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
-                self.early_stop(metric)
-                if self.stop:
+                if self.early_stop(metric):
                     break
         # test
         logger.info('[Test]')

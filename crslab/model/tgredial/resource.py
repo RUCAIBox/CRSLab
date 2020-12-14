@@ -15,4 +15,8 @@ resources = {
         'version': '0.1',
         'file': DownloadableFile('', '', ''),
     },
+    'TGReDial': {
+        'version': '0.1',
+        'file': DownloadableFile('', '', '')
+    }
 }

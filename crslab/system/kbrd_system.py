@@ -100,8 +100,7 @@ class KBRDSystem(BaseSystem):
                 self.evaluator.report()
                 # early stop
                 metric = self.evaluator.optim_metrics['rec_loss']
-                self.early_stop(metric)
-                if self.stop:
+                if self.early_stop(metric):
                     break
         # test
         logger.info('[Test]')
@@ -130,8 +129,7 @@ class KBRDSystem(BaseSystem):
                 self.evaluator.report()
                 # early stop
                 metric = self.evaluator.optim_metrics['gen_loss']
-                self.early_stop(metric)
-                if self.stop:
+                if self.early_stop(metric):
                     break
         # test
         logger.info('[Test]')

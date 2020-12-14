@@ -6,9 +6,9 @@
 # @Time   : 2020/12/13
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
+from math import floor
 
 import torch
-import transformers
 from loguru import logger
 
 from crslab.evaluator.metrics.base_metrics import AverageMetric
@@ -39,25 +39,24 @@ class TGReDialSystem(BaseSystem):
         self.movie_ids = side_data['rec']['item_entity_ids']
 
         self.rec_optim_opt = self.opt['rec']
-        self.conv_optim_opt = self.opt['conv']
-        self.policy_optim_opt = self.opt['policy']
         self.rec_epoch = self.rec_optim_opt['epoch']
-        self.conv_epoch = self.conv_optim_opt['epoch']
-        self.policy_epoch = self.policy_optim_opt['epoch']
         self.rec_batch_size = self.rec_optim_opt['batch_size']
+
+        self.conv_optim_opt = self.opt['conv']
+        self.conv_epoch = self.conv_optim_opt['epoch']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
-        self.policy_batch_size = self.policy_optim_opt['batch_size']
 
-        # only conv model need gradient clip
-        self.rec_gradient_clip = self.opt['rec'].get('gradient_clip', None)
-        self.conv_gradient_clip = self.opt['conv'].get('gradient_clip', None)
-        self.policy_gradient_clip = self.opt['policy'].get('gradient_clip', None)
+        self.policy_optim_opt = self.opt.get('policy', None)
+        if self.policy_optim_opt:
+            self.policy_epoch = self.policy_optim_opt['epoch']
+            self.policy_batch_size = self.policy_optim_opt['batch_size']
 
-        # self.warmup_steps = self.opt['warmup_steps']
-        # self.WarmupLinearSchedule = self.opt['WarmupLinearSchedule']
-        # self.total_steps = int(self.conv_optim_opt['datasset_len'] *
-        #                        self.conv_epoch / self.conv_batch_size /
-        #                        self.conv_optim_opt['gradient_accumulation'])
+        if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler']:
+            batch_num = 0
+            for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                batch_num += 1
+            conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
+            self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
     def rec_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()
@@ -85,109 +84,12 @@ class TGReDialSystem(BaseSystem):
             r_str = ind2txt(r[1:], self.ind2tok, self.end_token_idx)
             self.evaluator.gen_evaluate(p_str, [r_str])
 
-    def backward(self, loss):
-        """empty grad, backward loss and update params
-
-        Args:
-            loss (torch.Tensor):
-        """
-        self._zero_grad()
-
-        if self.update_freq > 1:
-            self._number_grad_accum = (self._number_grad_accum +
-                                       1) % self.update_freq
-            loss /= self.update_freq
-        loss.backward()
-
-        # shuld be True only when training conv model
-        if self.gradient_clip:
-            torch.nn.utils.clip_grad_norm_(self.model_parameters,
-                                           self.gradient_clip)
-
-        self._update_params()
-
-    def _update_params(self):
-        if self.update_freq > 1:
-            # we're doing gradient accumulation, so we don't only want to step
-            # every N updates instead
-            # self._number_grad_accum is updated in backward function
-            if self._number_grad_accum != 0:
-                return
-
-        self.optimizer.step()
-
-        # keep track up number of steps, compute warmup factor
-        # self._number_training_updates += 1
-
-        # delete the args of step
-        if hasattr(self, 'scheduler'):
-            self.scheduler.step()
-
-    def build_lr_scheduler(self, opt, state=None):
-        """
-        Add conversational model's scheduler
-        """
-        super(TGReDialSystem, self).build_lr_scheduler(opt, state)
-
-        # # create scheduler for conv model
-        # if self.WarmupLinearSchedule:
-        #     self.scheduler = transformers.get_linear_schedule_with_warmup(
-        #         self.optimizer, self.warmup_steps, self.total_steps)
-
     def policy_evaluate(self, rec_predict, movie_label):
         rec_predict = rec_predict.cpu().detach()
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
         movie_label = movie_label.cpu().detach()
         for rec_rank, movie in zip(rec_ranks, movie_label):
             self.evaluator.rec_evaluate(rec_rank, movie)
-
-    def build_optimizer(self, opt, task):
-        if task == 'rec':
-            bert_param_optimizer = list(self.rec_model.bert.named_parameters())
-            bert_param_name = ['bert.' + n for n, p in bert_param_optimizer]
-
-            other_param_optimizer = [
-                name_param for name_param in self.rec_model.named_parameters()
-                if name_param[0] not in bert_param_name
-            ]
-            other_param_name = [n for n, p in other_param_optimizer]
-
-            self.optimizer = transformers.AdamW(
-                [{
-                    'params': [p for n, p in bert_param_optimizer],
-                    'lr': self.rec_optim_opt['lr_bert']
-                }, {
-                    'params': [p for n, p in other_param_optimizer]
-                }],
-                lr=self.rec_optim_opt['lr_sasrec'])
-
-            logger.info("[Build optimizer: {}]", opt["optimizer"])
-        elif task == 'policy':
-            param_optimizer = list(self.policy_model.named_parameters())
-            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-            optimizer_grouped_parameters = [{
-                'params': [
-                    p for n, p in param_optimizer
-                    if not any(nd in n for nd in no_decay)
-                ],
-                'weight_decay':
-                    0.01
-            }, {
-                'params': [
-                    p for n, p in param_optimizer
-                    if any(nd in n for nd in no_decay)
-                ],
-                'weight_decay':
-                    0.0
-            }]
-
-            self.optimizer = transformers.AdamW(optimizer_grouped_parameters,
-                                                lr=self.policy_optim_opt['lr'])
-            logger.info("[Build optimizer: {}]", opt["optimizer"])
-        elif task == 'conv':
-            self.optimizer = transformers.AdamW(self.conv_model.parameters(),
-                                                lr=self.conv_optim_opt['lr'],
-                                                correct_bias=True)
 
     def step(self, batch, stage, mode):
         """
@@ -245,16 +147,19 @@ class TGReDialSystem(BaseSystem):
             raise
 
     def train_recommender(self):
-        # check the next two line
-        self.build_optimizer(self.rec_optim_opt, 'rec')
-        self.build_lr_scheduler(self.rec_optim_opt)  # do nothing
-        self.reset_early_stop_state()
-        self.gradient_clip = self.rec_gradient_clip
+        bert_param = list(self.rec_model.bert.named_parameters())
+        bert_param_name = ['bert.' + n for n, p in bert_param]
+        other_param = [
+            name_param for name_param in self.rec_model.named_parameters()
+            if name_param[0] not in bert_param_name
+        ]
+        params = [{'params': [p for n, p in bert_param], 'lr': self.rec_optim_opt['lr_bert']},
+                  {'params': [p for n, p in other_param]}]
+        self.init_optim(self.rec_optim_opt, params)
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
             logger.info(f'[Recommendation epoch {str(epoch)}]')
-            # change the shuffle to True
             for batch in self.train_dataloader['rec'].get_rec_data(self.rec_batch_size,
                                                                    shuffle=True):
                 self.step(batch, stage='rec', mode='train')
@@ -267,11 +172,8 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report()
                 # early stop
-                # fancy metric
-                metric = self.evaluator.rec_metrics[
-                             'recall@1'] + self.evaluator.rec_metrics['recall@50']
-                self.early_stop(metric)
-                if self.stop:
+                metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
+                if self.early_stop(metric):
                     break
         # test
         with torch.no_grad():
@@ -282,11 +184,7 @@ class TGReDialSystem(BaseSystem):
             self.evaluator.report()
 
     def train_conversation(self):
-        # what does the next line do: freeze the param of other model
-        self.build_optimizer(self.conv_optim_opt, 'conv')
-        self.build_lr_scheduler(self.conv_optim_opt)
-        self.gradient_clip = self.conv_gradient_clip
-        self.model_parameters = self.conv_model.parameters()
+        self.init_optim(self.conv_optim_opt, self.conv_model.parameters())
 
         for epoch in range(self.conv_epoch):
             self.evaluator.reset_metrics()
@@ -311,10 +209,22 @@ class TGReDialSystem(BaseSystem):
             self.evaluator.report()
 
     def train_policy(self):
-        self.build_optimizer(self.rec_optim_opt, 'policy')
-        self.build_lr_scheduler(self.rec_optim_opt)  # do nothing
-        self.reset_early_stop_state()
-        self.gradient_clip = self.policy_gradient_clip
+        policy_params = list(self.policy_model.named_parameters())
+        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        params = [{
+            'params': [
+                p for n, p in policy_params
+                if not any(nd in n for nd in no_decay)
+            ],
+            'weight_decay':
+                self.policy_optim_opt['weight_decay']
+        }, {
+            'params': [
+                p for n, p in policy_params
+                if any(nd in n for nd in no_decay)
+            ],
+        }]
+        self.init_optim(self.policy_optim_opt, params)
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
@@ -332,11 +242,8 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='policy', mode='val')
                 self.evaluator.report()
                 # early stop
-                # fancy metric
-                metric = self.evaluator.rec_metrics[
-                             'recall@1'] + self.evaluator.rec_metrics['recall@50']
-                self.early_stop(metric)
-                if self.stop:
+                metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
+                if self.early_stop(metric):
                     break
         # test
         with torch.no_grad():
@@ -347,6 +254,9 @@ class TGReDialSystem(BaseSystem):
             self.evaluator.report()
 
     def fit(self):
-        self.train_recommender()
-        # self.train_policy()
-        self.train_conversation()
+        if hasattr(self, 'rec_model'):
+            self.train_recommender()
+        if hasattr(self, 'policy_model'):
+            self.train_policy()
+        if hasattr(self, 'conv_model'):
+            self.train_conversation()

@@ -5,6 +5,7 @@ embedding: word2vec.npy
 # dataloader
 context_truncate: 256
 response_truncate: 30
+scale: 0.01
 # model
 model: KGSF
 token_emb_dim: 300
@@ -25,23 +26,26 @@ n_positions: 1024
 pretrain:
   epoch: 1
   batch_size: 4096
-  optimizer: adam
-  learning_rate: !!float 3e-3
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
 rec:
   epoch: 1
   batch_size: 1024
-  regular_weight: 0.025
-  optimizer: adam
-  learning_rate: !!float 3e-3
   early_stop: true
+  stop_mode: max
   impatience: 3
-  valid_mode: max
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
 conv:
   epoch: 1
   batch_size: 256
-  optimizer: adam
-  learning_rate: !!float 3e-3
-  lr_scheduler: reduceonplateau
-  lr_scheduler_patience: 3
-  lr_scheduler_decay: 0.5
   gradient_clip: 0.1
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5

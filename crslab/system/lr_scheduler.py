@@ -3,15 +3,16 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/12/1
+# @Time   : 2020/12/14
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
-
+import math
 from abc import abstractmethod, ABC
 
+import numpy as np
+import torch
 from loguru import logger
 from torch import optim
-import numpy as np
 
 
 class LRScheduler(ABC):
@@ -26,7 +27,7 @@ class LRScheduler(ABC):
     __init__() should not be called directly.
     """
 
-    def __init__(self, hard_reset, warmup_updates, warmup_rate):
+    def __init__(self, optimizer, warmup_steps: int = 0):
         """
         Initialize warmup scheduler. Specific main schedulers should be initialized in
         the subclasses. Do not invoke this method diretly.
@@ -34,29 +35,22 @@ class LRScheduler(ABC):
         :param optimizer optimizer:
             Optimizer being used for training. May be wrapped in
             fp16_optimizer_wrapper depending on whether fp16 is used.
-        :param state_dict states:
-            Possible state_dict provided by model checkpoint, for restoring
-            LR state.
-        :param bool hard_reset:
-            If true, the LR scheduler should ignore the state dictionary.
-        :param int warmup_updates:
+        :param int warmup_steps:
             Number of training step updates warmup scheduler should take.
-        :param float warmup_rate:
-            Starting multiplier for warmup scheduler.
         """
         self._number_training_updates = 0
-        self.warmup_updates = warmup_updates
-        self.warmup_rate = warmup_rate
-        self.hard_reset = hard_reset
+        self.warmup_steps = warmup_steps
+        self._init_warmup_scheduler(optimizer)
 
-    def _init_warmup_scheduler(self, optimizer, states):
-        updates_so_far = states.get('number_training_updates', 0)
-        if self.warmup_updates > 0 and (
-            updates_so_far < self.warmup_updates or self.hard_reset
-        ):
-            self.warmup_scheduler = optim.lr_scheduler.LambdaLR(
-                optimizer, self._warmup_lr
-            )
+    def _warmup_lr(self, step):
+        """
+        Return lr multiplier (on initial lr) for warmup scheduler.
+        """
+        return float(step) / float(max(1, self.warmup_steps))
+
+    def _init_warmup_scheduler(self, optimizer):
+        if self.warmup_steps > 0:
+            self.warmup_scheduler = optim.lr_scheduler.LambdaLR(optimizer, self._warmup_lr)
         else:
             self.warmup_scheduler = None
 
@@ -65,173 +59,33 @@ class LRScheduler(ABC):
         Check if we're warming up the learning rate.
         """
         return (
-            hasattr(self, 'warmup_scheduler')
-            and self.warmup_scheduler is not None
-            and self._number_training_updates <= self.warmup_updates
+                hasattr(self, 'warmup_scheduler')
+                and self.warmup_scheduler is not None
+                and self._number_training_updates <= self.warmup_steps
         )
 
-    def _warmup_lr(self, step):
-        """
-        Return lr multiplier (on initial lr) for warmup scheduler.
-        """
-        start = self.warmup_rate
-        end = 1.0
-        progress = min(1.0, step / self.warmup_updates)
-        lr_mult = start + (end - start) * progress
-        return lr_mult
-
-    def load_state(self, states):
-        """
-        Load state of scheduler from states.
-        """
-        if self.scheduler and 'lr_scheduler' in states:
-            self.scheduler.load_state_dict(states['lr_scheduler'])
-        if states.get('warmup_scheduler') and getattr(self, 'warmup_scheduler', None):
-            self.warmup_scheduler.load_state_dict(states['warmup_scheduler'])
-        self._number_training_updates = states.get('number_training_updates', 0)
-        self.step(self._number_training_updates)
-
-    def get_initial_number_training_updates(self):
-        return self._number_training_updates
-
-    def get_state_dict(self):
-        """
-        Return scheduler state dictionary.
-        """
-        return self.scheduler.state_dict()
-
-    def get_warmup_state_dict(self):
-        """
-        Return warmup scheduler state dictionary.
-        """
-        if self.warmup_scheduler is None:
-            return None
-        return self.warmup_scheduler.state_dict()
-
-    @classmethod
-    def lr_scheduler_factory(cls, opt, optimizer, states, hard_reset=False):
-        """
-        Create the learning rate scheduler, and assign it to self.scheduler. This
-        scheduler will be updated upon a call to receive_metrics. May also create
-        self.warmup_scheduler, if appropriate.
-
-        :param opt opt:
-            Arguments received by torch_agent
-        :param optimizer optimizer:
-            Optimizer being used for training. May be wrapped in
-            fp16_optimizer_wrapper depending on whether fp16 is used.
-        :param state_dict states:
-            Possible state_dict provided by model checkpoint, for restoring
-            LR state.
-        :param bool hard_reset:
-            If true, the LR scheduler should ignore the state dictionary.
-        :return: LRScheduler object
-        """
-
-        patience = opt.get('lr_scheduler_patience', 3)
-        decay = opt.get('lr_scheduler_decay', 0.5)
-        warmup_updates = opt.get('warmup_updates', -1)
-        warmup_rate = opt.get('warmup_rate', 1e-4)
-        max_lr_steps = opt.get('max_lr_steps', -1)
-        invsqrt_lr_decay_gamma = opt.get('invsqrt_lr_decay_gamma', -1)
-
-        if opt.get('lr_scheduler', 'none') == 'none':
-            return None
-        elif decay == 1.0:
-            logger.warning(
-                "Your LR decay is set to 1.0. Assuming you meant you wanted "
-                "to disable learning rate scheduling. Adjust lr_scheduler_decay "
-                "if this is not correct."
-            )
-            return None
-        elif opt.get('lr_scheduler') == 'reduceonplateau':
-            scheduler = ReduceOnPlateauLRScheduler(
-                optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
-            )
-        elif opt.get('lr_scheduler') == 'fixed':
-            scheduler = FixedLRScheduler(
-                optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
-            )
-        elif opt.get('lr_scheduler') == 'invsqrt':
-            scheduler = InvSqrtLRScheduler(
-                optimizer,
-                hard_reset,
-                patience,
-                decay,
-                warmup_updates,
-                warmup_rate,
-                invsqrt_lr_decay_gamma,
-            )
-        elif opt.get('lr_scheduler') == 'cosine':
-            scheduler = CosineLRScheduler(
-                optimizer,
-                hard_reset,
-                patience,
-                decay,
-                warmup_updates,
-                warmup_rate,
-                max_lr_steps,
-            )
-        elif opt.get('lr_scheduler') == 'linear':
-            scheduler = LinearLRScheduler(
-                optimizer,
-                hard_reset,
-                patience,
-                decay,
-                warmup_updates,
-                warmup_rate,
-                max_lr_steps,
-            )
-        else:
-            raise ValueError(
-                "Don't know what to do with lr_scheduler '{}'".format(
-                    opt.get('lr_scheduler')
-                )
-            )
-
-        # time to load LR state from the checkpoint, if possible.
-        if (
-            # there is already an old LR scheduler saved on disk
-            states
-            # and there was a scheduler in the dump
-            and 'lr_scheduler_type' in states
-            # and the old LR scheduler is different
-            and states.get('lr_scheduler_type') != opt['lr_scheduler']
-            # and we're not already using a fresh scheduler
-            and not hard_reset
-        ):
-            # the LR scheduler changed, start things fresh
-            logger.warning(
-                f"LR scheduler ({opt['lr_scheduler']}) is different from saved "
-                f"({states.get('lr_scheduler_type')}). Starting fresh!"
-            )
-            hard_reset = True
-
-        if not hard_reset:
-            # do the actual loading (if possible)
-            scheduler.load_state(states)
-
-        # setup warmup scheduler after loading saved scheduler
-        scheduler._init_warmup_scheduler(optimizer, states)
-
-        return scheduler
-
-    def step(self, num_steps):
+    def train_step(self):
         """
         Use the number of train steps to adjust the warmup scheduler or the main
         scheduler, depending on where in training we are.
 
         Override this method to override the behavior for training schedulers.
         """
-        self._number_training_updates = num_steps
+        self._number_training_updates += 1
         if self._is_lr_warming_up():
-            self.warmup_scheduler.step(epoch=num_steps)
+            self.warmup_scheduler.step()
         else:
-            scheduler_steps = num_steps - self.warmup_updates
-            self.train_step(scheduler_steps)
+            self.train_adjust()
+
+    def valid_step(self, metric=None):
+        if self._is_lr_warming_up():
+            # we're not done warming up, so don't start using validation
+            # metrics to adjust schedule
+            return
+        self.valid_adjust(metric)
 
     @abstractmethod
-    def train_step(self, scheduler_steps):
+    def train_adjust(self):
         """
         Use the number of train steps to decide when to adjust LR schedule.
 
@@ -240,7 +94,7 @@ class LRScheduler(ABC):
         pass
 
     @abstractmethod
-    def valid_step(self, metric):
+    def valid_adjust(self, metric):
         """
         Use the metrics to decide when to adjust LR schedule.
 
@@ -253,74 +107,64 @@ class LRScheduler(ABC):
         pass
 
 
-class ReduceOnPlateauLRScheduler(LRScheduler):
+class ReduceLROnPlateau(LRScheduler):
     """
     Scheduler that decays by a multiplicative rate when valid loss plateaus.
     """
 
-    def __init__(
-        self, optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
-    ):
-        super().__init__(hard_reset, warmup_updates, warmup_rate)
-        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, 'min', factor=decay, patience=patience, verbose=True
-        )
+    def __init__(self, optimizer, mode='min', factor=0.1, patience=10, verbose=False, threshold=0.0001,
+                 threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, warmup_steps=0):
+        super(ReduceLROnPlateau, self).__init__(optimizer, warmup_steps)
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode, factor, patience, verbose, threshold,
+                                                              threshold_mode, cooldown, min_lr, eps)
 
-    def train_step(self, scheduler_steps):
+    def train_adjust(self):
         pass
 
-    def valid_step(self, metric):
-        if self._is_lr_warming_up():
-            # we're not done warming up, so don't start using validation
-            # metrics to adjust schedule
-            return
+    def valid_adjust(self, metric):
         self.scheduler.step(metric)
 
 
-class FixedLRScheduler(LRScheduler):
+class StepLR(LRScheduler):
     """
     Scheduler that decays by a fixed multiplicative rate at each valid step.
     """
 
-    def __init__(
-        self, optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
-    ):
-        super().__init__(hard_reset, warmup_updates, warmup_rate)
-        self.scheduler = optim.lr_scheduler.StepLR(optimizer, patience, gamma=decay)
+    def __init__(self, optimizer, step_size, gamma=0.1, last_epoch=-1, warmup_steps=0):
+        super(StepLR, self).__init__(optimizer, warmup_steps)
+        self.scheduler = optim.lr_scheduler.StepLR(optimizer, step_size, gamma, last_epoch)
 
-    def train_step(self, scheduler_steps):
+    def train_adjust(self):
         pass
 
-    def valid_step(self, metric):
-        if self._is_lr_warming_up():
-            # we're not done warming up, so don't start using validation
-            # metrics to adjust schedule
-            return
+    def valid_adjust(self, metric=None):
         self.scheduler.step()
 
 
-class InvSqrtLRScheduler(LRScheduler):
+class ConstantLR(LRScheduler):
+    def __init__(self, optimizer, warmup_steps=0):
+        super(ConstantLR, self).__init__(optimizer, warmup_steps)
+
+    def train_adjust(self):
+        pass
+
+    def valid_adjust(self, metric):
+        pass
+
+
+class InvSqrtLR(LRScheduler):
     """
     Scheduler that decays at an inverse square root rate.
     """
 
-    def __init__(
-        self,
-        optimizer,
-        hard_reset,
-        patience,
-        decay,
-        warmup_updates,
-        warmup_rate,
-        invsqrt_lr_decay_gamma,
-    ):
+    def __init__(self, optimizer, invsqrt_lr_decay_gamma=-1, last_epoch=-1, warmup_steps=0):
         """
         invsqrt_lr_decay_gamma determines the cycle length of the inverse square root
         scheduler.
 
         When steps taken == invsqrt_lr_decay_gamma, the lr multiplier is 1
         """
-        super().__init__(hard_reset, warmup_updates, warmup_rate)
+        super(InvSqrtLR, self).__init__(optimizer, warmup_steps)
         self.invsqrt_lr_decay_gamma = invsqrt_lr_decay_gamma
         if invsqrt_lr_decay_gamma <= 0:
             logger.warning(
@@ -328,92 +172,143 @@ class InvSqrtLRScheduler(LRScheduler):
                 '--invsqrt-lr-decay-gamma. Defaulting to set gamma to '
                 '--warmup-updates value for backwards compatibility.'
             )
-            self.invsqrt_lr_decay_gamma = self.warmup_updates
+            self.invsqrt_lr_decay_gamma = self.warmup_steps
 
         self.decay_factor = np.sqrt(max(1, self.invsqrt_lr_decay_gamma))
-        self.scheduler = optim.lr_scheduler.LambdaLR(optimizer, self._invsqrt_lr)
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, self._invsqrt_lr, last_epoch)
 
     def _invsqrt_lr(self, step):
         return self.decay_factor / np.sqrt(max(1, self.invsqrt_lr_decay_gamma + step))
 
-    def train_step(self, scheduler_steps):
-        self.scheduler.step(epoch=scheduler_steps)
+    def train_adjust(self):
+        self.scheduler.step()
 
-    def valid_step(self, metric):
+    def valid_adjust(self, metric):
         # this is a training step lr scheduler, nothing to adjust in validation
         pass
 
 
-class CosineLRScheduler(LRScheduler):
+class CosineAnnealingLR(LRScheduler):
     """
     Scheduler that decays by a cosine function.
     """
 
-    def __init__(
-        self,
-        optimizer,
-        hard_reset,
-        patience,
-        decay,
-        warmup_updates,
-        warmup_rate,
-        max_lr_steps,
-    ):
+    def __init__(self, optimizer, T_max, eta_min=0, last_epoch=-1, warmup_steps=0):
         """
-        max_lr_steps determines the cycle length of the cosine annealing.
+        training_steps determines the cycle length of the cosine annealing.
 
         It indicates the number of steps from 1.0 multiplier to 0.0, which corresponds
         to going from cos(0) to cos(pi)
         """
-        super().__init__(hard_reset, warmup_updates, warmup_rate)
-        if max_lr_steps <= 0:
-            raise ValueError('--lr-scheduler cosine requires setting --max-lr-steps')
-        self.max_lr_steps = max_lr_steps
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, max_lr_steps)
+        super(CosineAnnealingLR, self).__init__(optimizer, warmup_steps)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max, eta_min, last_epoch)
 
-    def train_step(self, scheduler_steps):
-        self.scheduler.step(epoch=scheduler_steps)
+    def train_adjust(self):
+        self.scheduler.step()
 
-    def valid_step(self, metric):
+    def valid_adjust(self, metric):
         pass
 
 
-class LinearLRScheduler(LRScheduler):
+class CosineAnnealingWarmRestartsLR(LRScheduler):
+    def __init__(self, optimizer, T_0, T_mult=1, eta_min=0, last_epoch=-1, warmup_steps=0):
+        super(CosineAnnealingWarmRestartsLR, self).__init__(optimizer, warmup_steps)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0, T_mult, eta_min, last_epoch)
+
+    def train_adjust(self):
+        self.scheduler.step()
+
+    def valid_adjust(self, metric):
+        pass
+
+
+class TransformersLinearLR(LRScheduler):
     """
     Scheduler that decays linearly.
     """
 
-    def __init__(
-        self,
-        optimizer,
-        hard_reset,
-        patience,
-        decay,
-        warmup_updates,
-        warmup_rate,
-        max_lr_steps,
-    ):
+    def __init__(self, optimizer, training_steps, warmup_steps=0):
         """
-        max_lr_steps determines the cycle length of the linear annealing.
+        training_steps determines the cycle length of the linear annealing.
 
         It indicates the number of steps from 1.0 multiplier to 0.0
         """
-        super().__init__(hard_reset, warmup_updates, warmup_rate)
-        if max_lr_steps <= 0:
-            raise ValueError('lr_scheduler linear requires setting max_lr_steps')
-        self.max_lr_steps = max_lr_steps
-        self.scheduler = optim.lr_scheduler.LambdaLR(optimizer, self._linear_lr)
+        super(TransformersLinearLR, self).__init__(optimizer, warmup_steps)
+        self.training_steps = training_steps - warmup_steps
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, self._linear_lr)
 
     def _linear_lr(self, step):
-        # this multiplicative factor ensures linear decay rate
-        # lr_mult = float(self.max_lr_steps - step - 1) / float(self.max_lr_steps - step)
-        lr_mult = max(0.0, 1.0 - step / self.max_lr_steps)
-        return lr_mult
+        return max(0.0, float(self.training_steps - step) / float(max(1, self.training_steps)))
 
-    def train_step(self, scheduler_steps):
-        if scheduler_steps >= self.max_lr_steps:
-            raise Exception('End of Linear LR Schedule')
-        self.scheduler.step(epoch=scheduler_steps)
+    def train_adjust(self):
+        self.scheduler.step()
 
-    def valid_step(self, metric):
+    def valid_adjust(self, metric):
+        pass
+
+
+class TransformersCosineLR(LRScheduler):
+    def __init__(self, optimizer, training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1,
+                 warmup_steps: int = 0):
+        super(TransformersCosineLR, self).__init__(optimizer, warmup_steps)
+        self.training_steps = training_steps - warmup_steps
+        self.num_cycles = num_cycles
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, self._cosine_lr, last_epoch)
+
+    def _cosine_lr(self, step):
+        progress = float(step) / float(max(1, self.training_steps))
+        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(self.num_cycles) * 2.0 * progress)))
+
+    def train_adjust(self):
+        self.scheduler.step()
+
+    def valid_adjust(self, metric):
+        pass
+
+
+class TransformersCosineWithHardRestartsLR(LRScheduler):
+    def __init__(self, optimizer, training_steps: int, num_cycles: int = 1, last_epoch: int = -1,
+                 warmup_steps: int = 0):
+        super(TransformersCosineWithHardRestartsLR, self).__init__(optimizer, warmup_steps)
+        self.training_steps = training_steps - warmup_steps
+        self.num_cycles = num_cycles
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, self._cosine_with_hard_restarts_lr, last_epoch)
+
+    def _cosine_with_hard_restarts_lr(self, step):
+        progress = float(step) / float(max(1, self.training_steps))
+        if progress >= 1.0:
+            return 0.0
+        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * ((float(self.num_cycles) * progress) % 1.0))))
+
+    def train_adjust(self):
+        self.scheduler.step()
+
+    def valid_adjust(self, metric):
+        pass
+
+
+class TransformersPolynomialDecayLR(LRScheduler):
+    def __init__(self, optimizer, training_steps, lr_end=1e-7, power=1.0, last_epoch=-1, warmup_steps=0):
+        super(TransformersPolynomialDecayLR, self).__init__(optimizer, warmup_steps)
+        self.training_steps = training_steps - warmup_steps
+        self.lr_init = optimizer.defaults["lr"]
+        self.lr_end = lr_end
+        assert self.lr_init > lr_end, f"lr_end ({lr_end}) must be be smaller than initial lr ({self.lr_init})"
+        self.power = power
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, self._polynomial_decay_lr, last_epoch)
+
+    def _polynomial_decay_lr(self, step):
+        if step > self.training_steps:
+            return self.lr_end / self.lr_init  # as LambdaLR multiplies by lr_init
+        else:
+            lr_range = self.lr_init - self.lr_end
+            decay_steps = self.training_steps
+            pct_remaining = 1 - step / decay_steps
+            decay = lr_range * pct_remaining ** self.power + self.lr_end
+            return decay / self.lr_init  # as LambdaLR multiplies by lr_init
+
+    def train_adjust(self):
+        self.scheduler.step()
+
+    def valid_adjust(self, metric):
         pass
