@@ -39,7 +39,7 @@ class TGRecModel(BaseModel):
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.bert = BertModel.from_pretrained(os.path.join(self.dpath, 'Bert'))
+        self.bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
         self.bert_hidden_size = self.bert.config.hidden_size
         self.concat_embed_size = self.bert_hidden_size + self.hidden_size
         self.fusion = nn.Linear(self.concat_embed_size, self.item_size)

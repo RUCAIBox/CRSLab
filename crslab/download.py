@@ -83,12 +83,11 @@ class DownloadableFile:
 def download(url, path, fname, redownload=False, num_retries=5):
     """
     Download file using `requests`.
-
     If ``redownload`` is set to false, then will not download tar file again if it is
     present (default ``False``).
     """
     outfile = os.path.join(path, fname)
-    download = not os.path.isfile(outfile) or redownload
+    download = not os.path.exists(outfile) or redownload
     logger.info(f"Downloading {url} to {outfile}")
     retry = num_retries
     exp_backoff = [2 ** r for r in reversed(range(retry))]
@@ -96,67 +95,49 @@ def download(url, path, fname, redownload=False, num_retries=5):
     pbar = tqdm.tqdm(unit='B', unit_scale=True, desc='Downloading {}'.format(fname))
 
     while download and retry > 0:
-        resume_file = outfile + '.part'
-        resume = os.path.isfile(resume_file)
-        if resume:
-            resume_pos = os.path.getsize(resume_file)
-            mode = 'ab'
-        else:
-            resume_pos = 0
-            mode = 'wb'
         response = None
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.60',
+            }
+            response = requests.get(url, stream=True, headers=headers)
 
-        with requests.Session() as session:
-            try:
-                header = (
-                    {'Range': 'bytes=%d-' % resume_pos, 'Accept-Encoding': 'identity'}
-                    if resume
-                    else {}
+            # negative reply could be 'none' or just missing
+            CHUNK_SIZE = 32768
+            total_size = int(response.headers.get('Content-Length', -1))
+            # server returns remaining size if resuming, so adjust total
+            pbar.total = total_size
+            done = 0
+
+            with open(outfile, 'wb') as f:
+                for chunk in response.iter_content(CHUNK_SIZE):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+                    if total_size > 0:
+                        done += len(chunk)
+                        if total_size < done:
+                            # don't freak out if content-length was too small
+                            total_size = done
+                            pbar.total = total_size
+                        pbar.update(len(chunk))
+                break
+        except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.ReadTimeout,
+        ):
+            retry -= 1
+            pbar.clear()
+            if retry > 0:
+                pl = 'y' if retry == 1 else 'ies'
+                logger.debug(
+                    f'Connection error, retrying. ({retry} retr{pl} left)'
                 )
-                response = session.get(url, stream=True, timeout=5, headers=header)
-
-                # negative reply could be 'none' or just missing
-                if resume and response.headers.get('Accept-Ranges', 'none') == 'none':
-                    resume_pos = 0
-                    mode = 'wb'
-
-                CHUNK_SIZE = 32768
-                total_size = int(response.headers.get('Content-Length', -1))
-                # server returns remaining size if resuming, so adjust total
-                total_size += resume_pos
-                pbar.total = total_size
-                done = resume_pos
-
-                with open(resume_file, mode) as f:
-                    for chunk in response.iter_content(CHUNK_SIZE):
-                        if chunk:  # filter out keep-alive new chunks
-                            f.write(chunk)
-                        if total_size > 0:
-                            done += len(chunk)
-                            if total_size < done:
-                                # don't freak out if content-length was too small
-                                total_size = done
-                                pbar.total = total_size
-                            pbar.update(len(chunk))
-                    break
-            except (
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.ReadTimeout,
-            ):
-                retry -= 1
-                pbar.clear()
-                if retry > 0:
-                    pl = 'y' if retry == 1 else 'ies'
-                    logger.debug(
-                        f'Connection error, retrying. ({retry} retr{pl} left)'
-                    )
-                    time.sleep(exp_backoff[retry])
-                else:
-                    logger.error('Retried too many times, stopped retrying.')
-                    pass
-            finally:
-                if response:
-                    response.close()
+                time.sleep(exp_backoff[retry])
+            else:
+                logger.error('Retried too many times, stopped retrying.')
+        finally:
+            if response:
+                response.close()
     if retry <= 0:
         raise RuntimeError('Connection broken too many times. Stopped retrying.')
 
@@ -167,7 +148,6 @@ def download(url, path, fname, redownload=False, num_retries=5):
                 f'Received less data than specified in Content-Length header for '
                 f'{url}. There may be a download problem.'
             )
-        move(resume_file, outfile)
 
     pbar.close()
 

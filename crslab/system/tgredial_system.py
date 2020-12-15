@@ -51,7 +51,8 @@ class TGReDialSystem(BaseSystem):
             self.policy_epoch = self.policy_optim_opt['epoch']
             self.policy_batch_size = self.policy_optim_opt['batch_size']
 
-        if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler']:
+        if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler'][
+            'name']:
             batch_num = 0
             for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                 batch_num += 1

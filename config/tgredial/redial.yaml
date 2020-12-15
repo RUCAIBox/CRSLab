@@ -36,5 +36,5 @@ conv:
     name: AdamW
     lr: !!float 1.5e-4
   lr_scheduler:
-    name: LinearLR
+    name: TransformersLinearLR
     warmup_steps: 2000

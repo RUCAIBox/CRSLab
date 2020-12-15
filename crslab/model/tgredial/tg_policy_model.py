@@ -28,9 +28,9 @@ class TGPolicyModel(BaseModel):
 
     def build_model(self, *args, **kwargs):
         """build model"""
-        self.context_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'Bert'))
-        self.topic_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'Bert'))
-        self.profile_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'Bert'))
+        self.context_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
+        self.topic_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
+        self.profile_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
 
         self.bert_hidden_size = self.context_bert.config.hidden_size
         self.state2topic_id = nn.Linear(self.bert_hidden_size * 3,
