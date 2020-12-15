@@ -1,20 +1,20 @@
 # -*- encoding: utf-8 -*-
-# @Time    :   2020/12/4
+# @Time    :   2020/12/14
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/4
+# @Time    :   2020/12/15
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
 from crslab.download import DownloadableFile
 
 resources = {
-    'pkuseg': {
-        'version': '0.14',
-        'file': DownloadableFile('1YEiRrWLlBr1mJa8VsOSEA1-W8cNI5tu0', 'tgredial_pkuseg.zip',
-                                 '8b7e23205778db4baa012eeb129cf8d26f4871ae98cdfe81fde6adc27a73a8d6',
+    'nltk': {
+        'version': '0.11',
+        'file': DownloadableFile('1LONCv9G50A933_muSYJrVFhj9TsPeOBe', 'gorecdial_nltk.zip',
+                                 '7e523f7ca90bb32ee8f2471ac5736717c45b20822c63bd958d0546de0a9cd863',
                                  from_google=True),
         'special_token_idx': {
             'pad': 0,

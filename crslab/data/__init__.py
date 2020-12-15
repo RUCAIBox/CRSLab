@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/6, 2020/12/9
+# @Time   : 2020/11/24, 2020/12/14, 2020/12/9
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -12,7 +12,8 @@ from crslab.data.dataset import *
 
 dataset_register_table = {
     'ReDial': ReDialDataset,
-    'TGReDial': TGReDialDataset
+    'TGReDial': TGReDialDataset,
+    'GoRecDial': GoReDialDataset
 }
 
 dataloader_register_table = {

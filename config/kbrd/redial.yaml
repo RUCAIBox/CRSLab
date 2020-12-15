@@ -1,6 +1,6 @@
 # dataset
 dataset: ReDial
-tokenize: gpt2
+tokenize: nltk
 # dataloader
 context_truncate: 1024
 response_truncate: 1024

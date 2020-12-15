@@ -1,13 +1,12 @@
 # dataset
-dataset: TGReDial
-tokenize: pkuseg
-embedding: word2vec.npy
+dataset: GoRecDial
+tokenize: nltk
 # dataloader
-context_truncate: 256
-response_truncate: 30
+context_truncate: 1024
+response_truncate: 1024
 scale: 0.01
 # model
-model: KGSF
+model: KBRD
 token_emb_dim: 300
 kg_emb_dim: 128
 num_bases: 8
@@ -22,21 +21,12 @@ embeddings_scale: true
 reduction: false
 n_positions: 1024
 # optim
-pretrain:
+rec:
   epoch: 1
   batch_size: 4096
   optimizer:
     name: Adam
     lr: !!float 3e-3
-rec:
-  epoch: 1
-  batch_size: 1024
-  optimizer:
-    name: Adam
-    lr: !!float 3e-3
-  early_stop: true
-  stop_mode: max
-  impatience: 3
 conv:
   epoch: 1
   batch_size: 256
@@ -48,3 +38,6 @@ conv:
     patience: 3
     factor: 0.5
   gradient_clip: 0.1
+  early_stop: true
+  stop_mode: min
+  impatience: 3

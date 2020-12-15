@@ -1,11 +1,12 @@
 torchvision
 pyyaml~=5.3.1
-tqdm~=4.53.0
+tqdm
 loguru~=0.5.3
 numpy~=1.19.4
 nltk~=3.4.4
 requests~=2.25.0
 torch-geometric
 transformers~=4.0.1
+dataclasses~=0.7
 sentencepiece<=0.1.91
 torch~=1.4.0

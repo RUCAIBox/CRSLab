@@ -1,3 +1,4 @@
 from .base_dataset import BaseDataset
-from .redial.redial_dataset import ReDialDataset
-from .tgredial.tgredial_dataset import TGReDialDataset
+from .gorecdial import GoReDialDataset
+from .redial import ReDialDataset
+from .tgredial import TGReDialDataset

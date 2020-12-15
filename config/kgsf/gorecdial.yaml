@@ -1,6 +1,6 @@
 # dataset
-dataset: TGReDial
-tokenize: pkuseg
+dataset: GoRecDial
+tokenize: nltk
 embedding: word2vec.npy
 # dataloader
 context_truncate: 256
@@ -24,22 +24,22 @@ n_positions: 1024
 # optim
 pretrain:
   epoch: 1
-  batch_size: 4096
+  batch_size: 64
   optimizer:
     name: Adam
     lr: !!float 3e-3
 rec:
   epoch: 1
-  batch_size: 1024
+  batch_size: 64
   optimizer:
     name: Adam
     lr: !!float 3e-3
   early_stop: true
-  stop_mode: max
+  valid_mode: max
   impatience: 3
 conv:
   epoch: 1
-  batch_size: 256
+  batch_size: 64
   optimizer:
     name: Adam
     lr: !!float 3e-3
