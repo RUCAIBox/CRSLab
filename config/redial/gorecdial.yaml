@@ -1,0 +1,45 @@
+# dataset
+dataset: GoRecDial
+tokenize:
+  rec: nltk
+  conv: nltk
+# dataloader
+utterance_truncate: 80
+conversation_truncate: 40
+scale: 1
+# model
+# rec
+rec_model: ReDialRec
+autorec_layer_sizes: [ 1000 ]
+autorec_f: sigmoid
+autorec_g: sigmoid
+# conv
+conv_model: ReDialConv
+#embedding: word2vec
+embedding_dim: 300
+utterance_encoder_hidden_size: 256
+dialog_encoder_hidden_size: 256
+dialog_encoder_num_layers: 1
+use_dropout: False
+dropout: 0.3
+decoder_hidden_size: 256
+decoder_num_layers: 1
+# optim
+rec:
+  epoch: 1
+  batch_size: 1024
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  early_stop: true
+  impatience: 3
+  stop_mode: min
+conv:
+  epoch: 1
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  early_stop: true
+  impatience: 3
+  stop_mode: min
