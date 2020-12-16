@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/14
+# @Time   : 2020/11/24, 2020/12/16
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -30,7 +30,7 @@ lr_scheduler_class = {k: v for k, v in lr_scheduler.__dict__.items() if not k.st
 
 class BaseSystem(ABC):
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data=None, restore=False,
-                 save=False, debug=False):
+                 debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # data
@@ -59,7 +59,7 @@ class BaseSystem(ABC):
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
         if restore:
             self.restore_model()
-        self.save = save
+
         self.evaluator = get_evaluator(opt.get('evaluator', 'standard'))
 
         self.need_early_stop = opt.get('early_stop', False)
@@ -98,7 +98,7 @@ class BaseSystem(ABC):
         self.optimizer = optim_class[optimizer](parameters, **optimizer_opt)
         logger.info(f"[Build optimizer: {optimizer}]")
 
-    def build_lr_scheduler(self, *args, **kwargs):
+    def build_lr_scheduler(self):
         """
         Create the learning rate scheduler, and assign it to self.scheduler. This
         scheduler will be updated upon a call to receive_metrics. May also create

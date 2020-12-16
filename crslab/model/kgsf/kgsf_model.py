@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/2
+# @Time   : 2020/11/24, 2020/12/16
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -32,7 +32,7 @@ class KGSFModel(BaseModel):
         self.start_token_idx = vocab['start']
         self.end_token_idx = vocab['end']
         self.token_emb_dim = opt['token_emb_dim']
-        self.pretrain_embedding = side_data.get('embedding', None)
+        self.pretrained_embedding = side_data.get('embedding', None)
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']
@@ -60,7 +60,7 @@ class KGSFModel(BaseModel):
         self.reduction = opt['reduction']
         self.n_positions = opt['n_positions']
         self.response_truncate = opt.get('response_truncate', 20)
-        # resource
+        # copy mask
         dataset = opt['dataset']
         dpath = os.path.join(MODEL_PATH, "kgsf", dataset)
         resource = resources[dataset]
@@ -74,9 +74,9 @@ class KGSFModel(BaseModel):
         self._build_conversation_layer()
 
     def _init_embeddings(self):
-        if self.pretrain_embedding is not None:
+        if self.pretrained_embedding is not None:
             self.token_embedding = nn.Embedding.from_pretrained(
-                torch.as_tensor(self.pretrain_embedding, dtype=torch.float), freeze=False,
+                torch.as_tensor(self.pretrained_embedding, dtype=torch.float), freeze=False,
                 padding_idx=self.pad_token_idx)
         else:
             self.token_embedding = nn.Embedding(self.vocab_size, self.token_emb_dim, self.pad_token_idx)

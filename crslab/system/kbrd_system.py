@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/14
+# @Time    :   2020/12/16
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -19,9 +19,9 @@ from crslab.system.utils import ind2txt
 
 class KBRDSystem(BaseSystem):
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
-                 save=False, debug=False):
+                 debug=False):
         super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                         restore, save, debug)
+                                         restore, debug)
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']
@@ -88,7 +88,7 @@ class KBRDSystem(BaseSystem):
             self.evaluator.reset_metrics()
             logger.info(f'[Recommendation epoch {str(epoch)}]')
             logger.info('[Train]')
-            for batch in self.train_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+            for batch in self.train_dataloader.get_rec_data(self.rec_batch_size):
                 self.step(batch, stage='rec', mode='train')
             self.evaluator.report()
             # val
@@ -117,7 +117,7 @@ class KBRDSystem(BaseSystem):
             self.evaluator.reset_metrics()
             logger.info(f'[Conversation epoch {str(epoch)}]')
             logger.info('[Train]')
-            for batch in self.train_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+            for batch in self.train_dataloader.get_conv_data(batch_size=self.conv_batch_size):
                 self.step(batch, stage='conv', mode='train')
             self.evaluator.report()
             # val
@@ -142,5 +142,3 @@ class KBRDSystem(BaseSystem):
     def fit(self):
         self.train_recommender()
         self.train_conversation()
-        if self.save:
-            self.save_model()

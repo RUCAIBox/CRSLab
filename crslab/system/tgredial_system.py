@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/14
+# @Time   : 2020/12/16
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 from math import floor
@@ -26,10 +26,9 @@ class TGReDialSystem(BaseSystem):
                  vocab,
                  side_data,
                  restore=False,
-                 save=False,
                  debug=False):
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore, save,
+                                             test_dataloader, vocab, side_data, restore,
                                              debug)
 
         self.dataset = self.opt['dataset']

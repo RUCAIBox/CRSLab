@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/14
+# @Time   : 2020/12/16
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 import os
@@ -38,10 +38,7 @@ class TGConvModel(BaseModel):
         # self.model.resize_token_embeddings(self.vocab_size)
         # self.n_ctx = self.model.config.to_dict().get("n_ctx")  # not used
 
-        self.loss = CrossEntropyLoss(
-            ignore_index=self.pad_id,
-            reduction='sum'
-        )
+        self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
     def forward(self, batch, mode):
         input_ids, context, _, _, y = batch
@@ -97,6 +94,4 @@ class TGConvModel(BaseModel):
         """
 
         loss = self.loss(logit.reshape(-1, logit.size(-1)), labels.reshape(-1))
-        num_target = labels.ne(self.pad_id).long().sum().item()
-
-        return loss / num_target
+        return loss

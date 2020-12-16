@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/13
+# @Time   : 2020/11/24, 2020/12/16
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/kgsf/gorecdial.yaml', help='config file(yaml) path')
+                        default='config/redial/redial.yaml', help='config file(yaml) path')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',
@@ -45,9 +45,14 @@ if __name__ == '__main__':
         test_dataloader = {}
         vocab = {}
         side_data = {}
+        tokenized_dataset = {}
 
         for task, tokenize in opt['tokenize'].items():
-            dataset = get_dataset(opt, tokenize, args.restore_data, args.save_data)
+            if tokenize in tokenized_dataset:
+                dataset = tokenized_dataset[tokenize]
+            else:
+                dataset = get_dataset(opt, tokenize, args.restore_data, args.save_data)
+                tokenized_dataset[tokenize] = dataset
             train_data = dataset.train_data
             valid_data = dataset.valid_data
             test_data = dataset.test_data
@@ -57,7 +62,9 @@ if __name__ == '__main__':
             train_dataloader[task] = get_dataloader(opt, train_data, vocab[task])
             valid_dataloader[task] = get_dataloader(opt, valid_data, vocab[task])
             test_dataloader[task] = get_dataloader(opt, test_data, vocab[task])
-    # system init and fit
+    # system init, fit and save
     CRS = get_system(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args.restore_system,
-                     args.save_system, args.debug)
+                     args.debug)
     CRS.fit()
+    if args.save_system:
+        CRS.save_model()

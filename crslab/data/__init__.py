@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/14, 2020/12/9
+# @Time   : 2020/11/24, 2020/12/16, 2020/12/9
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -25,6 +25,9 @@ dataloader_register_table = {
     'TGPolicy': TGReDialDataLoader,
     'TGRec_TGConv': TGReDialDataLoader,
     'TGRec_TGConv_TGPolicy': TGReDialDataLoader,
+    'ReDialRec': ReDialDataLoader,
+    'ReDialConv': ReDialDataLoader,
+    'ReDialRec_ReDialConv': ReDialDataLoader
 }
 
 

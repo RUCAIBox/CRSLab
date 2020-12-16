@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/13
+# @Time   : 2020/11/24, 2020/12/16
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -11,6 +11,7 @@ from loguru import logger
 
 from .kbrd import *
 from .kgsf import *
+from .redial import *
 from .tgredial import *
 
 Model_register_table = {
@@ -18,7 +19,9 @@ Model_register_table = {
     'KBRD': KBRDModel,
     'TGRec': TGRecModel,
     'TGConv': TGConvModel,
-    'TGPolicy': TGPolicyModel
+    'TGPolicy': TGPolicyModel,
+    'ReDialRec': ReDialRecModel,
+    'ReDialConv': ReDialConvModel
 }
 
 

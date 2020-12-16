@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/14
+# @Time   : 2020/11/24, 2020/12/16
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -18,9 +18,9 @@ from crslab.system.utils import ind2txt
 
 class KGSFSystem(BaseSystem):
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
-                 save=False, debug=False):
+                 debug=False):
         super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                         restore, save, debug)
+                                         restore, debug)
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']
@@ -161,5 +161,3 @@ class KGSFSystem(BaseSystem):
         self.pretrain()
         self.train_recommender()
         self.train_conversation()
-        if self.save:
-            self.save_model()
