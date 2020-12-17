@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time    :   2020/12/16
+# @Time    :   2020/12/17
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -31,12 +31,14 @@ class ReDialSystem(BaseSystem):
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
-    def rec_evaluate(self, rec_predict, movie_label):
+    def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu().detach()
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        movie_label = movie_label.cpu().detach()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
-            self.evaluator.rec_evaluate(rec_rank, movie)
+        item_label = item_label.cpu().detach()
+        for rec_rank, item in zip(rec_ranks, item_label):
+            rec_rank = rec_rank.tolist()
+            item = item.item()
+            self.evaluator.rec_evaluate(rec_rank, item)
 
     def conv_evaluate(self, prediction, response):
         prediction = prediction.cpu().detach()

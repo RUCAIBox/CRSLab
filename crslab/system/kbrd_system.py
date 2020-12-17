@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/16
+# @Time    :   2020/12/17
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -25,7 +25,7 @@ class KBRDSystem(BaseSystem):
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']
-        self.movie_ids = side_data['item_entity_ids']
+        self.item_ids = side_data['item_entity_ids']
 
         self.rec_optim_opt = opt['rec']
         self.conv_optim_opt = opt['conv']
@@ -34,14 +34,15 @@ class KBRDSystem(BaseSystem):
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
-    def rec_evaluate(self, rec_predict, movie_label):
+    def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu().detach()
-        rec_predict = rec_predict[:, self.movie_ids]
+        rec_predict = rec_predict[:, self.item_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        movie_label = movie_label.cpu().detach()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
-            movie = self.movie_ids.index(movie.item())
-            self.evaluator.rec_evaluate(rec_rank, movie)
+        item_label = item_label.cpu().detach()
+        for rec_rank, label in zip(rec_ranks, item_label):
+            rec_rank = rec_rank.tolist()
+            label = self.item_ids.index(label.item())
+            self.evaluator.rec_evaluate(rec_rank, label)
 
     def conv_evaluate(self, prediction, response):
         prediction = prediction.cpu().detach()

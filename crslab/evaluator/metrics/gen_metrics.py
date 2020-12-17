@@ -1,3 +1,12 @@
+# @Time   : 2020/11/30
+# @Author : Xiaolei Wang
+# @Email  : wxl1999@foxmail.com
+
+# UPDATE:
+# @Time   : 2020/12/2
+# @Author : Xiaolei Wang
+# @Email  : wxl1999@foxmail.com
+
 import math
 import re
 from collections import Counter

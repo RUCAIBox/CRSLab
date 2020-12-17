@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/17
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -24,7 +24,7 @@ class KGSFSystem(BaseSystem):
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']
-        self.movie_ids = side_data['item_entity_ids']
+        self.item_ids = side_data['item_entity_ids']
 
         self.pretrain_optim_opt = self.opt['pretrain']
         self.rec_optim_opt = self.opt['rec']
@@ -36,14 +36,15 @@ class KGSFSystem(BaseSystem):
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
-    def rec_evaluate(self, rec_predict, movie_label):
+    def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu().detach()
-        rec_predict = rec_predict[:, self.movie_ids]
+        rec_predict = rec_predict[:, self.item_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        movie_label = movie_label.cpu().detach()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
-            movie = self.movie_ids.index(movie.item())
-            self.evaluator.rec_evaluate(rec_rank, movie)
+        item_label = item_label.cpu().detach()
+        for rec_rank, item in zip(rec_ranks, item_label):
+            rec_rank = rec_rank.tolist()
+            item = self.item_ids.index(item.item())
+            self.evaluator.rec_evaluate(rec_rank, item)
 
     def conv_evaluate(self, prediction, response):
         prediction = prediction.cpu().detach()
@@ -120,7 +121,7 @@ class KGSFSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report()
                 # early stop
-                metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test

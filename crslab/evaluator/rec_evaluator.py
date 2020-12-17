@@ -3,16 +3,15 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/11/30
+# @Time   : 2020/12/17
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
 from loguru import logger
 
 from crslab.evaluator.base_evaluator import BaseEvaluator
-from crslab.evaluator.metrics.base_metrics import Metrics, aggregate_unnamed_reports
-from crslab.evaluator.metrics.rec_metrics import RecallMetric
-from crslab.system.utils import nice_report
+from crslab.evaluator.utils import nice_report
+from .metrics import *
 
 
 class RecEvaluator(BaseEvaluator):
@@ -21,10 +20,12 @@ class RecEvaluator(BaseEvaluator):
         self.rec_metrics = Metrics()
         self.optim_metrics = Metrics()
 
-    def rec_evaluate(self, preds, label):
+    def rec_evaluate(self, ranks, label):
         for k in [1, 10, 50]:
-            if len(preds) >= k:
-                self.rec_metrics.add(f"recall@{k}", RecallMetric.compute(preds, label, k))
+            if len(ranks) >= k:
+                self.rec_metrics.add(f"hit@{k}", HitMetric.compute(ranks, label, k))
+                self.rec_metrics.add(f"ndcg@{k}", NDCGMetric.compute(ranks, label, k))
+                self.rec_metrics.add(f"mrr@{k}", MRRMetric.compute(ranks, label, k))
 
     def report(self):
         reports = [self.rec_metrics.report(), self.optim_metrics.report()]

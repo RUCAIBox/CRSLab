@@ -3,7 +3,7 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/11/30
+# @Time   : 2020/12/17
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -13,9 +13,8 @@ from loguru import logger
 from nltk import ngrams
 
 from crslab.evaluator.base_evaluator import BaseEvaluator
-from crslab.evaluator.metrics.base_metrics import aggregate_unnamed_reports, Metrics, AverageMetric
-from crslab.evaluator.metrics.gen_metrics import F1Metric, BleuMetric
-from crslab.system.utils import nice_report
+from crslab.evaluator.utils import nice_report
+from .metrics import *
 
 
 class ConvEvaluator(BaseEvaluator):

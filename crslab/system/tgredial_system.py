@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/16
+# @Time   : 2020/12/17
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 from math import floor
@@ -58,16 +58,16 @@ class TGReDialSystem(BaseSystem):
             conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
             self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
-    def rec_evaluate(self, rec_predict, movie_label):
+    def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu().detach()
         if self.dataset == 'ReDial':
             rec_predict = rec_predict[:, self.movie_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        movie_label = movie_label.cpu().detach()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
+        item_label = item_label.cpu().detach()
+        for rec_rank, item in zip(rec_ranks, item_label):
             if self.dataset == 'ReDial':
-                movie = self.movie_ids.index(movie.item())
-            self.evaluator.rec_evaluate(rec_rank, movie)
+                item = self.movie_ids.index(item.item())
+            self.evaluator.rec_evaluate(rec_rank, item)
 
     def conv_evaluate(self, prediction, response):
         """
@@ -172,7 +172,7 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report()
                 # early stop
-                metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
@@ -242,7 +242,7 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='policy', mode='val')
                 self.evaluator.report()
                 # early stop
-                metric = self.evaluator.rec_metrics['recall@1'] + self.evaluator.rec_metrics['recall@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
