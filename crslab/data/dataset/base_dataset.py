@@ -22,10 +22,11 @@ class BaseDataset(ABC):
         self.opt = opt
         self.dpath = dpath
 
+        # download
+        dfile = resource['file']
+        build(dpath, dfile, version=resource['version'])
+
         if not restore:
-            # download
-            dfile = resource['file']
-            build(dpath, dfile, version=resource['version'])
             # load and process
             train_data, valid_data, test_data, self.vocab = self._load_data()
             logger.info('[Finish data load]')
