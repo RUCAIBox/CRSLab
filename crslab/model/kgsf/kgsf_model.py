@@ -156,7 +156,7 @@ class KGSFModel(BaseModel):
             padding_idx=self.pad_token_idx,
             n_positions=self.n_positions
         )
-        self.conv_loss = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.pad_token_idx)
+        self.conv_loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
 
         logger.debug('[Finish build conv layer]')
 
@@ -306,10 +306,8 @@ class KGSFModel(BaseModel):
 
             logits = logits.view(-1, logits.shape[-1])
             response = response.view(-1)
-            response_mask = response.ne(self.pad_token_idx)
-
             loss = self.conv_loss(logits, response)
-            return loss / torch.sum(response_mask), preds
+            return loss, preds
         else:
             logits, preds = self._decode_greedy_with_kg(tokens_encoding, conv_entity_reps, conv_entity_emb,
                                                         entity_padding_mask,

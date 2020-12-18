@@ -3,7 +3,7 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/12/2
+# @Time   : 2020/12/18
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -12,8 +12,10 @@ import re
 from collections import Counter
 from typing import List, Optional
 
+import numpy as np
 from nltk import ngrams
 from nltk.translate.bleu_score import sentence_bleu
+from sklearn.metrics.pairwise import cosine_similarity
 
 from crslab.evaluator.metrics.base_metrics import AverageMetric, SumMetric
 
@@ -111,3 +113,46 @@ class DistMetric(SumMetric):
         for token in ngrams(sent.split(), k):
             token_set.add(token)
         return DistMetric(len(token_set))
+
+
+class EmbeddingAverage(AverageMetric):
+    @staticmethod
+    def _avg_embedding(embedding):
+        return np.sum(embedding, axis=0) / (np.linalg.norm(np.sum(embedding, axis=0)) + 1e-12)
+
+    @staticmethod
+    def compute(hyp_embedding, ref_embeddings) -> 'EmbeddingAverage':
+        hyp_avg_emb = EmbeddingAverage._avg_embedding(hyp_embedding).reshape(1, -1)
+        ref_avg_embs = [EmbeddingAverage._avg_embedding(emb) for emb in ref_embeddings]
+        ref_avg_embs = np.array(ref_avg_embs)
+        return EmbeddingAverage(float(cosine_similarity(hyp_avg_emb, ref_avg_embs).max()))
+
+
+class VectorExtrema(AverageMetric):
+    @staticmethod
+    def _extreme_embedding(embedding):
+        max_emb = np.max(embedding, axis=0)
+        min_emb = np.min(embedding, axis=0)
+        extreme_emb = np.fromiter(
+            map(lambda x, y: x if ((x > y or x < -y) and y > 0) or ((x < y or x > -y) and y < 0) else y, max_emb,
+                min_emb), dtype=float)
+        return extreme_emb
+
+    @staticmethod
+    def compute(hyp_embedding, ref_embeddings) -> 'VectorExtrema':
+        hyp_ext_emb = VectorExtrema._extreme_embedding(hyp_embedding).reshape(1, -1)
+        ref_ext_embs = [VectorExtrema._extreme_embedding(emb) for emb in ref_embeddings]
+        ref_ext_embs = np.asarray(ref_ext_embs)
+        return VectorExtrema(float(cosine_similarity(hyp_ext_emb, ref_ext_embs).max()))
+
+
+class GreedyMatch(AverageMetric):
+    @staticmethod
+    def compute(hyp_embedding, ref_embeddings) -> 'GreedyMatch':
+        hyp_emb = np.asarray(hyp_embedding)
+        ref_embs = (np.asarray(ref_embedding) for ref_embedding in ref_embeddings)
+        score_max = 0
+        for ref_emb in ref_embs:
+            sim_mat = cosine_similarity(hyp_emb, ref_emb)
+            score_max = max(score_max, (sim_mat.max(axis=0).mean() + sim_mat.max(axis=1).mean()) / 2)
+        return GreedyMatch(score_max)

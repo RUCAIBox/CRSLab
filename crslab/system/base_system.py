@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/18
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -60,7 +60,7 @@ class BaseSystem(ABC):
         if restore:
             self.restore_model()
 
-        self.evaluator = get_evaluator(opt.get('evaluator', 'standard'))
+        self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'])
 
         self.need_early_stop = opt.get('early_stop', False)
 

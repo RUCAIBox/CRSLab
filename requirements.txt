@@ -1,6 +1,6 @@
 torchvision
 pyyaml~=5.3.1
-tqdm
+tqdm~=4.53.0
 loguru~=0.5.3
 numpy~=1.19.4
 nltk~=3.4.4
@@ -10,3 +10,5 @@ transformers~=4.0.1
 dataclasses~=0.7
 sentencepiece<=0.1.91
 torch~=1.4.0
+scikit-learn~=0.23.2
+fasttext~=0.9.2

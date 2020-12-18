@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/16
+# @Time   : 2020/12/18
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -41,8 +41,6 @@ class ReDialConvModel(BaseModel):
 
     def build_model(self):
         if self.pretrained_embedding:
-            # embed_dim = self.pretrained_embedding.shape[1]
-            # self.pretrained_embedding = np.concatenate((self.pretrained_embedding, [0] * embed_dim), axis=0)
             embedding = nn.Embedding.from_pretrained(
                 torch.as_tensor(self.pretrained_embedding, dtype=torch.float), freeze=False,
                 padding_idx=self.pad_token_idx)

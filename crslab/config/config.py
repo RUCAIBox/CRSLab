@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/13
+# @Time   : 2020/11/23, 2020/12/18
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -21,6 +21,7 @@ ROOT_PATH = dirname(dirname(dirname(realpath(__file__))))
 DATA_PATH = os.path.join(ROOT_PATH, 'data')
 DATASET_PATH = os.path.join(DATA_PATH, 'dataset')
 MODEL_PATH = os.path.join(DATA_PATH, 'model')
+EMBEDDING_PATH = os.path.join(DATA_PATH, 'embedding')
 SAVE_PATH = os.path.join(ROOT_PATH, 'save')
 
 

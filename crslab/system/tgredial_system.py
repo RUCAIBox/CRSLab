@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/17
+# @Time   : 2020/12/18
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 from math import floor
@@ -35,7 +35,7 @@ class TGReDialSystem(BaseSystem):
 
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
-        self.movie_ids = side_data['rec']['item_entity_ids']
+        self.item_ids = side_data['rec']['item_entity_ids']
 
         self.rec_optim_opt = self.opt['rec']
         self.rec_epoch = self.rec_optim_opt['epoch']
@@ -59,14 +59,13 @@ class TGReDialSystem(BaseSystem):
             self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
     def rec_evaluate(self, rec_predict, item_label):
-        rec_predict = rec_predict.cpu().detach()
-        if self.dataset == 'ReDial':
-            rec_predict = rec_predict[:, self.movie_ids]
+        rec_predict = rec_predict.cpu()
+        rec_predict = rec_predict[:, self.item_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        item_label = item_label.cpu().detach()
+        rec_ranks = rec_ranks.tolist()
+        item_label = item_label.tolist()
         for rec_rank, item in zip(rec_ranks, item_label):
-            if self.dataset == 'ReDial':
-                item = self.movie_ids.index(item.item())
+            item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
 
     def conv_evaluate(self, prediction, response):
@@ -77,8 +76,8 @@ class TGReDialSystem(BaseSystem):
 
             the first token in response is <|endoftext|>,  it is not in prediction
         """
-        prediction = [[ind.item() for ind in inds] for inds in prediction.cpu().detach()]
-        response = [[ind.item() for ind in inds] for inds in response.cpu().detach()]
+        prediction = prediction.tolist()
+        response = response.tolist()
         for p, r in zip(prediction, response):
             p_str = ind2txt(p, self.ind2tok, self.end_token_idx)
             r_str = ind2txt(r[1:], self.ind2tok, self.end_token_idx)

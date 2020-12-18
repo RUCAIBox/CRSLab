@@ -3,21 +3,24 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/18
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import argparse
+import warnings
 
 from crslab.config import Config
 from crslab.data import get_dataset, get_dataloader
 from crslab.system import get_system
 
+warnings.filterwarnings('ignore')
+
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/kgsf/redial.yaml', help='config file(yaml) path')
+                        default='config/kbrd/tgredial.yaml', help='config file(yaml) path')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',
@@ -40,12 +43,12 @@ if __name__ == '__main__':
         valid_dataloader = get_dataloader(opt, CRS_dataset.valid_data, vocab)
         test_dataloader = get_dataloader(opt, CRS_dataset.test_data, vocab)
     else:
+        tokenized_dataset = {}
         train_dataloader = {}
         valid_dataloader = {}
         test_dataloader = {}
         vocab = {}
         side_data = {}
-        tokenized_dataset = {}
 
         for task, tokenize in opt['tokenize'].items():
             if tokenize in tokenized_dataset:

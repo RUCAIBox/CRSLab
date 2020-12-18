@@ -3,9 +3,9 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time    :   2020/12/17
-# @Author  :   Xiaolei Wang
-# @email   :   wxl1999@foxmail.com
+# @Time   : 2020/12/18
+# @Author : Xiaolei Wang
+# @email  : wxl1999@foxmail.com
 
 import torch
 from loguru import logger
@@ -23,6 +23,7 @@ class ReDialSystem(BaseSystem):
                                            restore, debug)
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
+        self.item_ids = side_data['item_entity_ids']
 
         self.rec_optim_opt = opt['rec']
         self.conv_optim_opt = opt['conv']
@@ -32,17 +33,18 @@ class ReDialSystem(BaseSystem):
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
     def rec_evaluate(self, rec_predict, item_label):
-        rec_predict = rec_predict.cpu().detach()
+        rec_predict = rec_predict.cpu()
+        rec_predict = rec_predict[:, self.item_ids]
         _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        item_label = item_label.cpu().detach()
+        rec_ranks = rec_ranks.tolist()
+        item_label = item_label.tolist()
         for rec_rank, item in zip(rec_ranks, item_label):
-            rec_rank = rec_rank.tolist()
-            item = item.item()
+            item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
 
     def conv_evaluate(self, prediction, response):
-        prediction = prediction.cpu().detach()
-        response = response.cpu().detach()
+        prediction = prediction.tolist()
+        response = response.tolist()
         for p, r in zip(prediction, response):
             p_str = ind2txt(p, self.ind2tok, self.end_token_idx)
             r_str = ind2txt(r, self.ind2tok, self.end_token_idx)

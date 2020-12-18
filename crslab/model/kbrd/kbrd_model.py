@@ -116,7 +116,7 @@ class KBRDModel(BaseModel):
         )
         self.user_proj_1 = nn.Linear(self.user_emb_dim, 512)
         self.user_proj_2 = nn.Linear(512, self.vocab_size)
-        self.conv_loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx, reduction='sum')
+        self.conv_loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
         logger.debug('[Build conversation layer]')
 
     def encode_user(self, entity_lists, kg_embedding):
@@ -186,9 +186,7 @@ class KBRDModel(BaseModel):
             logits, preds = self.decode_forced(encoder_state, user_embedding, response)
             logits = logits.view(-1, logits.shape[-1])
             labels = response.view(-1)
-            notnull = labels.ne(self.pad_token_idx)
-            target_tokens = notnull.long().sum().item()
-            return self.conv_loss(logits, labels) / target_tokens, preds
+            return self.conv_loss(logits, labels), preds
         else:
             _, preds = self.decode_greedy(encoder_state, user_embedding)
             return preds

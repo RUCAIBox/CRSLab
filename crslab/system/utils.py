@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/17
+# @Time   : 2020/11/24, 2020/12/18
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -36,6 +36,8 @@ def compute_grad_norm(parameters, norm_type=2.0):
 def ind2txt(inds, ind2tok, end_token_idx=None, unk_token='unk'):
     sentence = []
     for ind in inds:
+        if isinstance(ind, torch.Tensor):
+            ind = ind.item()
         if end_token_idx and ind == end_token_idx:
             break
         sentence.append(ind2tok.get(ind, unk_token))
