@@ -23,7 +23,7 @@ class ReDialSystem(BaseSystem):
                                            restore, debug)
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
-        self.item_ids = side_data['item_entity_ids']
+        self.item_ids = side_data['rec']['item_entity_ids']
 
         self.rec_optim_opt = opt['rec']
         self.conv_optim_opt = opt['conv']

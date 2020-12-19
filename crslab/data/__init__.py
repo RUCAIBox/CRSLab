@@ -13,7 +13,7 @@ from crslab.data.dataset import *
 dataset_register_table = {
     'ReDial': ReDialDataset,
     'TGReDial': TGReDialDataset,
-    'GoRecDial': GoReDialDataset
+    'GoRecDial': GoRecDialDataset
 }
 
 dataloader_register_table = {
