@@ -62,8 +62,6 @@ class BaseSystem(ABC):
 
         self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'])
 
-        self.need_early_stop = opt.get('early_stop', False)
-
     def init_optim(self, opt, parameters):
         self.optim_opt = opt
         parameters = list(parameters)
@@ -88,6 +86,7 @@ class BaseSystem(ABC):
             self.parameters = parameters
 
         # early stop
+        self.need_early_stop = self.optim_opt.get('early_stop', False)
         if self.need_early_stop:
             logger.debug('[Enable early stop]')
             self.reset_early_stop_state()
