@@ -187,16 +187,17 @@ class GoRecDialDataset(BaseDataset):
                 }
                 augmented_conv_dicts.append(conv_dict)
 
-            context_tokens.append(text_tokens)
-            context_items += movies
-            for entity in entities + movies:
-                if entity not in entity_set:
-                    entity_set.add(entity)
-                    context_entities.append(entity)
-            for word in words:
-                if word not in word_set:
-                    word_set.add(word)
-                    context_words.append(word)
+            if len(text_tokens) > 0:
+                context_tokens.append(text_tokens)
+                context_items += movies
+                for entity in entities + movies:
+                    if entity not in entity_set:
+                        entity_set.add(entity)
+                        context_entities.append(entity)
+                for word in words:
+                    if word not in word_set:
+                        word_set.add(word)
+                        context_words.append(word)
 
         return augmented_conv_dicts
 
