@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {
-        'version': '0.2',
+        'version': '0.21',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/fc9d96c44806d458f4f42ed336f0d239?fn=nltk',
             'gorecdial_nltk.zip',
