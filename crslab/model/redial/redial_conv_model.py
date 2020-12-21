@@ -3,9 +3,9 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/18
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/18, 2020/12/21
+# @Author : Xiaolei Wang, Chenzhan Shang
+# @email  : wxl1999@foxmail.com, czshang@outlook.com
 
 import torch
 from torch import nn
@@ -92,12 +92,23 @@ class ReDialConvModel(BaseModel):
 
         request = batch['request']
         request_lengths = batch['request_lengths']
+
+        # Skip null requests
+        mask = []
+        for i in range(len(request_lengths)):
+            if request_lengths[i].item() != 0:
+                mask.append(i)
+        request = request[mask]
+        request_lengths = request_lengths[mask]
+        context_state = context_state[mask]
+        response = batch['response'][mask]
+
         log_probs = self.decoder(request, request_lengths,
                                  context_state)  # (batch_size, max_utterance_length, vocab_size + 1)
         preds = log_probs.argmax(dim=-1)  # (batch_size, max_utterance_length)
 
         log_probs = log_probs.view(-1, log_probs.shape[-1])
-        response = batch['response'].view(-1)
+        response = response.view(-1)
         loss = self.loss(log_probs, response)
 
         return loss, preds
