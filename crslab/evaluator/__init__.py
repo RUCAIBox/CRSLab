@@ -13,7 +13,8 @@ Evaluator_register_table = {
 dataset_language_map = {
     'ReDial': 'en',
     'TGReDial': 'zh',
-    'GoRecDial': 'en'
+    'GoRecDial': 'en',
+    'OpenDialKG': 'en'
 }
 
 

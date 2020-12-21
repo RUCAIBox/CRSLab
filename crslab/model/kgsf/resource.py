@@ -34,5 +34,13 @@ resources = {
             'kgsf_gorecdial.zip',
             '9794abf12b5d6773d867556685da14d951d42f64a5c4781af7d6fb720e87ec4f',
         )
+    },
+    'OpenDialKG': {
+        'version': '0.1',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/f364604c91b9ed61771b1b3ee09b4cc4?fn=opendialkg',
+            'kgsf_opendialkg.zip',
+            '89b785b23478b1d91d6ab4f34a3658e82b52dcbb73828713a9b369fa49db9e61'
+        )
     }
 }

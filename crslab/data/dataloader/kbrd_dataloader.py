@@ -7,8 +7,6 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
-from copy import deepcopy
-
 import torch
 from tqdm import tqdm
 
@@ -36,8 +34,7 @@ class KBRDDataLoader(BaseDataLoader):
         for conv_dict in tqdm(self.dataset):
             if conv_dict['role'] == 'Recommender':
                 for movie in conv_dict['items']:
-                    augment_conv_dict = deepcopy(conv_dict)
-                    augment_conv_dict['item'] = movie
+                    augment_conv_dict = {'context_entities': conv_dict['context_entities'], 'item': movie}
                     augment_dataset.append(augment_conv_dict)
         return augment_dataset
 
@@ -85,8 +82,8 @@ class KBRDDataLoader(BaseDataLoader):
                 truncate(merge_utt(conv_dict['context_tokens']), self.context_truncate, truncate_tail=False))
             batch_context_entities.append(conv_dict['context_entities'])
             batch_response.append(
-                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2), add_start=True,
-                                        start_token_idx=self.start_token_idx, add_end=True,
+                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2),
+                                        start_token_idx=self.start_token_idx,
                                         end_token_idx=self.end_token_idx))
 
         return {

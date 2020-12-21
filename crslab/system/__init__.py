@@ -18,6 +18,7 @@ system_register_table = {
     'KGSF': KGSFSystem,
     'KBRD': KBRDSystem,
     'TGRec_TGConv': TGReDialSystem,
+    'TGRec_TGConv_TGPolicy': TGReDialSystem,
     'ReDialRec_ReDialConv': ReDialSystem
 }
 

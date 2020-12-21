@@ -4,9 +4,9 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/10
-# @Author  :   Xiaolei Wang
-# @email   :   wxl1999@foxmail.com
+# @Time    :   2020/12/20, 2020/12/15
+# @Author  :   Xiaolei Wang, Yuanhang Zhou
+# @email   :   wxl1999@foxmail.com, sdzyh002@gmail
 
 from copy import copy
 from typing import List, Union, Optional
@@ -14,11 +14,11 @@ from typing import List, Union, Optional
 import torch
 
 
-def add_start_end_token_idx(vec: list, add_start=False, start_token_idx=None, add_end=False, end_token_idx=None):
+def add_start_end_token_idx(vec: list, start_token_idx=None, end_token_idx=None):
     res = copy(vec)
-    if add_start and start_token_idx:
+    if start_token_idx:
         res.insert(0, start_token_idx)
-    if add_end and end_token_idx:
+    if end_token_idx:
         res.append(end_token_idx)
     return res
 
@@ -121,7 +121,7 @@ def truncate(vec, max_length, truncate_tail=True):
         return vec[-max_length:]
 
 
-def merge_utt(conv):
+def merge_utt(conv, split_token_idx=None, split_in_tail=False, final_token_idx=None):
     """merge utterances in one conversation
 
     Args:
@@ -130,4 +130,14 @@ def merge_utt(conv):
     Returns:
         list: tokens of all utterances in one conversation
     """
-    return [token for utt in conv for token in utt]
+    merged_conv = []
+    for utt in conv:
+        for token in utt:
+            merged_conv.append(token)
+        if split_token_idx:
+            merged_conv.append(split_token_idx)
+    if split_token_idx and not split_in_tail:
+        merged_conv = merged_conv[:-1]
+    if final_token_idx:
+        merged_conv.append(final_token_idx)
+    return merged_conv

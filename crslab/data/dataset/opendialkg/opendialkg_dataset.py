@@ -1,11 +1,11 @@
-# @Time   : 2020/11/22
+# @Time   : 2020/12/19
 # @Author : Kun Zhou
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/13, 2020/12/19
-# @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail
+# @Time   : 2020/12/20, 2020/12/21
+# @Author : Kun Zhou, Xiaolei Wang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import json
 import os
@@ -20,12 +20,12 @@ from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 
 
-class ReDialDataset(BaseDataset):
+class OpenDialKGDataset(BaseDataset):
     def __init__(self, opt, tokenize, restore=False, save=False):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        dpath = os.path.join(DATASET_PATH, "redial", tokenize)
+        dpath = os.path.join(DATASET_PATH, 'opendialkg', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_data(self):
@@ -36,10 +36,9 @@ class ReDialDataset(BaseDataset):
         vocab = {
             'tok2ind': self.tok2ind,
             'ind2tok': self.ind2tok,
-            'id2entity': self.id2entity,
             'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
-            'n_word': self.n_word,
+            'n_word': self.n_word
         }
         vocab.update(self.special_token_idx)
 
@@ -68,24 +67,23 @@ class ReDialDataset(BaseDataset):
         logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
 
     def _load_other_data(self):
-        # dbpedia
+        # opendialkg
         self.entity2id = json.load(
-            open(os.path.join(self.dpath, 'entity2id.json'), 'r', encoding='utf-8'))  # {entity: entity_id}
-        self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
+            open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8'))  # {entity: entity_id}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = json.load(open(os.path.join(self.dpath, 'dbpedia_subkg.json'), 'r', encoding='utf-8'))
+        self.entity_kg = open(os.path.join(self.dpath, 'opendialkg_subkg.txt'), encoding='utf-8')
         logger.debug(
-            f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'entity2id.json')} and {os.path.join(self.dpath, 'dbpedia_subkg.json')}]")
+            f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'opendialkg_subkg.json')} and {os.path.join(self.dpath, 'opendialkg_triples.txt')}]")
 
-        # conceptNet
+        # conceptnet
         # {concept: concept_id}
-        self.word2id = json.load(open(os.path.join(self.dpath, 'concept2id.json'), 'r', encoding='utf-8'))
+        self.word2id = json.load(open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8'))
         self.n_word = max(self.word2id.values()) + 1
-        # {relation\t concept \t concept}
-        self.word_kg = open(os.path.join(self.dpath, 'conceptnet_subkg.txt'), 'r', encoding='utf-8')
+        # {concept \t relation\t concept}
+        self.word_kg = open(os.path.join(self.dpath, 'concept_subkg.txt'), encoding='utf-8')
         logger.debug(
-            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'concept2id.json')} and {os.path.join(self.dpath, 'conceptnet_subkg.txt')}]")
+            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'concept_subkg.txt')}]")
 
     def _data_preprocess(self, train_data, valid_data, test_data):
         processed_train_data = self._raw_data_process(train_data)
@@ -104,11 +102,11 @@ class ReDialDataset(BaseDataset):
         Args:
             raw_data (list of dict): {
                 'conv_id' (int):
-                'dialog' (list of dict): {
-                    'utt_id' (int):
+                'messages' (list of dict): {
+                    'local_id' (int): id of current utterance
                     'role' (str): 'Seeker' or 'Recommender'
                     'text' (list of str): utterance which has benn tokenized into tokens
-                    'movies' (list of str): mentioned movies in text
+                    'item' (list of str): mentioned items to rec in text
                     'entity' (list of str): mentioned entities of dbpedia in text
                     'word' (list of str): mentioned words of conceptnet in text
                 }
@@ -119,35 +117,32 @@ class ReDialDataset(BaseDataset):
                 'role' (str): 'Seeker' or 'Recommender';
                 'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
                 'response' (list of int): token ids of the ground-truth response;
-                'context_items' (list of int): id of items mentioned in context;
-                'items' (list of int): id of items mentioned in current turn;
-                'context_entities' (list of int): id of entities in context;
-                'context_words' (list of int): id of words in context;
+                'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
+                'context_entities' (list of int): if necessary, id of entities in context;
+                'context_words' (list of int): if necessary, id of words in context;
             }
         """
-
-        augmented_convs = [self._merge_conv_data(conversation["dialog"]) for conversation in tqdm(raw_data)]
+        augmented_convs = [self._convert_to_id(conversation) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
             augmented_conv_dicts.extend(self._augment_and_add(conv))
         return augmented_conv_dicts
 
-    def _merge_conv_data(self, dialog):
+    def _convert_to_id(self, conversation):
         """
-        1.merge the continue utterances based on roles;
-        2.convert token/word/entity/movie into ids;
+        convert token/word/entity/movie into ids;
         """
         augmented_convs = []
         last_role = None
-        for utt in dialog:
+        for utt in conversation['dialog']:
             text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
-            movie_ids = [self.entity2id[movie] for movie in utt['movies'] if movie in self.entity2id]
+            item_ids = [self.entity2id[movie] for movie in utt['item'] if movie in self.entity2id]
             entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
             word_ids = [self.word2id[word] for word in utt['word'] if word in self.word2id]
 
             if utt["role"] == last_role:
                 augmented_convs[-1]["text"] += text_token_ids
-                augmented_convs[-1]["movie"] += movie_ids
+                augmented_convs[-1]["item"] += item_ids
                 augmented_convs[-1]["entity"] += entity_ids
                 augmented_convs[-1]["word"] += word_ids
             else:
@@ -155,7 +150,7 @@ class ReDialDataset(BaseDataset):
                     "role": utt["role"],
                     "text": text_token_ids,
                     "entity": entity_ids,
-                    "movie": movie_ids,
+                    "item": item_ids,
                     "word": word_ids
                 })
             last_role = utt["role"]
@@ -164,36 +159,28 @@ class ReDialDataset(BaseDataset):
 
     def _augment_and_add(self, raw_conv_dict):
         """
-        1.augment one conversation into several instances;
-        2.add start or end token;
-        input: {
-            "role": role,
-            "text": text_token_ids,
-            "entity": entity_ids,
-            "movie": movie_ids,
-            "word": word_ids
-        }
+        augment one conversation into several instances;
         """
         augmented_conv_dicts = []
         context_tokens, context_entities, context_words, context_items = [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
-            text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
+            text_tokens, entities, items, words = conv["text"], conv["entity"], conv["item"], conv["word"]
             if len(context_tokens) > 0:
                 conv_dict = {
-                    "role": conv['role'],
+                    'role': conv['role'],
                     "context_tokens": copy(context_tokens),
                     "response": text_tokens,
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
-                    "context_items": copy(context_items),
-                    "items": movies,
+                    'context_items': copy(context_items),
+                    "items": items,
                 }
                 augmented_conv_dicts.append(conv_dict)
 
             context_tokens.append(text_tokens)
-            context_items += movies
-            for entity in entities + movies:
+            context_items += items
+            for entity in entities + items:
                 if entity not in entity_set:
                     entity_set.add(entity)
                     context_entities.append(entity)
@@ -205,22 +192,31 @@ class ReDialDataset(BaseDataset):
         return augmented_conv_dicts
 
     def _side_data_process(self):
+        """process side data
+
+        Returns:
+            dict: {
+                'entity_kg' (list of tuple): entity knowledge graph;
+                'word_kg' (list of tuple): word knowledge graph;
+                'item_entity_ids' (list of int): entity id of each item
+            }
+        """
         processed_entity_kg = self._entity_kg_process()
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
         logger.debug("[Finish word KG process]")
-        movie_entity_ids = json.load(open(os.path.join(self.dpath, 'movie_ids.json'), 'r', encoding='utf-8'))
-        logger.debug('[Load movie entity ids]')
+        item_entity_ids = json.load(open(os.path.join(self.dpath, 'item_ids.json'), 'r', encoding='utf-8'))
+        logger.debug('[Load item entity ids]')
 
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,
-            "item_entity_ids": movie_entity_ids,
+            "item_entity_ids": item_entity_ids,
         }
         return side_data
 
-    def _entity_kg_process(self, SELF_LOOP_ID=185):
-        """get dbpedia edge information
+    def _entity_kg_process(self):
+        """get cn-dbpedia edge information
 
         Args:
 
@@ -228,24 +224,28 @@ class ReDialDataset(BaseDataset):
             list: edge list [(head_entity_id, tail_entity_id, new_relation_id)]
         """
         edge_list = []  # [(entity, entity, relation)]
-        for entity in range(self.n_entity):
-            # add self loop
-            edge_list.append((entity, entity, SELF_LOOP_ID))
-            if entity not in self.entity_kg:
+        for line in self.entity_kg:
+            triple = line.strip().split('\t')
+            if len(triple) != 3 or triple[0] not in self.entity2id or triple[2] not in self.entity2id:
                 continue
-            for tail_and_relation in self.entity_kg[entity]:
-                if entity != tail_and_relation[1] and tail_and_relation[0] != SELF_LOOP_ID:
-                    edge_list.append((entity, tail_and_relation[1], tail_and_relation[0]))
-                    edge_list.append((tail_and_relation[1], entity, tail_and_relation[0]))
+            e0 = self.entity2id[triple[0]]
+            e1 = self.entity2id[triple[2]]
+            r = triple[1]
+            edge_list.append((e0, e1, r))
+            # edge_list.append((e1, e0, r))
+            edge_list.append((e0, e0, 'SELF_LOOP'))
+            if e1 != e0:
+                edge_list.append((e1, e1, 'SELF_LOOP'))
 
         relation_cnt, relation2id, edges = defaultdict(int), dict(), set()
         for h, t, r in edge_list:
             relation_cnt[r] += 1
         for h, t, r in edge_list:
-            if relation_cnt[r] > 1000:
+            if relation_cnt[r] > 20000:
                 if r not in relation2id:
                     relation2id[r] = len(relation2id)
                 edges.add((h, t, relation2id[r]))
+
         return {
             'edge': list(edges),
             'n_relation': len(relation2id)
@@ -255,9 +255,9 @@ class ReDialDataset(BaseDataset):
         """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
         for line in self.word_kg:
-            kg = line.strip().split('\t')
-            e0 = self.word2id[kg[1].split('/')[0]]
-            e1 = self.word2id[kg[2].split('/')[0]]
+            triple = line.strip().split('\t')
+            e0 = self.word2id[triple[0]]
+            e1 = self.word2id[triple[2]]
             edges.add((e0, e1))
             edges.add((e1, e0))
         # edge_set = [[co[0] for co in list(edges)], [co[1] for co in list(edges)]]

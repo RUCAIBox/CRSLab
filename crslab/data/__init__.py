@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16, 2020/12/9
+# @Time   : 2020/11/24, 2020/12/21, 2020/12/17
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -13,7 +13,8 @@ from crslab.data.dataset import *
 dataset_register_table = {
     'ReDial': ReDialDataset,
     'TGReDial': TGReDialDataset,
-    'GoRecDial': GoRecDialDataset
+    'GoRecDial': GoRecDialDataset,
+    'OpenDialKG': OpenDialKGDataset
 }
 
 dataloader_register_table = {
@@ -27,7 +28,19 @@ dataloader_register_table = {
     'TGRec_TGConv_TGPolicy': TGReDialDataLoader,
     'ReDialRec': ReDialDataLoader,
     'ReDialConv': ReDialDataLoader,
-    'ReDialRec_ReDialConv': ReDialDataLoader
+    'ReDialRec_ReDialConv': ReDialDataLoader,
+    'BERT': TGReDialDataLoader,
+    'SASREC': TGReDialDataLoader,
+    'TextCNN': TGReDialDataLoader,
+    'GRU4REC': TGReDialDataLoader,
+    'Popularity': TGReDialDataLoader,
+    'Transformer': KGSFDataLoader,
+    'GPT2': TGReDialDataLoader,
+    'ConvBERT': TGReDialDataLoader,
+    'TopicBERT': TGReDialDataLoader,
+    'ProfileBERT': TGReDialDataLoader,
+    'MGCG': TGReDialDataLoader,
+    'PMI': TGReDialDataLoader,
 }
 
 

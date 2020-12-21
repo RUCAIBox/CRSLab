@@ -27,5 +27,33 @@ resources = {
             'pad_word': 0,
             'pad_topic': 0
         },
-    }
+    },
+    'bert': {
+        'version': '0.21',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/45cab9530723ebd8247a4a2763abdf6c?fn=bert',
+            'gorecdial_bert.zip',
+            'ca377837d769c8515bb9b5170cd624ae3b8bcdd56533ea6d307554e9d9406d6c'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 101,
+            'end': 102,
+            'unk': 100,
+            'sent_split': 2,
+            'word_split': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+            'pad_topic': 0
+        }
+    },
+    # 'gpt2': {
+    #     'version': '0.21',
+    #     'file': DownloadableFile(
+    #
+    #     ),
+    #     'special_token_idx': {
+    #
+    #     }
+    # }
 }

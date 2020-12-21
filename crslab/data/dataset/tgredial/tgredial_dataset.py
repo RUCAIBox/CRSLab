@@ -3,9 +3,9 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/12/6, 2020/12/13
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com
+# @Time   : 2020/12/6, 2020/12/13, 2020/12/19
+# @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
+# @Email  : francis_kun_zhou@163.com, sdzyh002@gmail
 
 import json
 import os
@@ -29,15 +29,27 @@ class TGReDialDataset(BaseDataset):
         dpath = os.path.join(DATASET_PATH, 'tgredial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
-    def _load_vocab(self):
-        self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
-        self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
-
-        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
-        logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
-        logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
-
     def _load_data(self):
+        train_data, valid_data, test_data = self._load_raw_data()
+        self._load_vocab()
+        self._load_other_data()
+
+        vocab = {
+            'tok2ind': self.tok2ind,
+            'ind2tok': self.ind2tok,
+            'topic2ind': self.topic2ind,
+            'ind2topic': self.ind2topic,
+            'id2entity': self.id2entity,
+            'vocab_size': len(self.tok2ind),
+            'n_topic': len(self.topic2ind),
+            'n_entity': self.n_entity,
+            'n_word': self.n_word,
+        }
+        vocab.update(self.special_token_idx)
+
+        return train_data, valid_data, test_data, vocab
+
+    def _load_raw_data(self):
         # load train/valid/test data
         with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
@@ -49,11 +61,28 @@ class TGReDialDataset(BaseDataset):
             test_data = json.load(f)
             logger.debug(f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
 
-        self._load_vocab()
+        return train_data, valid_data, test_data
 
+    def _load_vocab(self):
+        self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
+        self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
+
+        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
+        logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
+        logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
+
+        self.topic2ind = json.load(open(os.path.join(self.dpath, 'topic2id.json'), 'r', encoding='utf-8'))
+        self.ind2topic = {idx: word for word, idx in self.topic2ind.items()}
+
+        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'topic2id.json')}]")
+        logger.debug(f"[The size of token2index dictionary is {len(self.topic2ind)}]")
+        logger.debug(f"[The size of index2token dictionary is {len(self.ind2topic)}]")
+
+    def _load_other_data(self):
         # cn-dbpedia
         self.entity2id = json.load(
             open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8'))  # {entity: entity_id}
+        self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
         self.entity_kg = open(os.path.join(self.dpath, 'cn-dbpedia.txt'), encoding='utf-8')
@@ -69,11 +98,6 @@ class TGReDialDataset(BaseDataset):
         logger.debug(
             f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'hownet.txt')}]")
 
-        # topic dictionary
-        self.topic2id = json.load(open(os.path.join(self.dpath, 'topic2id.json'), 'r', encoding='utf-8'))
-        self.n_topic = len(self.topic2id) + 1
-        logger.debug(f"[Load topic dictionary from {os.path.join(self.dpath, 'topic2id.json')}]")
-
         # user interaction history dictionary
         self.conv2history = json.load(open(os.path.join(self.dpath, 'user2history.json'), 'r', encoding='utf-8'))
         logger.debug(f"[Load user interaction history from {os.path.join(self.dpath, 'user2history.json')}]")
@@ -81,18 +105,6 @@ class TGReDialDataset(BaseDataset):
         # user profile
         self.user2profile = json.load(open(os.path.join(self.dpath, 'user2profile.json'), 'r', encoding='utf-8'))
         logger.debug(f"[Load user profile from {os.path.join(self.dpath, 'user2profile.json')}")
-
-        vocab = {
-            'tok2ind': self.tok2ind,
-            'ind2tok': self.ind2tok,
-            'vocab_size': len(self.tok2ind),
-            'n_entity': self.n_entity,
-            'n_word': self.n_word,
-            'n_topic': self.n_topic
-        }
-        vocab.update(self.special_token_idx)
-
-        return train_data, valid_data, test_data, vocab
 
     def _data_preprocess(self, train_data, valid_data, test_data):
         processed_train_data = self._raw_data_process(train_data)
@@ -164,9 +176,9 @@ class TGReDialDataset(BaseDataset):
                     continue
                 if isinstance(kw, str):
                     kw = [kw]
-                kw = [self.topic2id.get(k, self.pad_topic_idx) for k in kw]
+                kw = [self.topic2ind.get(k, self.pad_topic_idx) for k in kw]
                 policy.append([action, kw])
-            final_kws = [self.topic2id[kw] if kw is not None else self.pad_topic_idx for kw in utt['final'][1]]
+            final_kws = [self.topic2ind[kw] if kw is not None else self.pad_topic_idx for kw in utt['final'][1]]
             final = [utt['final'][0], final_kws]
             conv_utt_id = str(conversation['conv_id']) + '/' + str(utt['local_id'])
             interaction_history = self.conv2history.get(conv_utt_id, [])

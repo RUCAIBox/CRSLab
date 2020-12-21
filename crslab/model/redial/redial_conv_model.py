@@ -24,7 +24,7 @@ class ReDialConvModel(BaseModel):
         self.unk_token_idx = vocab['unk']
         self.pretrained_embedding = side_data.get('embedding', None)
         self.embedding_dim = opt.get('embedding_dim', None)
-        if self.pretrained_embedding is None and self.embedding_dim is None:
+        if opt.get('embedding', None) and self.embedding_dim is None:
             raise
         # HRNN
         self.utterance_encoder_hidden_size = opt['utterance_encoder_hidden_size']
@@ -40,7 +40,7 @@ class ReDialConvModel(BaseModel):
         super(ReDialConvModel, self).__init__(opt, device)
 
     def build_model(self):
-        if self.pretrained_embedding:
+        if self.opt.get('embedding', None) and self.pretrained_embedding is not None:
             embedding = nn.Embedding.from_pretrained(
                 torch.as_tensor(self.pretrained_embedding, dtype=torch.float), freeze=False,
                 padding_idx=self.pad_token_idx)

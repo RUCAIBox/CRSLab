@@ -119,8 +119,8 @@ class KGSFDataLoader(BaseDataLoader):
                 truncate(conv_dict['context_entities'], self.entity_truncate, truncate_tail=False))
             batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
             batch_response.append(
-                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2), add_start=True,
-                                        start_token_idx=self.start_token_idx, add_end=True,
+                add_start_end_token_idx(truncate(conv_dict['response'], self.response_truncate - 2),
+                                        start_token_idx=self.start_token_idx,
                                         end_token_idx=self.end_token_idx))
 
         return (padded_tensor(batch_context_tokens, self.pad_token_idx, pad_tail=False),

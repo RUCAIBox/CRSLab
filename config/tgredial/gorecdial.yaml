@@ -1,18 +1,15 @@
 # dataset
-dataset: TGReDial
+dataset: GoRecDial
 tokenize:
   rec: bert
   conv: gpt2
-  policy: bert
 # dataloader
 context_truncate: 256
 response_truncate: 30
-item_truncate: 100
 scale: 0.01
 # model
 rec_model: TGRec
 conv_model: TGConv
-policy_model: TGPolicy
 hidden_dropout_prob: 0.2
 initializer_range: 0.02
 hidden_size: 50
@@ -41,13 +38,3 @@ conv:
   lr_scheduler:
     name: TransformersLinearLR
     warmup_steps: 2000
-policy:
-  epoch: 1
-  batch_size: 8
-  weight_decay: 0.01
-  optimizer:
-    name: AdamW
-    lr: !!float 1e-5
-  early_stop: true
-  stop_mode: max
-  impatience: 3
