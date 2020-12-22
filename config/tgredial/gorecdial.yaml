@@ -6,6 +6,7 @@ tokenize:
 # dataloader
 context_truncate: 256
 response_truncate: 30
+item_truncate: 100
 scale: 0.01
 # model
 rec_model: TGRec
@@ -29,7 +30,7 @@ rec:
   lr_bert: !!float 1e-5
 conv:
   epoch: 1
-  batch_size: 8
+  batch_size: 4
   gradient_clip: 1.0
   update_freq: 1
   optimizer:

@@ -11,11 +11,19 @@
 from crslab.download import DownloadableFile
 
 resources = {
-    'ReDial': {
-        'version': '0.2',
+    'en': {
+        'version': '0.25',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/ce6451628b2fe21080011569a7931d71?fn=redial',
+            'http://d0.ananas.chaoxing.com/download/6c91d43b81bc0b5e2f81e0b2be57128a?fn=redial',
             'tgredial_redial.zip',
-            '8059145f4feaca8ec9cb0bf1bb54842c95a54210bad74a589160f479391aafb3'),
+            'f71c134ce9cf9c0c8b4af9733bd6ce5bdf7ccd6e979ab0a68b693f19224554ad'),
     },
+    'zh': {
+        'version': '0.25',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/40feec1c3fc247ec7da6096da22e9a85?fn=tgredial',
+            'tgredial_tgredial.zip',
+            'f8ca711a150c0483e1016d642984863158b81b1dfb2d9d07239209024808e75e'
+        )
+    }
 }

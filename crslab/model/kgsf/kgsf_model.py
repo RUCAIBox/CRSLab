@@ -16,12 +16,12 @@ from loguru import logger
 from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
-from crslab.config.config import MODEL_PATH
 from crslab.model.base_model import BaseModel
 from crslab.model.layers import SelfAttentionSeq, GateLayer
 from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
 from crslab.model.utils import edge_to_pyg_format
 from .resource import resources
+from ...config import MODEL_PATH
 
 
 class KGSFModel(BaseModel):

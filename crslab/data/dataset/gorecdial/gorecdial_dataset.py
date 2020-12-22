@@ -14,7 +14,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config.config import DATASET_PATH
+from crslab.config import DATASET_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 
@@ -24,7 +24,6 @@ class GoRecDialDataset(BaseDataset):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        self.pad_topic_idx = self.special_token_idx['pad_topic']
         dpath = os.path.join(DATASET_PATH, 'gorecdial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 

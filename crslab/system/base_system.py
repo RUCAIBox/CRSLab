@@ -15,7 +15,7 @@ from loguru import logger
 from torch import optim
 from transformers import AdamW, Adafactor
 
-from crslab.config.config import SAVE_PATH
+from crslab.config import SAVE_PATH
 from crslab.evaluator import get_evaluator
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.model import get_model

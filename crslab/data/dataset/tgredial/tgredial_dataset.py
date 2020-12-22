@@ -15,7 +15,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config.config import DATASET_PATH
+from crslab.config import DATASET_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 
@@ -172,7 +172,7 @@ class TGReDialDataset(BaseDataset):
             policy = []
             for action, kw in zip(utt['target'][1::2], utt['target'][2::2]):
                 if kw is None or action == '推荐电影':
-                    policy.append([action, self.pad_topic_idx])
+                    # policy.append([action, self.pad_topic_idx])
                     continue
                 if isinstance(kw, str):
                     kw = [kw]

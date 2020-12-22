@@ -27,4 +27,40 @@ resources = {
             'pad_word': 0,
         },
     },
+    'bert': {
+        'version': '0.25',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/868102c5b21c4fa7f8b3f4574b3acf97?fn=bert',
+            'inspired_bert.zip',
+            '9affea30978a6cd48b8038dddaa36f4cb4d8491cf8ae2de44a6d3dde2651f29c'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 101,
+            'end': 102,
+            'unk': 100,
+            'sent_split': 2,
+            'word_split': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+        },
+    },
+    'gpt2': {
+        'version': '0.25',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/854ef833f1365ac9c7f1254f767df81d?fn=gpt2',
+            'inspired_gpt2.zip',
+            '23bb4ce3299186630fdf673e17f43ee43e91573ea786c922e3527e4c341a313c'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 1,
+            'end': 2,
+            'unk': 3,
+            'sent_split': 4,
+            'word_split': 5,
+            'pad_entity': 0,
+            'pad_word': 0
+        },
+    }
 }

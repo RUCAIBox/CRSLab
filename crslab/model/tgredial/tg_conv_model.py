@@ -3,18 +3,19 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/16
-# @Author : Xiaolei Wang
-# @Email  : wxl1999@foxmail.com
+# @Time   : 2020/12/21, 2020/12/15
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @Email  : wxl1999@foxmail.com, sdzyh002@gmail
+
 import os
 
 import torch
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
-from crslab.config.config import MODEL_PATH
 from crslab.model.base_model import BaseModel
 from .resource import resources
+from ...config import MODEL_PATH, dataset_language_map
 
 
 class TGConvModel(BaseModel):
@@ -23,41 +24,34 @@ class TGConvModel(BaseModel):
         self.response_truncate = opt['response_truncate']
         self.pad_id = vocab['pad']
 
-        dataset = opt['dataset']
-        dpath = os.path.join(MODEL_PATH, "tgredial", dataset)
-        resource = resources[dataset]
+        language = dataset_language_map[opt['dataset']]
+        dpath = os.path.join(MODEL_PATH, "tgredial", language)
+        resource = resources[language]
         super(TGConvModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         """build model"""
-        # model_config = transformers.modeling_gpt2.GPT2Config.from_json_file(
-        #     self.model_config)
-        # self.model = GPT2LMHeadModel(config=model_config)
         self.model = GPT2LMHeadModel.from_pretrained(os.path.join(self.dpath, 'gpt2'))
-
-        # self.model.resize_token_embeddings(self.vocab_size)
-        # self.n_ctx = self.model.config.to_dict().get("n_ctx")  # not used
-
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
     def forward(self, batch, mode):
-        input_ids, context, _, _, y = batch
-
         if mode != 'test':
+            enhanced_input_ids = batch[0]
             # torch.tensor's shape = (bs, seq_len, v_s); tuple's length = 12
-            lm_logits = self.model(input_ids).logits
+            lm_logits = self.model(enhanced_input_ids).logits
 
             # index from 1 to self.reponse_truncate is valid response
             loss = self.calculate_loss(
                 lm_logits[:, -self.response_truncate:-1, :],
-                input_ids[:, -self.response_truncate + 1:])
+                enhanced_input_ids[:, -self.response_truncate + 1:])
 
             pred = torch.max(lm_logits, dim=2)[1]  # [bs, seq_len]
             pred = pred[:, -self.response_truncate:]
 
             return loss, pred
         else:
-            return self.generate(context)
+            enhanced_context = batch[1]
+            return self.generate(enhanced_context)
 
     def generate(self, context):
         """
@@ -73,9 +67,9 @@ class TGConvModel(BaseModel):
 
         for i in range(self.response_truncate - 1):
             outputs = self.model(context, former_hidden_state)  # (bs, c_t, v_s),
-            last_hidden_state, former_hidden_state = outputs.hidden_states, outputs.past_key_values
+            last_hidden_state, former_hidden_state = outputs.logits, outputs.past_key_values
 
-            next_token_logits = last_hidden_state[-1][:, -1, :]  # (bs, v_s)
+            next_token_logits = last_hidden_state[:, -1, :]  # (bs, v_s)
             preds = next_token_logits.argmax(dim=-1).long()  # (bs)
 
             context = preds.unsqueeze(1)

@@ -14,7 +14,7 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config.config import DATASET_PATH
+from crslab.config import DATASET_PATH
 from crslab.data.dataset.base_dataset import BaseDataset
 from .resource import resources
 

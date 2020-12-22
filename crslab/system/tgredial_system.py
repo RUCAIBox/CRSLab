@@ -68,6 +68,14 @@ class TGReDialSystem(BaseSystem):
             item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
 
+    def policy_evaluate(self, rec_predict, movie_label):
+        rec_predict = rec_predict.cpu()
+        _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
+        rec_ranks = rec_ranks.tolist()
+        movie_label = movie_label.tolist()
+        for rec_rank, movie in zip(rec_ranks, movie_label):
+            self.evaluator.rec_evaluate(rec_rank, movie)
+
     def conv_evaluate(self, prediction, response):
         """
         Args:
@@ -83,13 +91,6 @@ class TGReDialSystem(BaseSystem):
             r_str = ind2txt(r[1:], self.ind2tok, self.end_token_idx)
             self.evaluator.gen_evaluate(p_str, [r_str])
 
-    def policy_evaluate(self, rec_predict, movie_label):
-        rec_predict = rec_predict.cpu().detach()
-        _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        movie_label = movie_label.cpu().detach()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
-            self.evaluator.rec_evaluate(rec_rank, movie)
-
     def step(self, batch, stage, mode):
         """
         stage: ['policy', 'rec', 'conv']
@@ -103,11 +104,10 @@ class TGReDialSystem(BaseSystem):
                 self.policy_model.eval()
 
             policy_loss, policy_predict = self.policy_model(batch, mode)
-            loss = policy_loss
             if mode == "train":
-                self.backward(loss)
+                self.backward(policy_loss)
             else:
-                self.rec_evaluate(policy_predict, batch[-1])
+                self.policy_evaluate(policy_predict, batch[-1])
             policy_loss = policy_loss.item()
             self.evaluator.optim_metrics.add("policy_loss",
                                              AverageMetric(policy_loss))
@@ -118,9 +118,8 @@ class TGReDialSystem(BaseSystem):
                 self.rec_model.eval()
 
             rec_loss, rec_predict = self.rec_model(batch, mode)
-            loss = rec_loss
             if mode == "train":
-                self.backward(loss)
+                self.backward(rec_loss)
             else:
                 self.rec_evaluate(rec_predict, batch[-1])
             rec_loss = rec_loss.item()
@@ -146,8 +145,12 @@ class TGReDialSystem(BaseSystem):
             raise
 
     def train_recommender(self):
-        bert_param = list(self.rec_model.bert.named_parameters())
-        bert_param_name = ['bert.' + n for n, p in bert_param]
+        if hasattr(self.rec_model, 'bert'):
+            bert_param = list(self.rec_model.bert.named_parameters())
+            bert_param_name = ['bert.' + n for n, p in bert_param]
+        else:
+            bert_param = []
+            bert_param_name = []
         other_param = [
             name_param for name_param in self.rec_model.named_parameters()
             if name_param[0] not in bert_param_name

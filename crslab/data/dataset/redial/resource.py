@@ -28,11 +28,11 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.21',
+        'version': '0.25',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/5b3aab42435aefb07120dea6b4ac8e8d?fn=bert',
+            'http://d0.ananas.chaoxing.com/download/b96b62df9ff2dceac18d76d21e7ae9e9?fn=bert',
             'redial_bert.zip',
-            'ee10b26eb1ba04d23e508ee0f98ef1aa131507eae84847c23c3c6857e9c25c7f',
+            '21992cc07524ac5428d875e564582b84a78d262eae589a3fa164f479a1b96993',
         ),
         'special_token_idx': {
             'pad': 0,
@@ -46,11 +46,11 @@ resources = {
         },
     },
     'gpt2': {
-        'version': '0.21',
+        'version': '0.25',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/485387914cb4cb0c8d457499ecbe2fab?fn=gpt2',
+            'http://d0.ananas.chaoxing.com/download/959dd4bb927d0d47283d4d9de8179a9f?fn=gpt2',
             'redial_gpt2.zip',
-            '3c3661ea8319c8195d9d8505558832e6d34a653e19a78f9943566aacf7bdd564',
+            'bb0deb54766fc8a48e82697141e502dbda8e0011c198d5f051ff9ae7f0d278c3',
         ),
         'special_token_idx': {
             'pad': 0,

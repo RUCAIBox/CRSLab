@@ -17,7 +17,7 @@ from crslab.evaluator.base_evaluator import BaseEvaluator
 from crslab.evaluator.utils import nice_report
 from .metrics import *
 from .resource import resources
-from ..config.config import EMBEDDING_PATH
+from ..config import EMBEDDING_PATH
 from ..download import build
 
 

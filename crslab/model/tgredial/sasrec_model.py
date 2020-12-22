@@ -139,8 +139,7 @@ class SASRecModel(nn.Module):
         neg_logits = torch.sum(neg * seq_emb, -1)
 
         # [batch*seq_len]
-        istarget = (pos_ids > 0).view(pos_ids.size(0) *
-                                      self.max_seq_length).float()
+        istarget = (pos_ids > 0).view(-1).float()
         loss = torch.sum(-torch.log(torch.sigmoid(pos_logits) + 1e-24) *
                          istarget -
                          torch.log(1 - torch.sigmoid(neg_logits) + 1e-24) *

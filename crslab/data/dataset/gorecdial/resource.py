@@ -29,11 +29,11 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.21',
+        'version': '0.25',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/45cab9530723ebd8247a4a2763abdf6c?fn=bert',
+            'http://d0.ananas.chaoxing.com/download/d9c00b7daee6c9f954130ddbc1797cac?fn=bert',
             'gorecdial_bert.zip',
-            'ca377837d769c8515bb9b5170cd624ae3b8bcdd56533ea6d307554e9d9406d6c'
+            'fc7aff18504f750d8974d90f2941a01ff22cc054283124936b778ba91f03554f'
         ),
         'special_token_idx': {
             'pad': 0,
@@ -47,13 +47,22 @@ resources = {
             'pad_topic': 0
         }
     },
-    # 'gpt2': {
-    #     'version': '0.21',
-    #     'file': DownloadableFile(
-    #
-    #     ),
-    #     'special_token_idx': {
-    #
-    #     }
-    # }
+    'gpt2': {
+        'version': '0.25',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/c4cb3cabbf78c5edb2f6dbb36fdadcbd?fn=gpt2',
+            'gorecdial_gpt2.zip',
+            '7234138dcc27ed00bdac95da4096cd435023c229d227fa494d2bd7a653a492a9'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 1,
+            'end': 2,
+            'unk': 3,
+            'sent_split': 4,
+            'word_split': 5,
+            'pad_entity': 0,
+            'pad_word': 0
+        },
+    }
 }

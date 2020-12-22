@@ -32,7 +32,7 @@ rec:
   lr_bert: !!float 1e-5
 conv:
   epoch: 1
-  batch_size: 8
+  batch_size: 1
   gradient_clip: 1.0
   update_freq: 1
   optimizer:
@@ -43,7 +43,7 @@ conv:
     warmup_steps: 2000
 policy:
   epoch: 1
-  batch_size: 8
+  batch_size: 1
   weight_decay: 0.01
   optimizer:
     name: AdamW

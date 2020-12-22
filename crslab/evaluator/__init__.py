@@ -3,20 +3,12 @@ from loguru import logger
 from .conv_evaluator import ConvEvaluator
 from .rec_evaluator import RecEvaluator
 from .standard_evaluator import StandardEvaluator
+from ..config import dataset_language_map
 
 Evaluator_register_table = {
     'rec': RecEvaluator,
     'conv': ConvEvaluator,
     'standard': StandardEvaluator
-}
-
-dataset_language_map = {
-    'ReDial': 'en',
-    'TGReDial': 'zh',
-    'GoRecDial': 'en',
-    'OpenDialKG': 'en',
-    'Inspired': 'en',
-    'DuRecDial': 'zh'
 }
 
 

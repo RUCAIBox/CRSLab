@@ -14,10 +14,10 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config.config import MODEL_PATH
 from crslab.model.base_model import BaseModel
 from .resource import resources
 from .sasrec_model import SASRecModel
+from ...config import MODEL_PATH, dataset_language_map
 
 
 class TGRecModel(BaseModel):
@@ -26,15 +26,15 @@ class TGRecModel(BaseModel):
         self.initializer_range = opt['initializer_range']
         self.hidden_size = opt['hidden_size']
         self.max_seq_length = opt['max_history_items']
-        self.item_size = vocab['n_entity']
+        self.item_size = vocab['n_entity'] + 1
         self.num_attention_heads = opt['num_attention_heads']
         self.attention_probs_dropout_prob = opt['attention_probs_dropout_prob']
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        dataset = opt['dataset']
-        dpath = os.path.join(MODEL_PATH, "tgredial", dataset)
-        resource = resources[dataset]
+        language = dataset_language_map[opt['dataset']]
+        dpath = os.path.join(MODEL_PATH, "tgredial", language)
+        resource = resources[language]
         super(TGRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
