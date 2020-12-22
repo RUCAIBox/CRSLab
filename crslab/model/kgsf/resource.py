@@ -42,5 +42,13 @@ resources = {
             'kgsf_opendialkg.zip',
             '89b785b23478b1d91d6ab4f34a3658e82b52dcbb73828713a9b369fa49db9e61'
         )
+    },
+    'Inspired': {
+        'version': '0.1',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/7b2418b9f681bea8d6ed01bdf8ec3630?fn=inspired',
+            'kgsf_inspired.zip',
+            '23dfc031a3c71f2a52e29fe0183e1a501771b8d431852102ba6fd83d971f928d'
+        )
     }
 }

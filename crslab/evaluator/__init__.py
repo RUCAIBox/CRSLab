@@ -14,7 +14,8 @@ dataset_language_map = {
     'ReDial': 'en',
     'TGReDial': 'zh',
     'GoRecDial': 'en',
-    'OpenDialKG': 'en'
+    'OpenDialKG': 'en',
+    'Inspired': 'en',
 }
 
 

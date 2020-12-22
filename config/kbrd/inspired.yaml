@@ -1,5 +1,5 @@
 # dataset
-dataset: ReDial
+dataset: Inspired
 tokenize: nltk
 # dataloader
 context_truncate: 1024
@@ -23,7 +23,7 @@ n_positions: 1024
 # optim
 rec:
   epoch: 1
-  batch_size: 4096
+  batch_size: 1024
   optimizer:
     name: Adam
     lr: !!float 3e-3
