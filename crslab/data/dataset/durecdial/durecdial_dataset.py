@@ -37,7 +37,8 @@ class DuRecDialDataset(BaseDataset):
             'ind2tok': self.ind2tok,
             'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
-            'n_word': self.n_word
+            'n_word': self.n_word,
+            'id2entity': self.id2entity
         }
         vocab.update(self.special_token_idx)
 
@@ -68,6 +69,7 @@ class DuRecDialDataset(BaseDataset):
         # entity kg
         with open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8') as f:
             self.entity2id = json.load(f)  # {entity: entity_id}
+        self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
         self.entity_kg = open(os.path.join(self.dpath, 'entity_subkg.txt'), encoding='utf-8')
