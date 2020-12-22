@@ -50,5 +50,13 @@ resources = {
             'kgsf_inspired.zip',
             '23dfc031a3c71f2a52e29fe0183e1a501771b8d431852102ba6fd83d971f928d'
         )
+    },
+    'DuRecDial': {
+        'version': '0.1',
+        'file': DownloadableFile(
+            'http://d0.ananas.chaoxing.com/download/6127c64e70d80d8d7fd2cac7bc4b7067?fn=durecdial',
+            'kgsf_durecdial.zip',
+            'f9a39c2382efe88d80ef14d7db8b4cbaf3a6eb92a33e018dfc9afba546ba08ef'
+        )
     }
 }

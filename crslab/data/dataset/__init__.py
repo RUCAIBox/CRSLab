@@ -1,4 +1,5 @@
 from .base_dataset import BaseDataset
+from .durecdial import DuRecDialDataset
 from .gorecdial import GoRecDialDataset
 from .inspired import InspiredDataset
 from .opendialkg import OpenDialKGDataset

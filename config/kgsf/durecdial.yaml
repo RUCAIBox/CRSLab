@@ -1,0 +1,50 @@
+# dataset
+dataset: DuRecDial
+tokenize: jieba
+embedding: word2vec.npy
+# dataloader
+context_truncate: 256
+response_truncate: 30
+scale: 0.01
+# model
+model: KGSF
+token_emb_dim: 300
+kg_emb_dim: 128
+num_bases: 8
+n_heads: 2
+n_layers: 2
+ffn_size: 300
+dropout: 0.1
+attention_dropout: 0.0
+relu_dropout: 0.1
+learn_positional_embeddings: false
+embeddings_scale: true
+reduction: false
+n_positions: 1024
+# optim
+pretrain:
+  epoch: 1
+  batch_size: 4096
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+rec:
+  epoch: 1
+  batch_size: 1024
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+  early_stop: true
+  stop_mode: max
+  impatience: 3
+conv:
+  epoch: 1
+  batch_size: 256
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5
+  gradient_clip: 0.1

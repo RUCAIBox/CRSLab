@@ -15,7 +15,8 @@ dataset_register_table = {
     'TGReDial': TGReDialDataset,
     'GoRecDial': GoRecDialDataset,
     'OpenDialKG': OpenDialKGDataset,
-    'Inspired': InspiredDataset
+    'Inspired': InspiredDataset,
+    'DuRecDial': DuRecDialDataset
 }
 
 dataloader_register_table = {

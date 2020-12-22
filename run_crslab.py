@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/kgsf/inspired.yaml', help='config file(yaml) path')
+                        default='config/redial/durecdial.yaml', help='config file(yaml) path')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',
