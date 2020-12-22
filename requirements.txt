@@ -1,5 +1,5 @@
-torch~=1.4.0
-torchvision
+torch=1.4.0
+torchvision=0.5.0
 pyyaml
 tqdm
 loguru
@@ -7,7 +7,7 @@ numpy
 nltk
 requests
 torch-geometric
-transformers
+transformers>=4.0
 dataclasses
 sentencepiece<0.1.92
 scikit-learn
