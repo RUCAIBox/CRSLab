@@ -30,7 +30,8 @@ system_register_table = {
     'BERT': TGReDialSystem,
     'SASREC': TGReDialSystem,
     'GRU4REC': TGReDialSystem,
-    'Popularity': TGReDialSystem
+    'Popularity': TGReDialSystem,
+    'TextCNN': TGReDialSystem
 }
 
 

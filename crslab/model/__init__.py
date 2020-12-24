@@ -35,7 +35,8 @@ Model_register_table = {
     'BERT': BERTModel,
     'SASREC': SASRECModel,
     'GRU4REC': GRU4RECModel,
-    'Popularity': PopularityModel
+    'Popularity': PopularityModel,
+    'TextCNN': TextCNNModel
 }
 
 
