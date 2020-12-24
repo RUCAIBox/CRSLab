@@ -15,13 +15,16 @@ from .redial_system import ReDialSystem
 from .tgredial_system import TGReDialSystem
 
 system_register_table = {
-    'KGSF': KGSFSystem,
+    'ReDialRec_ReDialConv': ReDialSystem,
     'KBRD': KBRDSystem,
+    'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,
     'TGRec_TGConv_TGPolicy': TGReDialSystem,
-    'ReDialRec_ReDialConv': ReDialSystem,
     'GPT2': TGReDialSystem,
-    'Transformer': TGReDialSystem
+    'Transformer': TGReDialSystem,
+    'ConvBERT': TGReDialSystem,
+    'ProfileBERT': TGReDialSystem,
+    'TopicBERT': TGReDialSystem
 }
 
 

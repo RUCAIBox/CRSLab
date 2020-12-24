@@ -17,7 +17,7 @@ from crslab.model.transformer import TransformerEncoder, TransformerDecoder
 from crslab.model.utils import edge_to_pyg_format
 
 
-class Transformer(BaseModel):
+class TransformerModel(BaseModel):
     def __init__(self, opt, device, vocab, side_data):
         # vocab
         self.vocab_size = vocab['vocab_size']
@@ -53,7 +53,7 @@ class Transformer(BaseModel):
         self.reduction = opt['reduction']
         self.n_positions = opt['n_positions']
         self.longest_label = opt.get('longest_label', 1)
-        super(Transformer, self).__init__(opt, device)
+        super(TransformerModel, self).__init__(opt, device)
 
     def build_model(self):
         self._init_embeddings()

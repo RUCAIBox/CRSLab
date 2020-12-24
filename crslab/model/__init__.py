@@ -12,6 +12,7 @@ from loguru import logger
 from .conversation import *
 from .kbrd import *
 from .kgsf import *
+from .policy import *
 from .redial import *
 from .tgredial import *
 
@@ -24,7 +25,10 @@ Model_register_table = {
     'ReDialRec': ReDialRecModel,
     'ReDialConv': ReDialConvModel,
     'GPT2': GPT2Model,
-    'Transformer': Transformer
+    'Transformer': TransformerModel,
+    'ConvBERT': ConvBERTModel,
+    'ProfileBERT': ProfileBERTModel,
+    'TopicBERT': TopicBERTModel
 }
 
 

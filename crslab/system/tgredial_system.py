@@ -231,19 +231,19 @@ class TGReDialSystem(BaseSystem):
         }]
         self.init_optim(self.policy_optim_opt, params)
 
-        for epoch in range(self.rec_epoch):
+        for epoch in range(self.policy_epoch):
             self.evaluator.reset_metrics()
             logger.info(f'[Policy epoch {str(epoch)}]')
             # change the shuffle to True
-            for batch in self.train_dataloader['rec'].get_policy_data(
-                    self.rec_batch_size, shuffle=True):
+            for batch in self.train_dataloader['policy'].get_policy_data(
+                    self.policy_batch_size, shuffle=True):
                 self.step(batch, stage='policy', mode='train')
             self.evaluator.report()
             # val
             with torch.no_grad():
                 self.evaluator.reset_metrics()
-                for batch in self.valid_dataloader['rec'].get_policy_data(
-                        self.rec_batch_size, shuffle=False):
+                for batch in self.valid_dataloader['policy'].get_policy_data(
+                        self.policy_batch_size, shuffle=False):
                     self.step(batch, stage='policy', mode='val')
                 self.evaluator.report()
                 # early stop
@@ -253,8 +253,8 @@ class TGReDialSystem(BaseSystem):
         # test
         with torch.no_grad():
             self.evaluator.reset_metrics()
-            for batch in self.test_dataloader['rec'].get_policy_data(
-                    self.rec_batch_size, shuffle=False):
+            for batch in self.test_dataloader['policy'].get_policy_data(
+                    self.policy_batch_size, shuffle=False):
                 self.step(batch, stage='policy', mode='test')
             self.evaluator.report()
 
