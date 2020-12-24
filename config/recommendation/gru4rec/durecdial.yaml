@@ -1,0 +1,26 @@
+# dataset
+dataset: DuRecDial
+tokenize:
+  rec: bert
+# dataloader
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+scale: 0.01
+# model
+rec_model: GRU4REC
+gru_hidden_size: 50
+num_layers: 3
+embedding_dim: 50
+dropout_input: 0
+dropout_hidden: 0.0
+hidden_size: 50
+# optim
+rec:
+  epoch: 1
+  batch_size: 8
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-3
+    weight_decay: !!float 0.0000
+  lr_bert: !!float 1e-5

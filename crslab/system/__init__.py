@@ -29,7 +29,8 @@ system_register_table = {
     'MGCG': TGReDialSystem,
     'BERT': TGReDialSystem,
     'SASREC': TGReDialSystem,
-    'GRU4REC': TGReDialSystem
+    'GRU4REC': TGReDialSystem,
+    'Popularity': TGReDialSystem
 }
 
 

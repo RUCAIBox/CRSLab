@@ -34,7 +34,8 @@ Model_register_table = {
     'MGCG': MGCGModel,
     'BERT': BERTModel,
     'SASREC': SASRECModel,
-    'GRU4REC': GRU4RECModel
+    'GRU4REC': GRU4RECModel,
+    'Popularity': PopularityModel
 }
 
 
