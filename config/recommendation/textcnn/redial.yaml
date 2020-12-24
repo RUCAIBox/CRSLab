@@ -1,14 +1,14 @@
 # dataset
-dataset: DuRecDial
+dataset: ReDial
 tokenize:
-  rec: bert
+  rec: nltk
 # dataloader
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
 scale: 0.01
 # model
-rec_model: SASREC
+rec_model: TextCNN
 hidden_dropout_prob: 0.2
 initializer_range: 0.02
 hidden_size: 50
@@ -17,6 +17,10 @@ num_attention_heads: 1
 attention_probs_dropout_prob: 0.2
 hidden_act: gelu
 num_hidden_layers: 2
+num_filters: 256
+embed: 300
+filter_sizes: (2, 3, 4)
+dropout: 0.5
 # optim
 rec:
   epoch: 1

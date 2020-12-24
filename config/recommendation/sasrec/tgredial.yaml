@@ -8,7 +8,7 @@ response_truncate: 30
 item_truncate: 100
 scale: 0.01
 # model
-rec_model: BERT
+rec_model: SASREC
 hidden_dropout_prob: 0.2
 initializer_range: 0.02
 hidden_size: 50

@@ -1,0 +1,1 @@
+from .textcnn import TextCNNModel
