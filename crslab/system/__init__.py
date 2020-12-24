@@ -26,7 +26,8 @@ system_register_table = {
     'ProfileBERT': TGReDialSystem,
     'TopicBERT': TGReDialSystem,
     'PMI': TGReDialSystem,
-    'MGCG': TGReDialSystem
+    'MGCG': TGReDialSystem,
+    'BERT': TGReDialSystem
 }
 
 

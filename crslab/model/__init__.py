@@ -13,6 +13,7 @@ from .conversation import *
 from .kbrd import *
 from .kgsf import *
 from .policy import *
+from .recommendation import *
 from .redial import *
 from .tgredial import *
 
@@ -30,7 +31,8 @@ Model_register_table = {
     'ProfileBERT': ProfileBERTModel,
     'TopicBERT': TopicBERTModel,
     'PMI': PMIModel,
-    'MGCG': MGCGModel
+    'MGCG': MGCGModel,
+    'BERT': BERTModel
 }
 
 

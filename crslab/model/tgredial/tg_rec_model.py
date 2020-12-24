@@ -15,8 +15,8 @@ from torch import nn
 from transformers import BertModel
 
 from crslab.model.base_model import BaseModel
+from crslab.model.sasrec_model import SASRecModel
 from .resource import resources
-from .sasrec_model import SASRecModel
 from ...config import MODEL_PATH, dataset_language_map
 
 
