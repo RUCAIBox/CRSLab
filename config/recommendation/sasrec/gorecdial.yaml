@@ -1,0 +1,28 @@
+# dataset
+dataset: GoRecDial
+tokenize:
+  rec: bert
+# dataloader
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+scale: 0.01
+# model
+rec_model: SASREC
+hidden_dropout_prob: 0.2
+initializer_range: 0.02
+hidden_size: 50
+max_history_items: 100
+num_attention_heads: 1
+attention_probs_dropout_prob: 0.2
+hidden_act: gelu
+num_hidden_layers: 2
+# optim
+rec:
+  epoch: 1
+  batch_size: 8
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-2
+    weight_decay: !!float 0.0000
+  lr_bert: !!float 1e-5

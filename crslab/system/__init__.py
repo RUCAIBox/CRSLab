@@ -27,7 +27,9 @@ system_register_table = {
     'TopicBERT': TGReDialSystem,
     'PMI': TGReDialSystem,
     'MGCG': TGReDialSystem,
-    'BERT': TGReDialSystem
+    'BERT': TGReDialSystem,
+    'SASREC': TGReDialSystem,
+    'GRU4REC': TGReDialSystem
 }
 
 

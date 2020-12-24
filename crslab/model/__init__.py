@@ -32,7 +32,9 @@ Model_register_table = {
     'TopicBERT': TopicBERTModel,
     'PMI': PMIModel,
     'MGCG': MGCGModel,
-    'BERT': BERTModel
+    'BERT': BERTModel,
+    'SASREC': SASRECModel,
+    'GRU4REC': GRU4RECModel
 }
 
 
