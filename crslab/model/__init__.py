@@ -29,7 +29,8 @@ Model_register_table = {
     'ConvBERT': ConvBERTModel,
     'ProfileBERT': ProfileBERTModel,
     'TopicBERT': TopicBERTModel,
-    'PMI': PMIModel
+    'PMI': PMIModel,
+    'MGCG': MGCGModel
 }
 
 

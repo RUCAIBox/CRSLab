@@ -1,0 +1,26 @@
+# dataset
+dataset: TGReDial
+tokenize:
+  policy: bert
+# dataloader
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+scale: 0.01
+# model
+policy_model: MGCG
+dropout_hidden: 0
+num_layers: 1
+hidden_size: 300
+embedding_dim: 300
+# optim
+policy:
+  epoch: 1
+  batch_size: 1024
+  weight_decay: 0.01
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-4
+  early_stop: true
+  stop_mode: max
+  impatience: 3
