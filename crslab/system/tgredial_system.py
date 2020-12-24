@@ -107,13 +107,14 @@ class TGReDialSystem(BaseSystem):
                 self.policy_model.eval()
 
             policy_loss, policy_predict = self.policy_model(batch, mode)
-            if mode == "train":
+            if mode == "train" and policy_loss is not None:
                 self.backward(policy_loss)
             else:
                 self.policy_evaluate(policy_predict, batch[-1])
-            policy_loss = policy_loss.item()
-            self.evaluator.optim_metrics.add("policy_loss",
-                                             AverageMetric(policy_loss))
+            if isinstance(policy_loss, torch.Tensor):
+                policy_loss = policy_loss.item()
+                self.evaluator.optim_metrics.add("policy_loss",
+                                                 AverageMetric(policy_loss))
         elif stage == 'rec':
             if mode == 'train':
                 self.rec_model.train()

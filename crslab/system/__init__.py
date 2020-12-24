@@ -24,7 +24,8 @@ system_register_table = {
     'Transformer': TGReDialSystem,
     'ConvBERT': TGReDialSystem,
     'ProfileBERT': TGReDialSystem,
-    'TopicBERT': TGReDialSystem
+    'TopicBERT': TGReDialSystem,
+    'PMI': TGReDialSystem
 }
 
 

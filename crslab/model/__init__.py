@@ -28,7 +28,8 @@ Model_register_table = {
     'Transformer': TransformerModel,
     'ConvBERT': ConvBERTModel,
     'ProfileBERT': ProfileBERTModel,
-    'TopicBERT': TopicBERTModel
+    'TopicBERT': TopicBERTModel,
+    'PMI': PMIModel
 }
 
 

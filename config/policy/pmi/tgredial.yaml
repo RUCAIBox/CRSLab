@@ -8,11 +8,11 @@ response_truncate: 30
 item_truncate: 100
 scale: 0.01
 # model
-policy_model: TopicBERT
+policy_model: PMI
 # optim
 policy:
   epoch: 1
-  batch_size: 8
+  batch_size: 1024
   weight_decay: 0.01
   optimizer:
     name: AdamW
