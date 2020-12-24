@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/22
+# @Time   : 2020/12/24
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 from math import floor
@@ -33,30 +33,33 @@ class TGReDialSystem(BaseSystem):
 
         self.dataset = self.opt['dataset']
 
-        self.ind2tok = vocab['conv']['ind2tok']
-        self.end_token_idx = vocab['conv']['end']
-        self.item_ids = side_data['rec']['item_entity_ids']
+        if hasattr(self, 'conv_model'):
+            self.ind2tok = vocab['conv']['ind2tok']
+            self.end_token_idx = vocab['conv']['end']
+        if hasattr(self, 'rec_model'):
+            self.item_ids = side_data['rec']['item_entity_ids']
 
-        self.rec_optim_opt = self.opt['rec']
-        self.rec_epoch = self.rec_optim_opt['epoch']
-        self.rec_batch_size = self.rec_optim_opt['batch_size']
+        if hasattr(self, 'rec_model'):
+            self.rec_optim_opt = self.opt['rec']
+            self.rec_epoch = self.rec_optim_opt['epoch']
+            self.rec_batch_size = self.rec_optim_opt['batch_size']
 
-        self.conv_optim_opt = self.opt['conv']
-        self.conv_epoch = self.conv_optim_opt['epoch']
-        self.conv_batch_size = self.conv_optim_opt['batch_size']
+        if hasattr(self, 'conv_model'):
+            self.conv_optim_opt = self.opt['conv']
+            self.conv_epoch = self.conv_optim_opt['epoch']
+            self.conv_batch_size = self.conv_optim_opt['batch_size']
+            if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler'][
+                'name']:
+                batch_num = 0
+                for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                    batch_num += 1
+                conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
+                self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
-        self.policy_optim_opt = self.opt.get('policy', None)
-        if self.policy_optim_opt:
+        if hasattr(self, 'policy_model'):
+            self.policy_optim_opt = self.opt['policy']
             self.policy_epoch = self.policy_optim_opt['epoch']
             self.policy_batch_size = self.policy_optim_opt['batch_size']
-
-        if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler'][
-            'name']:
-            batch_num = 0
-            for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
-                batch_num += 1
-            conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
-            self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

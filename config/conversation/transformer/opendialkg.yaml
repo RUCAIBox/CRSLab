@@ -1,0 +1,38 @@
+# dataset
+dataset: OpenDialKG
+tokenize:
+  conv: nltk
+# dataloader
+context_truncate: 1024
+response_truncate: 1024
+scale: 0.01
+# model
+conv_model: Transformer
+token_emb_dim: 300
+kg_emb_dim: 128
+num_bases: 8
+n_heads: 2
+n_layers: 2
+ffn_size: 300
+dropout: 0.1
+attention_dropout: 0.0
+relu_dropout: 0.1
+learn_positional_embeddings: false
+embeddings_scale: true
+reduction: false
+n_positions: 1024
+# optim
+conv:
+  epoch: 1
+  batch_size: 256
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5
+  gradient_clip: 0.1
+  early_stop: true
+  stop_mode: min
+  impatience: 3

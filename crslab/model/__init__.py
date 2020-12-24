@@ -3,12 +3,13 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/24
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 from loguru import logger
 
+from .conversation import *
 from .kbrd import *
 from .kgsf import *
 from .redial import *
@@ -21,7 +22,9 @@ Model_register_table = {
     'TGConv': TGConvModel,
     'TGPolicy': TGPolicyModel,
     'ReDialRec': ReDialRecModel,
-    'ReDialConv': ReDialConvModel
+    'ReDialConv': ReDialConvModel,
+    'GPT2': GPT2Model,
+    'Transformer': Transformer
 }
 
 

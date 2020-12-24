@@ -1,0 +1,23 @@
+# dataset
+dataset: Inspired
+tokenize:
+  conv: gpt2
+# dataloader
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+scale: 1
+# model
+conv_model: GPT2
+# optim
+conv:
+  epoch: 1
+  batch_size: 8
+  gradient_clip: 1.0
+  update_freq: 1
+  optimizer:
+    name: AdamW
+    lr: !!float 1.5e-4
+  lr_scheduler:
+    name: TransformersLinearLR
+    warmup_steps: 2000

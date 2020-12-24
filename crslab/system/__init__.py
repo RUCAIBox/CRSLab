@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/24
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -19,7 +19,9 @@ system_register_table = {
     'KBRD': KBRDSystem,
     'TGRec_TGConv': TGReDialSystem,
     'TGRec_TGConv_TGPolicy': TGReDialSystem,
-    'ReDialRec_ReDialConv': ReDialSystem
+    'ReDialRec_ReDialConv': ReDialSystem,
+    'GPT2': TGReDialSystem,
+    'Transformer': TGReDialSystem
 }
 
 
