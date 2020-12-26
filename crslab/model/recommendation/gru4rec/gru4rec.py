@@ -3,9 +3,9 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/24, 2020/12/26
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import torch
 from loguru import logger
@@ -40,13 +40,17 @@ class GRU4RECModel(BaseModel):
         logger.debug('[Finish build rec layer]')
 
     def reconstruct_input(self, input_ids):
+        """
+        convert the padding from left to right
+        """
+
         def reverse_padding(ids):
             ans = [0] * len(ids)
             idx = 0
-            for id in ids:
-                id = id.item()
-                if id != 0:
-                    ans[idx] = id
+            for m_id in ids:
+                m_id = m_id.item()
+                if m_id != 0:
+                    ans[idx] = m_id
                     idx += 1
             return ans
 
@@ -55,7 +59,7 @@ class GRU4RECModel(BaseModel):
         input_ids = torch.tensor(input_ids, dtype=torch.long)
         input_mask = (input_ids != 0).long()
 
-        return input_ids, input_len, input_mask
+        return input_ids.to(self.device), input_len, input_mask.to(self.device)
 
     def cross_entropy(self, seq_out, pos_ids, neg_ids, input_mask):
         # [batch seq_len hidden_size]
@@ -82,19 +86,18 @@ class GRU4RECModel(BaseModel):
 
         return loss
 
-    def forward(self, batch, mode='train'):
+    def forward(self, batch, mode):
+        """
+        Args:
+            input_ids: padding in left, [pad, pad, id1, id2, ..., idn]
+            target_ids: padding in left, [pad, pad, id2, id3, ..., y]
+        """
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
 
         input_ids, input_len, input_mask = self.reconstruct_input(input_ids)
-        input_ids = input_ids.to(self.device)
-        input_mask = input_mask.to(self.device)
-        # print(input_ids.shape)
-        # print(input_ids.dtype)
-        # ipdb.set_trace()
+        target_pos, _, _ = self.reconstruct_input(target_pos)
+        sample_negs, _, _ = self.reconstruct_input(sample_negs)
         embedded = self.item_embeddings(input_ids)  # (batch, seq_len, hidden_size)
-
-        # print(embedded.shape)
-        # print(input_len)
         input_len = [len_ if len_ > 0 else 1 for len_ in input_len]
         embedded = pack_padded_sequence(
             embedded, input_len, enforce_sorted=False,

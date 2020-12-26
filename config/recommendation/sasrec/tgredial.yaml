@@ -23,6 +23,6 @@ rec:
   batch_size: 8
   optimizer:
     name: AdamW
-    lr: !!float 1e-3
+    lr: !!float 1e-2
     weight_decay: !!float 0.0000
   lr_bert: !!float 1e-5

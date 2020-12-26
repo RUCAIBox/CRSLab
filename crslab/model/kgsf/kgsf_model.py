@@ -183,7 +183,7 @@ class KGSFModel(BaseModel):
         loss = self.infomax_loss(info_predict, entity_labels) / loss_mask
         return loss
 
-    def recommend(self, batch, mode='train'):
+    def recommend(self, batch, mode):
         """
         context_entities: (batch_size, entity_length)
         context_words: (batch_size, word_length)
