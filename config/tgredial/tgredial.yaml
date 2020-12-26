@@ -30,6 +30,9 @@ rec:
     lr: !!float 1e-3
     weight_decay: !!float 0.0000
   lr_bert: !!float 1e-5
+  early_stop: true
+  impatience: 3
+  stop_mode: max
 conv:
   epoch: 1
   batch_size: 1
@@ -41,6 +44,9 @@ conv:
   lr_scheduler:
     name: TransformersLinearLR
     warmup_steps: 2000
+  early_stop: true
+  impatience: 3
+  stop_mode: min
 policy:
   epoch: 1
   batch_size: 1

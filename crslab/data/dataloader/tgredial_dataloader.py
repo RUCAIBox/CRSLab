@@ -208,7 +208,7 @@ class TGReDialDataLoader(BaseDataLoader):
                         for topic in topic_variable:
                             enhanced_topic.append(topic)
                 enhanced_topic = [[
-                    self.tok2ind[token] for token in self.ind2topic[topic_id]
+                    self.tok2ind.get(token, self.unk_token_idx) for token in self.ind2topic[topic_id]
                 ] for topic_id in enhanced_topic]
                 enhanced_topic = merge_utt(enhanced_topic, self.word_split_idx, False, self.sent_split_idx)
 

@@ -206,6 +206,10 @@ class TGReDialSystem(BaseSystem):
                         batch_size=self.conv_batch_size, shuffle=False):
                     self.step(batch, stage='conv', mode='val')
                 self.evaluator.report()
+                # early stop
+                metric = self.evaluator.gen_metrics['ppl']
+                if self.early_stop(metric):
+                    break
         # test
         with torch.no_grad():
             self.evaluator.reset_metrics()
