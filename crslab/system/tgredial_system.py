@@ -207,7 +207,7 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='conv', mode='val')
                 self.evaluator.report()
                 # early stop
-                metric = self.evaluator.rec_metrics['ppl']
+                metric = self.evaluator.gen_metrics['ppl']
                 if self.early_stop(metric):
                     break
         # test
