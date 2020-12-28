@@ -287,7 +287,7 @@ class TGReDialDataLoader(BaseDataLoader):
         for conv_dict in batch:
             final_topic = conv_dict['final']
             final_topic = [[
-                self.tok2ind[token] for token in self.ind2topic[topic_id]
+                self.tok2ind.get(token, self.unk_token_idx) for token in self.ind2topic[topic_id]
             ] for topic_id in final_topic[1]]
             final_topic = merge_utt(final_topic, self.word_split_idx, False, self.sep_id)
 
@@ -311,7 +311,7 @@ class TGReDialDataLoader(BaseDataLoader):
                             if topic_id != self.pad_topic_idx:
                                 policy = []
                                 for token in self.ind2topic[topic_id]:
-                                    policy.append(self.tok2ind[token])
+                                    policy.append(self.tok2ind.get(token, self.unk_token_idx))
                                 context_policy.append(policy)
             context_policy = merge_utt(context_policy, self.word_split_idx, False)
             context_policy = add_start_end_token_idx(

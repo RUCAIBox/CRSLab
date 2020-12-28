@@ -41,7 +41,7 @@ class TGReDialDataset(BaseDataset):
             'ind2topic': self.ind2topic,
             'id2entity': self.id2entity,
             'vocab_size': len(self.tok2ind),
-            'n_topic': len(self.topic2ind),
+            'n_topic': len(self.topic2ind) + 1,
             'n_entity': self.n_entity,
             'n_word': self.n_word,
         }
