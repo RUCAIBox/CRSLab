@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/18
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -67,7 +67,7 @@ class ReDialConvModel(BaseModel):
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
 
-    def forward(self, batch, mode):
+    def converse(self, batch, mode):
         """
         batch: {
             context: (batch_size, max_context_length, max_utterance_length),

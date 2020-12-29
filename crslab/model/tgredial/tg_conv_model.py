@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/22, 2020/12/15
+# @Time   : 2020/12/29, 2020/12/15
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail
 
@@ -15,7 +15,8 @@ from transformers import GPT2LMHeadModel
 
 from crslab.model.base_model import BaseModel
 from .resource import resources
-from ...config import MODEL_PATH, dataset_language_map
+from ...config import MODEL_PATH
+from ...data import dataset_language_map
 
 
 class TGConvModel(BaseModel):
@@ -34,7 +35,7 @@ class TGConvModel(BaseModel):
         self.model = GPT2LMHeadModel.from_pretrained(os.path.join(self.dpath, 'gpt2'))
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
-    def forward(self, batch, mode):
+    def converse(self, batch, mode):
         if mode != 'test':
             enhanced_input_ids = batch[0]
             # torch.tensor's shape = (bs, seq_len, v_s); tuple's length = 12

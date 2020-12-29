@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/16
+# @Time   : 2020/11/24, 2020/12/29
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -44,7 +44,7 @@ class KGSFModel(BaseModel):
         self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
         self.entity_edge_idx = self.entity_edge_idx.to(device)
         self.entity_edge_type = self.entity_edge_type.to(device)
-        word_edges = side_data['word_kg']
+        word_edges = side_data['word_kg']['edge']
         self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(device)
         self.num_bases = opt['num_bases']
         self.kg_emb_dim = opt['kg_emb_dim']
@@ -277,7 +277,7 @@ class KGSFModel(BaseModel):
         logits = torch.cat(logits, dim=1)
         return logits, inputs
 
-    def converse(self, batch, mode='train'):
+    def converse(self, batch, mode):
         context_tokens, context_entities, context_words, response = batch
 
         entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)

@@ -1,14 +1,16 @@
 torch~=1.4.0
 torchvision=0.5.0
+torch-geometric
 pyyaml
 tqdm
 loguru
 numpy
 nltk
 requests
-torch-geometric
 transformers>=4.0
 dataclasses
 sentencepiece<0.1.92
 scikit-learn
 fasttext~=0.9.2
+fuzzywuzzy
+pkuseg

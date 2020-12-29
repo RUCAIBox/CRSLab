@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/14
+# @Time   : 2020/11/23, 2020/12/29
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -84,3 +84,9 @@ class BaseDataLoader(ABC):
             if conv_dict['role'] == 'Recommender':
                 dataset.append(conv_dict)
         return dataset
+
+    def rec_interact(self, data):
+        pass
+
+    def conv_interact(self, data):
+        pass

@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -13,7 +13,8 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import dataset_language_map, MODEL_PATH
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from .resource import resources
 
@@ -39,7 +40,7 @@ class BERTModel(BaseModel):
 
         logger.debug('[Finish build rec layer]')
 
-    def forward(self, batch, mode='train'):
+    def recommend(self, batch, mode='train'):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
 
         bert_embed = self.bert(context, attention_mask=mask).pooler_output

@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24, 2020/12/26
+# @Time   : 2020/12/29, 2020/12/26
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -86,7 +86,7 @@ class GRU4RECModel(BaseModel):
 
         return loss
 
-    def forward(self, batch, mode):
+    def recommend(self, batch, mode):
         """
         Args:
             input_ids: padding in left, [pad, pad, id1, id2, ..., idn]

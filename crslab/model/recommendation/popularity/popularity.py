@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -24,7 +24,7 @@ class PopularityModel(BaseModel):
         self.item_frequency = defaultdict(int)
         logger.debug('[Finish build rec layer]')
 
-    def forward(self, batch, mode='train'):
+    def recommend(self, batch, mode):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
         if mode == 'train':
             for ids in input_ids:

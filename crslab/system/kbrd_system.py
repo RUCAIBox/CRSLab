@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/18
+# @Time    :   2020/12/29
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -18,10 +18,9 @@ from crslab.system.utils import ind2txt
 
 
 class KBRDSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
-                 debug=False):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
         super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                         restore, debug)
+                                         args)
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']

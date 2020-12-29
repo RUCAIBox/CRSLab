@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -37,7 +37,7 @@ class TransformerModel(BaseModel):
         self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
         self.entity_edge_idx = self.entity_edge_idx.to(device)
         self.entity_edge_type = self.entity_edge_type.to(device)
-        word_edges = side_data['word_kg']
+        word_edges = side_data['word_kg']['edge']
         self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(device)
         self.num_bases = opt['num_bases']
         self.kg_emb_dim = opt['kg_emb_dim']
@@ -141,7 +141,7 @@ class TransformerModel(BaseModel):
         logits = torch.cat(logits, dim=1)
         return logits, inputs
 
-    def forward(self, batch, mode):
+    def converse(self, batch, mode):
         context_tokens, context_entities, context_words, response = batch
 
         # encoder-decoder

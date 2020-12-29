@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/22, 2020/12/15
+# @Time   : 2020/12/29, 2020/12/15
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail
 
@@ -15,7 +15,8 @@ from transformers import BertModel
 
 from crslab.model.base_model import BaseModel
 from .resource import resources
-from ...config import MODEL_PATH, dataset_language_map
+from ...config import MODEL_PATH
+from ...data import dataset_language_map
 
 
 class TGPolicyModel(BaseModel):
@@ -38,7 +39,7 @@ class TGPolicyModel(BaseModel):
 
         self.loss = nn.CrossEntropyLoss()
 
-    def forward(self, batch, mode):
+    def guide(self, batch, mode):
         # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
         context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
 

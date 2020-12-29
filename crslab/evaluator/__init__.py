@@ -13,7 +13,7 @@ from loguru import logger
 from .conv_evaluator import ConvEvaluator
 from .rec_evaluator import RecEvaluator
 from .standard_evaluator import StandardEvaluator
-from ..config import dataset_language_map
+from ..data import dataset_language_map
 
 Evaluator_register_table = {
     'rec': RecEvaluator,

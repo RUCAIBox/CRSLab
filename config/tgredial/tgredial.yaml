@@ -35,7 +35,7 @@ rec:
   stop_mode: max
 conv:
   epoch: 1
-  batch_size: 1
+  batch_size: 8
   gradient_clip: 1.0
   update_freq: 1
   optimizer:
@@ -49,7 +49,7 @@ conv:
   stop_mode: min
 policy:
   epoch: 1
-  batch_size: 1
+  batch_size: 8
   weight_decay: 0.01
   optimizer:
     name: AdamW

@@ -3,14 +3,18 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
+
+import os
 from math import floor
 
 import torch
 from loguru import logger
 
+from crslab.config import MODEL_PATH
+from crslab.data import get_dataloader, dataset_language_map
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.evaluator.metrics.gen_metrics import PPLMetric
 from crslab.system.base_system import BaseSystem
@@ -25,19 +29,16 @@ class TGReDialSystem(BaseSystem):
                  test_dataloader,
                  vocab,
                  side_data,
-                 restore=False,
-                 debug=False):
+                 args):
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore,
-                                             debug)
-
-        self.dataset = self.opt['dataset']
+                                             test_dataloader, vocab, side_data, args)
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']
             self.end_token_idx = vocab['conv']['end']
         if hasattr(self, 'rec_model'):
             self.item_ids = side_data['rec']['item_entity_ids']
+            self.id2entity = vocab['rec']['id2entity']
 
         if hasattr(self, 'rec_model'):
             self.rec_optim_opt = self.opt['rec']
@@ -60,6 +61,8 @@ class TGReDialSystem(BaseSystem):
             self.policy_optim_opt = self.opt['policy']
             self.policy_epoch = self.policy_optim_opt['epoch']
             self.policy_batch_size = self.policy_optim_opt['batch_size']
+
+        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
@@ -106,7 +109,7 @@ class TGReDialSystem(BaseSystem):
             else:
                 self.policy_model.eval()
 
-            policy_loss, policy_predict = self.policy_model(batch, mode)
+            policy_loss, policy_predict = self.policy_model.guide(batch, mode)
             if mode == "train" and policy_loss is not None:
                 self.backward(policy_loss)
             else:
@@ -121,7 +124,7 @@ class TGReDialSystem(BaseSystem):
             else:
                 self.rec_model.eval()
 
-            rec_loss, rec_predict = self.rec_model(batch, mode)
+            rec_loss, rec_predict = self.rec_model.recommend(batch, mode)
             if mode == "train":
                 self.backward(rec_loss)
             else:
@@ -132,7 +135,7 @@ class TGReDialSystem(BaseSystem):
         elif stage == "conv":
             if mode != "test":
                 # train + valid: need to compute ppl
-                gen_loss, pred = self.conv_model(batch, mode)
+                gen_loss, pred = self.conv_model.converse(batch, mode)
                 if mode == 'train':
                     self.backward(gen_loss)
                 else:
@@ -143,7 +146,7 @@ class TGReDialSystem(BaseSystem):
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
                 # generate response in conv_model.step
-                pred = self.conv_model(batch, mode)
+                pred = self.conv_model.converse(batch, mode)
                 self.conv_evaluate(pred, batch[-1])
         else:
             raise
@@ -270,3 +273,81 @@ class TGReDialSystem(BaseSystem):
             self.train_policy()
         if hasattr(self, 'conv_model'):
             self.train_conversation()
+
+    def interact(self):
+        self.init_interact()
+        input_text = self.get_input(self.language)
+        while not self.finished:
+            # rec
+            if hasattr(self, 'rec_model'):
+                rec_input = self.process_input(input_text, 'rec')
+                scores = self.rec_model.recommend(rec_input, 'test')
+
+                scores = scores[0].cpu()
+                scores = scores[self.item_ids]
+                _, rank = torch.topk(scores, 10, dim=-1)
+                item_ids = []
+                for r in rank.tolist():
+                    item_ids.append(self.item_ids[r])
+                first_item_id = item_ids[:1]
+                self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
+
+                print(f"[Recommend]:")
+                for item_id in item_ids:
+                    if item_id in self.id2entity:
+                        print(self.id2entity[item_id])
+            # conv
+            if hasattr(self, 'conv_model'):
+                conv_input = self.process_input(input_text, 'conv')
+                preds = self.conv_model.converse(conv_input, 'test').tolist()[0]
+                p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
+
+                token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
+                self.update_context('conv', token_ids, entity_ids, movie_ids, word_ids)
+
+                print(f"[Response]:\n{p_str}")
+            # input
+            input_text = self.get_input(self.language)
+
+    def process_input(self, input_text, stage):
+        token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(input_text, stage)
+        self.update_context(stage, token_ids, entity_ids, movie_ids, word_ids)
+
+        data = {'role': 'Seeker', 'context_tokens': self.context[stage]['context_tokens'],
+                'context_entities': self.context[stage]['context_entities'],
+                'context_words': self.context[stage]['context_words'],
+                'context_items': self.context[stage]['context_items'],
+                'user_profile': self.context[stage]['user_profile'],
+                'interaction_history': self.context[stage]['interaction_history']}
+        dataloader = get_dataloader(self.opt, data, self.vocab[stage])
+        if stage == 'rec':
+            data = dataloader.rec_interact(data)
+        elif stage == 'conv':
+            data = dataloader.conv_interact(data)
+
+        data = [ele.to(self.device) if isinstance(ele, torch.Tensor) else ele for ele in data]
+        return data
+
+    def convert_to_id(self, text, stage):
+        if self.language == 'zh':
+            tokens = self.tokenize(text, 'pkuseg')
+        elif self.language == 'en':
+            tokens = self.tokenize(text, 'nltk')
+        else:
+            raise
+
+        entities = self.link(tokens, self.side_data[stage]['entity_kg']['entity'])
+        words = self.link(tokens, self.side_data[stage]['word_kg']['entity'])
+
+        if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
+            language = dataset_language_map[self.opt['dataset']]
+            path = os.path.join(MODEL_PATH, "tgredial", language, self.opt['tokenize'][stage])
+            tokens = self.tokenize(text, 'bert', path)
+
+        token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
+        entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
+                      entity in self.vocab[stage]['entity2id']]
+        movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
+        word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
+
+        return token_ids, entity_ids, movie_ids, word_ids

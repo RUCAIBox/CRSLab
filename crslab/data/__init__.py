@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/22, 2020/12/17
+# @Time   : 2020/11/24, 2020/12/29, 2020/12/17
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -17,6 +17,15 @@ dataset_register_table = {
     'OpenDialKG': OpenDialKGDataset,
     'Inspired': InspiredDataset,
     'DuRecDial': DuRecDialDataset
+}
+
+dataset_language_map = {
+    'ReDial': 'en',
+    'TGReDial': 'zh',
+    'GoRecDial': 'en',
+    'OpenDialKG': 'en',
+    'Inspired': 'en',
+    'DuRecDial': 'zh'
 }
 
 dataloader_register_table = {

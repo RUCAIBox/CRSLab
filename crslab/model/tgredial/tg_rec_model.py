@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/22
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -17,7 +17,8 @@ from transformers import BertModel
 from crslab.model.base_model import BaseModel
 from crslab.model.sasrec_model import SASRecModel
 from .resource import resources
-from ...config import MODEL_PATH, dataset_language_map
+from ...config import MODEL_PATH
+from ...data import dataset_language_map
 
 
 class TGRecModel(BaseModel):
@@ -55,7 +56,7 @@ class TGRecModel(BaseModel):
 
         logger.debug('[Finish build rec layer]')
 
-    def forward(self, batch, mode='train'):
+    def recommend(self, batch, mode):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
 
         bert_embed = self.bert(context, attention_mask=mask).pooler_output
@@ -66,6 +67,8 @@ class TGRecModel(BaseModel):
         embed = torch.cat((sas_embed, bert_embed), dim=1)
         rec_scores = self.fusion(embed)  # bs, item_size
 
-        rec_loss = self.rec_loss(rec_scores, y)
-
-        return rec_loss, rec_scores
+        if mode == 'test':
+            return rec_scores
+        else:
+            rec_loss = self.rec_loss(rec_scores, y)
+            return rec_loss, rec_scores

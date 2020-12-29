@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -43,7 +43,7 @@ class SASRECModel(BaseModel):
 
         logger.debug('[Finish build rec layer]')
 
-    def forward(self, batch, mode='train'):
+    def recommend(self, batch, mode):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
         # print(input_ids.shape)
         sequence_output = self.SASREC(input_ids, input_mask)  # bs, max_len, hidden_size2

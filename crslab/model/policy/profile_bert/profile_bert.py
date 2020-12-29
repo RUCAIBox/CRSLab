@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -13,7 +13,8 @@ import torch
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import dataset_language_map, MODEL_PATH
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from .resource import resources
 
@@ -36,7 +37,7 @@ class ProfileBERTModel(BaseModel):
 
         self.loss = nn.CrossEntropyLoss()
 
-    def forward(self, batch, mode):
+    def guide(self, batch, mode):
         # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
         context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
 

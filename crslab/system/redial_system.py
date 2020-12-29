@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/18
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -17,10 +17,9 @@ from crslab.system.utils import ind2txt
 
 
 class ReDialSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
-                 debug=False):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
         super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                           restore, debug)
+                                           args)
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
         self.item_ids = side_data['rec']['item_entity_ids']
@@ -59,7 +58,7 @@ class ReDialSystem(BaseSystem):
                 batch[k] = v.to(self.device)
 
         if stage == 'rec':
-            rec_loss, rec_scores = self.rec_model(batch, mode=mode)
+            rec_loss, rec_scores = self.rec_model.recommend(batch, mode=mode)
             if mode == 'train':
                 self.backward(rec_loss)
             else:
@@ -67,7 +66,7 @@ class ReDialSystem(BaseSystem):
             rec_loss = rec_loss.item()
             self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
         else:
-            gen_loss, preds = self.conv_model(batch, mode=mode)
+            gen_loss, preds = self.conv_model.converse(batch, mode=mode)
             if mode == 'train':
                 self.backward(gen_loss)
             else:

@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/4
+# @Time    :   2020/12/29
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -130,7 +130,7 @@ class KBRDModel(BaseModel):
             user_repr_list.append(user_repr)
         return torch.stack(user_repr_list, dim=0)  # (bs, dim)
 
-    def recommend(self, batch):
+    def recommend(self, batch, mode):
         context_entities, item = batch['context_entities'], batch['item']
         kg_embedding = self.kg_encoder(None, self.edge_idx, self.edge_type)
         user_embedding = self.encode_user(context_entities, kg_embedding)
@@ -175,7 +175,7 @@ class KBRDModel(BaseModel):
         logits = torch.cat(logits, 1)
         return logits, xs
 
-    def converse(self, batch, mode='train'):
+    def converse(self, batch, mode):
         context_tokens, context_entities, response = batch['context_tokens'], batch['context_entities'], batch[
             'response']
         kg_embedding = self.kg_encoder(None, self.edge_idx, self.edge_type)

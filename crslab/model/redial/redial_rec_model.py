@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/16
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -47,7 +47,7 @@ class ReDialRecModel(BaseModel):
         self.decoder = nn.Linear(self.user_repr_dim, self.n_entity)
         self.loss = nn.CrossEntropyLoss()
 
-    def forward(self, batch, mode='train'):
+    def recommend(self, batch, mode):
         """
         :param batch: {'context_entities': (batch_size, n_entity), 'item': (batch_size)}
         :param mode

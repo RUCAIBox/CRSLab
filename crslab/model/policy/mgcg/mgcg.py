@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -55,7 +55,7 @@ class MGCGModel(BaseModel):
 
         return ans
 
-    def forward(self, batch, mode):
+    def guide(self, batch, mode):
         # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
         context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
 

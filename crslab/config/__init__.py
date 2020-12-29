@@ -4,7 +4,7 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/22
+# @Time    :   2020/12/29
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
@@ -19,12 +19,3 @@ DATA_PATH = os.path.join(ROOT_PATH, 'data')
 DATASET_PATH = os.path.join(DATA_PATH, 'dataset')
 MODEL_PATH = os.path.join(DATA_PATH, 'model')
 EMBEDDING_PATH = os.path.join(DATA_PATH, 'embedding')
-
-dataset_language_map = {
-    'ReDial': 'en',
-    'TGReDial': 'zh',
-    'GoRecDial': 'en',
-    'OpenDialKG': 'en',
-    'Inspired': 'en',
-    'DuRecDial': 'zh'
-}

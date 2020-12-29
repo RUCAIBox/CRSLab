@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/21, 2020/12/15
+# @Time   : 2020/12/29, 2020/12/15
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail
 
@@ -75,11 +75,12 @@ class TGReDialDataLoader(BaseDataLoader):
             compat_context: list of int, padding and adding special token
                 [CLS, ID1, ID2, sent_split_idx, ID3, ID4, ..., SEP]
         """
-        compat_context = [
-            utter + [self.sent_split_idx] for utter in context_tokens
-        ]
-        compat_context = compat_context[:-1]
-        compat_context = truncate(merge_utt(compat_context),
+        compact_context = []
+        for i, utterance in enumerate(context_tokens):
+            if i != 0:
+                utterance.insert(0, self.sent_split_idx)
+            compact_context.append(utterance)
+        compat_context = truncate(merge_utt(compact_context),
                                   self.context_truncate - 2,
                                   truncate_tail=False)
         compat_context = add_start_end_token_idx(compat_context,
@@ -93,7 +94,7 @@ class TGReDialDataLoader(BaseDataLoader):
             item = random.randint(1, self.item_size)
         return item
 
-    def _process_history(self, context_items, item_id):
+    def _process_history(self, context_items, item_id=None):
         """
         Args:
             context_items: 历史交互记录
@@ -102,15 +103,17 @@ class TGReDialDataLoader(BaseDataLoader):
         input_ids = truncate(context_items,
                              max_length=self.item_truncate,
                              truncate_tail=False)
-        target_pos = input_ids[1:] + [item_id]
         input_mask = [1] * len(input_ids)
-
         sample_negs = []
         seq_set = set(input_ids)
         for _ in input_ids:
             sample_negs.append(self._neg_sample(seq_set))
 
-        return input_ids, target_pos, input_mask, sample_negs
+        if item_id is not None:
+            target_pos = input_ids[1:] + [item_id]
+            return input_ids, target_pos, input_mask, sample_negs
+        else:
+            return input_ids, input_mask, sample_negs
 
     def rec_batchify(self, batch):
         batch_context = []
@@ -163,6 +166,36 @@ class TGReDialDataLoader(BaseDataLoader):
                               pad_tail=False,
                               max_len=self.item_truncate),
                 torch.tensor(batch_movie_id))
+
+    def rec_interact(self, data):
+        context = [self._process_rec_context(data['context_tokens'])]
+        if 'interaction_history' in data:
+            context_items = data['interaction_history'] + data['context_items']
+        else:
+            context_items = data['context_items']
+        input_ids, input_mask, sample_negs = self._process_history(context_items)
+        input_ids, input_mask, sample_negs = [input_ids], [input_mask], [sample_negs]
+
+        context = padded_tensor(context,
+                                self.pad_token_idx,
+                                max_len=self.context_truncate)
+        mask = (context != 0).long()
+
+        return (context, mask,
+                padded_tensor(input_ids,
+                              pad_idx=self.pad_token_idx,
+                              pad_tail=False,
+                              max_len=self.item_truncate),
+                None,
+                padded_tensor(input_mask,
+                              pad_idx=self.pad_token_idx,
+                              pad_tail=False,
+                              max_len=self.item_truncate),
+                padded_tensor(sample_negs,
+                              pad_idx=self.pad_token_idx,
+                              pad_tail=False,
+                              max_len=self.item_truncate),
+                None)
 
     def conv_batchify(self, batch):
         """collate batch data for conversation
@@ -259,6 +292,26 @@ class TGReDialDataLoader(BaseDataLoader):
                 padded_tensor(batch_context_words,
                               self.pad_word_idx,
                               pad_tail=False), batch_response)
+
+    def conv_interact(self, data):
+        context_tokens = [utter + [self.conv_bos_id] for utter in data['context_tokens']]
+        context_tokens[-1] = context_tokens[-1][:-1]
+        context_tokens = [truncate(merge_utt(context_tokens), max_length=self.context_truncate, truncate_tail=False)]
+        context_tokens = padded_tensor(items=context_tokens,
+                                       pad_idx=self.pad_token_idx,
+                                       max_len=self.context_truncate,
+                                       pad_tail=False)
+        context_entities = [truncate(data['context_entities'], self.entity_truncate, truncate_tail=False)]
+        context_words = [truncate(data['context_words'], self.word_truncate, truncate_tail=False)]
+
+        return (context_tokens, context_tokens,
+                context_tokens, context_tokens,
+                padded_tensor(context_entities,
+                              self.pad_entity_idx,
+                              pad_tail=False),
+                padded_tensor(context_words,
+                              self.pad_word_idx,
+                              pad_tail=False), None)
 
     def policy_process_fn(self, *args, **kwargs):
         augment_dataset = []

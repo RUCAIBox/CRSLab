@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/24
+# @Time   : 2020/12/29
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -13,7 +13,8 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
-from crslab.config import MODEL_PATH, dataset_language_map
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from .resource import resources
 
@@ -34,7 +35,7 @@ class GPT2Model(BaseModel):
         self.model = GPT2LMHeadModel.from_pretrained(os.path.join(self.dpath, 'gpt2'))
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
-    def forward(self, batch, mode):
+    def converse(self, batch, mode):
         _, _, input_ids, context, _, _, y = batch
 
         if mode != 'test':

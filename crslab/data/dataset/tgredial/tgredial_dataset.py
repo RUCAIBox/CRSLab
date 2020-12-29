@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/12/6, 2020/12/22, 2020/12/19
+# @Time   : 2020/12/6, 2020/12/29, 2020/12/19
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, sdzyh002@gmail
 
@@ -39,7 +39,9 @@ class TGReDialDataset(BaseDataset):
             'ind2tok': self.ind2tok,
             'topic2ind': self.topic2ind,
             'ind2topic': self.ind2topic,
+            'entity2id': self.entity2id,
             'id2entity': self.id2entity,
+            'word2id': self.word2id,
             'vocab_size': len(self.tok2ind),
             'n_topic': len(self.topic2ind) + 1,
             'n_entity': self.n_entity,
@@ -172,7 +174,6 @@ class TGReDialDataset(BaseDataset):
             policy = []
             for action, kw in zip(utt['target'][1::2], utt['target'][2::2]):
                 if kw is None or action == '推荐电影':
-                    # policy.append([action, self.pad_topic_idx])
                     continue
                 if isinstance(kw, str):
                     kw = [kw]
@@ -285,27 +286,36 @@ class TGReDialDataset(BaseDataset):
             if e1 != e0:
                 edge_list.append((e1, e1, 'SELF_LOOP'))
 
-        relation_cnt, relation2id, edges = defaultdict(int), dict(), set()
+        relation_cnt, relation2id, edges, entities = defaultdict(int), dict(), set(), set()
         for h, t, r in edge_list:
             relation_cnt[r] += 1
         for h, t, r in edge_list:
             if r not in relation2id:
                 relation2id[r] = len(relation2id)
             edges.add((h, t, relation2id[r]))
+            entities.add(self.id2entity[h])
+            entities.add(self.id2entity[t])
 
         return {
             'edge': list(edges),
-            'n_relation': len(relation2id)
+            'n_relation': len(relation2id),
+            'entity': list(entities)
         }
 
     def _word_kg_process(self):
         """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
+        entities = set()
         for line in self.word_kg:
             triple = line.strip().split('\t')
+            entities.add(triple[0])
+            entities.add(triple[2])
             e0 = self.word2id[triple[0]]
             e1 = self.word2id[triple[2]]
             edges.add((e0, e1))
             edges.add((e1, e0))
         # edge_set = [[co[0] for co in list(edges)], [co[1] for co in list(edges)]]
-        return list(edges)
+        return {
+            'edge': list(edges),
+            'entity': list(entities)
+        }
