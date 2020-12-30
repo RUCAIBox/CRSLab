@@ -13,7 +13,7 @@ import torch
 from tqdm import tqdm
 
 from crslab.data.dataloader.base_dataloader import BaseDataLoader
-from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, get_onehot_label, truncate, merge_utt
+from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, get_onehot, truncate, merge_utt
 
 
 class KGSFDataLoader(BaseDataLoader):
@@ -51,7 +51,7 @@ class KGSFDataLoader(BaseDataLoader):
             batch_context_words.append(truncate(conv_dict['context_words'], self.word_truncate, truncate_tail=False))
 
         return (padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
-                get_onehot_label(batch_context_entities, self.n_entity))
+                get_onehot(batch_context_entities, self.n_entity))
 
     def rec_process_fn(self):
         """
@@ -90,7 +90,7 @@ class KGSFDataLoader(BaseDataLoader):
 
         return (padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
                 padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
-                get_onehot_label(batch_context_entities, self.n_entity),
+                get_onehot(batch_context_entities, self.n_entity),
                 torch.tensor(batch_item, dtype=torch.long))
 
     def conv_process_fn(self, *args, **kwargs):

@@ -81,18 +81,18 @@ def padded_tensor(
     return output
 
 
-def get_onehot_label(label_lists, categories) -> torch.Tensor:
-    """transform lists of label into onehot label
+def get_onehot(data_list, categories) -> torch.Tensor:
+    """transform lists of label into one-hot
 
     Args:
-        label_lists (list of list of int):
+        data_list (list of list of int):
         categories (int): #label class
 
     Returns:
         torch.Tensor: onehot labels
     """
     onehot_labels = []
-    for label_list in label_lists:
+    for label_list in data_list:
         onehot_label = torch.zeros(categories)
         for label in label_list:
             onehot_label[label] = 1.0 / len(label_list)

@@ -283,7 +283,7 @@ class TGReDialSystem(BaseSystem):
                 rec_input = self.process_input(input_text, 'rec')
                 scores = self.rec_model.recommend(rec_input, 'test')
 
-                scores = scores[0].cpu()
+                scores = scores.cpu()[0]
                 scores = scores[self.item_ids]
                 _, rank = torch.topk(scores, 10, dim=-1)
                 item_ids = []

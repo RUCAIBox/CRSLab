@@ -161,3 +161,6 @@ class KGSFSystem(BaseSystem):
         self.pretrain()
         self.train_recommender()
         self.train_conversation()
+
+    def interact(self):
+        pass

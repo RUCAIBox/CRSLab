@@ -10,6 +10,7 @@
 import torch
 from loguru import logger
 
+from crslab.data import dataset_language_map
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.evaluator.metrics.gen_metrics import PPLMetric
 from crslab.system.base_system import BaseSystem
@@ -23,6 +24,7 @@ class ReDialSystem(BaseSystem):
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
         self.item_ids = side_data['rec']['item_entity_ids']
+        self.id2entity = vocab['rec']['id2entity']
 
         self.rec_optim_opt = opt['rec']
         self.conv_optim_opt = opt['conv']
@@ -30,6 +32,8 @@ class ReDialSystem(BaseSystem):
         self.conv_epoch = self.conv_optim_opt['epoch']
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
+
+        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
@@ -136,3 +140,6 @@ class ReDialSystem(BaseSystem):
     def fit(self):
         self.train_recommender()
         self.train_conversation()
+
+    def interact(self):
+        pass

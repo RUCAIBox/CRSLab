@@ -36,7 +36,9 @@ class ReDialDataset(BaseDataset):
         vocab = {
             'tok2ind': self.tok2ind,
             'ind2tok': self.ind2tok,
+            'entity2id': self.entity2id,
             'id2entity': self.id2entity,
+            'word2id': self.word2id,
             'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
             'n_word': self.n_word,

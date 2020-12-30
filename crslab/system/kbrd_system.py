@@ -142,3 +142,6 @@ class KBRDSystem(BaseSystem):
     def fit(self):
         self.train_recommender()
         self.train_conversation()
+
+    def interact(self):
+        pass
