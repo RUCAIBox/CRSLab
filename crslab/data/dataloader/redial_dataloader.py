@@ -14,7 +14,7 @@ import torch
 from tqdm import tqdm
 
 from crslab.data.dataloader.base_dataloader import BaseDataLoader
-from crslab.data.dataloader.utils import padded_tensor, get_onehot_label, truncate
+from crslab.data.dataloader.utils import padded_tensor, get_onehot, truncate
 
 movie_pattern = re.compile(r'^@\d{5,6}$')
 
@@ -47,7 +47,7 @@ class ReDialDataLoader(BaseDataLoader):
         for conversation in batch:
             batch_context_entities.append(conversation['context_entities'])
             batch_item.append(conversation['item'])
-        context_entities = get_onehot_label(batch_context_entities, self.n_entity)
+        context_entities = get_onehot(batch_context_entities, self.n_entity)
         return {'context_entities': context_entities, 'item': torch.tensor(batch_item, dtype=torch.long)}
 
     def conv_process_fn(self):
@@ -113,3 +113,24 @@ class ReDialDataLoader(BaseDataLoader):
 
     def policy_batchify(self, batch):
         pass
+
+    def rec_interact(self, data):
+        context_entities = get_onehot(data['context_entities'], self.n_entity)
+        return context_entities
+
+    # def conv_interact(self, data):
+    #     context_tokens = [truncate(utterance, self.utterance_truncate, truncate_tail=True) for utterance in data['context_tokens']]
+    #     context_tokens = truncate(context_tokens, self.conversation_truncate, truncate_tail=True)
+    #     context_length = len(context_tokens)
+    #     utterance_lengths = [len(utterance) for utterance in context_tokens]
+    #     max_utterance_length = max(utterance_lengths)
+    #     request = context_tokens[-1]
+    #     response = None
+    #
+    #     padded_context = padded_tensor(conversation['context_tokens'], pad_idx=self.pad_token_idx,
+    #                                    pad_tail=True, max_len=max_utterance_length)
+    #     if len(conversation['context_tokens']) < max_context_length:
+    #         pad_tensor = padded_context.new_full(
+    #             (max_context_length - len(conversation['context_tokens']), max_utterance_length), self.pad_token_idx
+    #         )
+    #         padded_context = torch.cat((padded_context, pad_tensor), 0)
