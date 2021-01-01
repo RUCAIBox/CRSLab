@@ -240,7 +240,7 @@ class ReDialDataset(BaseDataset):
                     edge_list.append((entity, tail_and_relation[1], tail_and_relation[0]))
                     edge_list.append((tail_and_relation[1], entity, tail_and_relation[0]))
 
-        relation_cnt, relation2id, edges = defaultdict(int), dict(), set()
+        relation_cnt, relation2id, edges, entities = defaultdict(int), dict(), set(), set()
         for h, t, r in edge_list:
             relation_cnt[r] += 1
         for h, t, r in edge_list:
@@ -248,19 +248,28 @@ class ReDialDataset(BaseDataset):
                 if r not in relation2id:
                     relation2id[r] = len(relation2id)
                 edges.add((h, t, relation2id[r]))
+                entities.add(self.id2entity[h])
+                entities.add(self.id2entity[t])
         return {
             'edge': list(edges),
-            'n_relation': len(relation2id)
+            'n_relation': len(relation2id),
+            'entity': list(entities)
         }
 
     def _word_kg_process(self):
         """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
+        entities = set()
         for line in self.word_kg:
             kg = line.strip().split('\t')
+            entities.add(kg[1].split('/')[0])
+            entities.add(kg[2].split('/')[0])
             e0 = self.word2id[kg[1].split('/')[0]]
             e1 = self.word2id[kg[2].split('/')[0]]
             edges.add((e0, e1))
             edges.add((e1, e0))
         # edge_set = [[co[0] for co in list(edges)], [co[1] for co in list(edges)]]
-        return list(edges)
+        return {
+            'edge': list(edges),
+            'entity': list(entities)
+        }
