@@ -23,26 +23,23 @@ reduction: false
 n_positions: 1024
 # optim
 pretrain:
-  epoch: 1
-  batch_size: 4096
+  epoch: 3
+  batch_size: 128
   optimizer:
     name: Adam
-    lr: !!float 3e-3
+    lr: !!float 1e-3
 rec:
-  epoch: 1
-  batch_size: 1024
+  epoch: 9
+  batch_size: 128
   optimizer:
     name: Adam
-    lr: !!float 3e-3
-  early_stop: true
-  stop_mode: max
-  impatience: 3
+    lr: !!float 1e-3
 conv:
-  epoch: 1
-  batch_size: 256
+  epoch: 90
+  batch_size: 128
   optimizer:
     name: Adam
-    lr: !!float 3e-3
+    lr: !!float 1e-3
   lr_scheduler:
     name: ReduceLROnPlateau
     patience: 3
