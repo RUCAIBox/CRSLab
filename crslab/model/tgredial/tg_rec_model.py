@@ -67,7 +67,7 @@ class TGRecModel(BaseModel):
         embed = torch.cat((sas_embed, bert_embed), dim=1)
         rec_scores = self.fusion(embed)  # bs, item_size
 
-        if mode == 'test':
+        if mode == 'infer':
             return rec_scores
         else:
             rec_loss = self.rec_loss(rec_scores, y)

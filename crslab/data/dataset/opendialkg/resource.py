@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/3cc0807922aa85b7ec2a331b13845353?fn=nltk',
             'opendialkg_nltk.zip',
@@ -28,7 +28,7 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/e50849698023f3b006129c1fc9c02e22?fn=bert',
             'opendialkg_bert.zip',
@@ -46,7 +46,7 @@ resources = {
         },
     },
     'gpt2': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/e3b05fa67a7900f2cd44602aef359810?fn=gpt2',
             'opendialkg_gpt2.zip',

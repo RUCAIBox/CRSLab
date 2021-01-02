@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'jieba': {
-        'version': '0.22',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/4079f3663051e87d64c4223e522394e6?fn=jieba',
             'durecdial_jieba.zip',
@@ -28,7 +28,7 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/21775beb2a83dc33395d1d7b1311b0bb?fn=bert',
             'durecdial_bert.zip',
@@ -47,7 +47,7 @@ resources = {
         },
     },
     'gpt2': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/742d3517069217c2b901f68a9055953d?fn=gpt2',
             'durecdial_gpt2.zip',

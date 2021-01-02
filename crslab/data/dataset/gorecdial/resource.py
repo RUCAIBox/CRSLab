@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/fc9d96c44806d458f4f42ed336f0d239?fn=nltk',
             'gorecdial_nltk.zip',
@@ -29,7 +29,7 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/d9c00b7daee6c9f954130ddbc1797cac?fn=bert',
             'gorecdial_bert.zip',
@@ -48,7 +48,7 @@ resources = {
         }
     },
     'gpt2': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/c4cb3cabbf78c5edb2f6dbb36fdadcbd?fn=gpt2',
             'gorecdial_gpt2.zip',

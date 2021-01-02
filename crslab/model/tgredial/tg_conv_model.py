@@ -36,7 +36,10 @@ class TGConvModel(BaseModel):
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
     def converse(self, batch, mode):
-        if mode != 'test':
+        if mode == 'test' or mode == 'infer':
+            enhanced_context = batch[1]
+            return self.generate(enhanced_context)
+        else:
             enhanced_input_ids = batch[0]
             # torch.tensor's shape = (bs, seq_len, v_s); tuple's length = 12
             lm_logits = self.model(enhanced_input_ids).logits
@@ -50,9 +53,6 @@ class TGConvModel(BaseModel):
             pred = pred[:, -self.response_truncate:]
 
             return loss, pred
-        else:
-            enhanced_context = batch[1]
-            return self.generate(enhanced_context)
 
     def generate(self, context):
         """

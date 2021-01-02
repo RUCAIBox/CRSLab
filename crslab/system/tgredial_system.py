@@ -281,7 +281,7 @@ class TGReDialSystem(BaseSystem):
             # rec
             if hasattr(self, 'rec_model'):
                 rec_input = self.process_input(input_text, 'rec')
-                scores = self.rec_model.recommend(rec_input, 'test')
+                scores = self.rec_model.recommend(rec_input, 'infer')
 
                 scores = scores.cpu()[0]
                 scores = scores[self.item_ids]
@@ -299,7 +299,7 @@ class TGReDialSystem(BaseSystem):
             # conv
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
-                preds = self.conv_model.converse(conv_input, 'test').tolist()[0]
+                preds = self.conv_model.converse(conv_input, 'infer').tolist()[0]
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
 
                 token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')

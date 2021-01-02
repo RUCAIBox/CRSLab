@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'pkuseg': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/d043702b50e547d369c81e276e6f6032?fn=pkuseg',
             'tgredial_pkuseg.zip',
@@ -29,7 +29,7 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/3e5b2aa52092267ad3443f528cb1d20d?fn=bert',
             'tgredial_bert.zip',
@@ -48,7 +48,7 @@ resources = {
         },
     },
     'gpt2': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
             'http://d0.ananas.chaoxing.com/download/becf68518c219e41f37191b983c62a0f?fn=gpt2',
             'tgredial_gpt2.zip',

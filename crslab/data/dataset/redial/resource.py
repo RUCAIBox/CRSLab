@@ -12,11 +12,11 @@ from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {
-        'version': '0.21',
+        'version': '0.3',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/2e547e232fd2795e97d9df9da6b20e30?fn=nltk',
+            'http://d0.ananas.chaoxing.com/download/417f6ac16282e4910fc93973e954ab42?fn=nltk',
             'redial_nltk.zip',
-            '9a0317a102675b748cb31fe0e77e152c2b2e6ece3268bcade2a0cd549e99bba1',
+            '01dc2ebf15a0988a92112daa7015ada3e95d855e80cc1474037a86e536de3424',
         ),
         'special_token_idx': {
             'pad': 0,
@@ -28,11 +28,11 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/b96b62df9ff2dceac18d76d21e7ae9e9?fn=bert',
+            'http://d0.ananas.chaoxing.com/download/34869653883b3eeb5d8d7c261207680e?fn=bert',
             'redial_bert.zip',
-            '21992cc07524ac5428d875e564582b84a78d262eae589a3fa164f479a1b96993',
+            'fb55516c22acfd3ba073e05101415568ed3398c86ff56792f82426b9258c92fd',
         ),
         'special_token_idx': {
             'pad': 0,
@@ -46,11 +46,11 @@ resources = {
         },
     },
     'gpt2': {
-        'version': '0.25',
+        'version': '0.3',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/959dd4bb927d0d47283d4d9de8179a9f?fn=gpt2',
+            'http://d0.ananas.chaoxing.com/download/bd10bcbc0f0bfe74dcc48fafaf518ae5?fn=gpt2',
             'redial_gpt2.zip',
-            'bb0deb54766fc8a48e82697141e502dbda8e0011c198d5f051ff9ae7f0d278c3',
+            '37b1a64032241903a37b5e014ee36e50d09f7e4a849058688e9af52027a3ac36',
         ),
         'special_token_idx': {
             'pad': 0,
