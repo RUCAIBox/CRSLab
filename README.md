@@ -6,12 +6,12 @@
 
 [Paper]() | [中文版](./README_CN.md)
 
-**CRSLab** is the **first** open-source toolkit for building Conversational Recommender System (CRS). It is developed based on Python and PyTorch. CRSLab has the following highlights:
+**CRSLab** is an open-source toolkit for building Conversational Recommender System (CRS). It is developed based on Python and PyTorch. CRSLab has the following highlights:
 
-- **Comprehensive benchmark models and datasets**: We have integrated commonly-used 6 datasets and 18 models, including KG-based and pre-training models such as GCN, BERT and GPT-2. We have preprocessed these datasets to support these models, and release for downloading.
+- **Comprehensive benchmark models and datasets**: We have integrated commonly-used 6 datasets and 18 models, including graph neural network and pre-training models such as R-GCN, BERT and GPT-2. We have preprocessed these datasets to support these models, and release for downloading.
 - **Extensive and standard evaluation protocols**: We support a series of widely-adopted evaluation protocols for testing and comparing different CRS.
 - **General and extensible structure**: We design a general and extensible structure to unify various conversational recommendation datasets and models, in which we integrate various built-in interfaces and functions for quickly development.
-- **Easy to quick start**: We provide simple yet flexible configuration for new researchers to quick start integrated models in our library. 
+- **Easy to quick start**: We provide simple yet flexible configuration for new researchers to quickly start integrated models in our library. 
 - **Human-machine interaction interfaces**: We provide flexible human-machine interaction interfaces for researchers to do quantitive analysis.
 
 <p align="center">
