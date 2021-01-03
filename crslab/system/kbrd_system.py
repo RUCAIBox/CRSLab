@@ -60,7 +60,7 @@ class KBRDSystem(BaseSystem):
                 batch[k] = v.to(self.device)
 
         if stage == 'rec':
-            rec_loss, rec_scores = self.model.recommend(batch)
+            rec_loss, rec_scores = self.model.recommend(batch, mode)
             if mode == 'train':
                 self.backward(rec_loss)
             else:

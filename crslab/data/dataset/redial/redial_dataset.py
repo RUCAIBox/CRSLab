@@ -231,10 +231,10 @@ class ReDialDataset(BaseDataset):
         """
         edge_list = []  # [(entity, entity, relation)]
         for entity in range(self.n_entity):
-            if entity not in self.entity_kg:
+            if str(entity) not in self.entity_kg:
                 continue
             edge_list.append((entity, entity, SELF_LOOP_ID))  # add self loop
-            for tail_and_relation in self.entity_kg[entity]:
+            for tail_and_relation in self.entity_kg[str(entity)]:
                 if entity != tail_and_relation[1] and tail_and_relation[0] != SELF_LOOP_ID:
                     edge_list.append((entity, tail_and_relation[1], tail_and_relation[0]))
                     edge_list.append((tail_and_relation[1], entity, tail_and_relation[0]))
