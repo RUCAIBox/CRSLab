@@ -3,7 +3,7 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/29
+# @Time   : 2021/1/3
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -18,9 +18,10 @@ from crslab.system.utils import ind2txt
 
 
 class ReDialSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
+                 interact=False, debug=False):
         super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                           args)
+                                           restore_system, interact, debug)
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
         self.item_ids = side_data['rec']['item_entity_ids']

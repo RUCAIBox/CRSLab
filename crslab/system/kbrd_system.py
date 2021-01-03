@@ -18,9 +18,10 @@ from crslab.system.utils import ind2txt
 
 
 class KBRDSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
+                 interact=False, debug=False):
         super(KBRDSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                         args)
+                                         restore_system, interact, debug)
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']

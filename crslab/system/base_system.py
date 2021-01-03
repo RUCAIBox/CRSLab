@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/29
+# @Time   : 2020/11/24, 2021/1/3
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -33,11 +33,12 @@ transformers_tokenizer = ('bert', 'gpt2')
 
 
 class BaseSystem(ABC):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
+                 interact=False, debug=False):
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # data
-        if args.debug:
+        if debug:
             self.train_dataloader = valid_dataloader
             self.valid_dataloader = valid_dataloader
             self.test_dataloader = test_dataloader
@@ -62,10 +63,10 @@ class BaseSystem(ABC):
                                               side_data['policy']).to(self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
-        if args.restore_system:
+        if restore_system:
             self.restore_model()
 
-        if not args.interact:
+        if not interact:
             self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'])
 
     def init_optim(self, opt, parameters):

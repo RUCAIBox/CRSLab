@@ -1,18 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import division
-
-import os
-
 from setuptools import setup, find_packages
 
-try:
-    import torch
-    import torch_geometric
-except:
-    raise Exception('Please install PyTorch and PyTorch Geometric manually first.\n' + 
-                    'View CRSLab GitHub page for more information: https://github.com/RUCAIBox/CRSLab')
-    exit(1)
 
 install_requires = [
     'numpy~=1.19.4',
@@ -32,36 +19,31 @@ install_requires = [
 
 setup_requires = []
 
-classifiers = ["License :: OSI Approved :: MIT License"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Human Machine Interfaces"
+]
 
-long_description = 'CRSLab is an open-source toolkit developed based ' \
-                   'on Python and Pytorch for reproducing and developing ' \
-                   'conversational recommender systems. View CRSLab GitHub ' \
-                   'page for more information: https://github.com/RUCAIBox/CRSLab'
-
-# Readthedocs requires Sphinx extensions to be specified as part of
-# install_requires in order to build properly.
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
-    install_requires.extend(setup_requires)
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
 
 setup(
     name='crslab',
-    version=
-    '0.1.1',  # please remember to edit crslab/__init__.py in response, once updating the version
-    description='An Open-Source Toolkit for Building Conversational Recommender System',
+    version='0.1.1',  # please remember to edit crslab/__init__.py in response, once updating the version
+    author='CRSLabTeam',
+    author_email='francis_kun_zhou@163.com',
+    description='An Open-Source Toolkit for Building Conversational Recommender System(CRS)',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/RUCAIBox/CRSLab',
-    author='CRSLabTeam',
-    author_email='francis_kun_zhou@163.com',
     packages=[
         package for package in find_packages()
         if package.startswith('crslab')
     ],
-    include_package_data=True,
+    classifiers=classifiers,
     install_requires=install_requires,
     setup_requires=setup_requires,
-    zip_safe=False,
-    classifiers=classifiers,
+    python_requires='>=3.6',
 )

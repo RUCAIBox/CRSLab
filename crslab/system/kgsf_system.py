@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/29
+# @Time   : 2020/11/24, 2021/1/3
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -17,9 +17,10 @@ from crslab.system.utils import ind2txt
 
 
 class KGSFSystem(BaseSystem):
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, args):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
+                 interact=False, debug=False):
         super(KGSFSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                         args)
+                                         restore_system, interact, debug)
 
         self.ind2tok = vocab['ind2tok']
         self.end_token_idx = vocab['end']

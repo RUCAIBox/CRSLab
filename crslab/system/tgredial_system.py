@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2021/1/2
+# @Time   : 2021/1/3
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
@@ -22,16 +22,10 @@ from crslab.system.utils import ind2txt
 
 
 class TGReDialSystem(BaseSystem):
-    def __init__(self,
-                 opt,
-                 train_dataloader,
-                 valid_dataloader,
-                 test_dataloader,
-                 vocab,
-                 side_data,
-                 args):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
+                 interact=False, debug=False):
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, args)
+                                             test_dataloader, vocab, side_data, restore_system, interact, debug)
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']
