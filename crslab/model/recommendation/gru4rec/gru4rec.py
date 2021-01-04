@@ -17,7 +17,27 @@ from crslab.model.base_model import BaseModel
 
 
 class GRU4RECModel(BaseModel):
+    """The model was proposed in XXX.
+
+    Attributes:
+        item_size: A integer indicating the number of items
+        hidden_size: A integer indicating the hidden state size in GRU
+        num_layers: A integer indicating the number of GRU layers
+        dropout_hidden: A integer indicating the dropout rate to dropout hidden state
+        dropout_input: A boolean indicating if we dropout the input of model
+        embedding_dim: A integer indicating the dimension of item embedding
+        batch_size: A integer indicating the batch size
+    """
+
     def __init__(self, opt, device, vocab, side_data):
+        """The model was proposed in XXX.
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         self.item_size = vocab['n_entity'] + 1
         self.hidden_size = opt['gru_hidden_size']
         self.num_layers = opt['num_layers']

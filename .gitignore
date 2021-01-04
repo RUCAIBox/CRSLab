@@ -2,9 +2,9 @@
 ### Project
 
 data
-!crslab/data
 log
 save
+!crslab/data
 
 ### VisualStudioCode template
 .vscode/*
