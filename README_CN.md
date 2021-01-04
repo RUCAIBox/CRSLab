@@ -111,6 +111,14 @@ pip install torch-geometric
 
 ### 安装 CRSLab
 
+你可以通过 pip 来安装：
+
+```bash
+pip install crslab
+```
+
+也可以通过源文件进行进行安装：
+
 ```bash
 git clone https://github.com/RUCAIBox/CRSLab && cd CRSLab
 pip install -e .
@@ -155,7 +163,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 |   类别   |                             模型                             |      Graph Neural Network?      |       Pre-training Model?       |
 | :------: | :----------------------------------------------------------: | :-----------------------------: | :-----------------------------: |
 | CRS 模型 | [ReDial](https://arxiv.org/abs/1812.07617)<br/>[KBRD](https://arxiv.org/abs/1908.05391)<br/>[KGSF](https://arxiv.org/abs/2007.04032)<br/>[TG-ReDial](https://arxiv.org/abs/2010.04125) |       ×<br/>√<br/>√<br/>×       |       ×<br/>×<br/>×<br/>√       |
-| 推荐模型 | Popularity<br/>[GRU4Rec](https://arxiv.org/abs/1609.05787)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
+| 推荐模型 | Popularity<br/>[GRU4Rec](https://arxiv.org/abs/1511.06939)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
 | 策略模型 | PMI<br/>[MGCG](https://arxiv.org/abs/2005.03954)<br/>[Conv-BERT](https://arxiv.org/abs/2010.04125)<br/>[Topic-BERT](https://arxiv.org/abs/2010.04125)<br/>[Profile-BERT](https://arxiv.org/abs/2010.04125) |    ×<br/>×<br/>×<br/>×<br/>×    |    ×<br/>×<br/>√<br/>√<br/>√    |
 | 对话模型 | [HERD](https://arxiv.org/abs/1507.04808)<br/>[Transformer](https://arxiv.org/abs/1706.03762)<br/>[GPT-2](http://www.persagen.com/files/misc/radford2019language.pdf) |          ×<br/>×<br/>×          |          ×<br/>×<br/>√          |
 
