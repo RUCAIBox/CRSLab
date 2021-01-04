@@ -12,14 +12,6 @@ crslab.system.base\_system module
    :undoc-members:
    :show-inheritance:
 
-crslab.system.interactive\_system module
-----------------------------------------
-
-.. automodule:: crslab.system.interactive_system
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crslab.system.kbrd\_system module
 ---------------------------------
 
@@ -67,6 +59,7 @@ crslab.system.utils module
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 Module contents
 ---------------

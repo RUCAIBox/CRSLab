@@ -12,14 +12,6 @@ crslab.model.tgredial.resource module
    :undoc-members:
    :show-inheritance:
 
-crslab.model.tgredial.sasrec\_model module
-------------------------------------------
-
-.. automodule:: crslab.model.tgredial.sasrec_model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crslab.model.tgredial.tg\_conv\_model module
 --------------------------------------------
 
@@ -43,6 +35,7 @@ crslab.model.tgredial.tg\_rec\_model module
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 Module contents
 ---------------

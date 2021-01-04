@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    crslab.model.conversation
    crslab.model.kbrd
@@ -18,26 +17,10 @@ Subpackages
 Submodules
 ----------
 
-crslab.model.base\_conv\_model module
--------------------------------------
-
-.. automodule:: crslab.model.base_conv_model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crslab.model.base\_model module
 -------------------------------
 
 .. automodule:: crslab.model.base_model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-crslab.model.base\_rec\_model module
-------------------------------------
-
-.. automodule:: crslab.model.base_rec_model
    :members:
    :undoc-members:
    :show-inheritance:
@@ -73,6 +56,7 @@ crslab.model.utils module
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 Module contents
 ---------------

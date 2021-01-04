@@ -20,14 +20,6 @@ crslab.model.redial.redial\_conv\_model module
    :undoc-members:
    :show-inheritance:
 
-crslab.model.redial.redial\_model module
-----------------------------------------
-
-.. automodule:: crslab.model.redial.redial_model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crslab.model.redial.redial\_rec\_model module
 ---------------------------------------------
 
@@ -36,13 +28,6 @@ crslab.model.redial.redial\_rec\_model module
    :undoc-members:
    :show-inheritance:
 
-crslab.model.redial.resource module
------------------------------------
-
-.. automodule:: crslab.model.redial.resource
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

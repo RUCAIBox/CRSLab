@@ -20,6 +20,7 @@ crslab.data.dataset.inspired.resource module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 
