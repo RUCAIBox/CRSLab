@@ -193,7 +193,7 @@ We have collected and preprocessed 6 commonly-used human-annotated datasets, and
 
 ## Performance
 
-We have trained our models on the TG-Redial datasets and recorded relevant evaluation results.
+We have trained and test the integrated models on the TG-Redial dataset, which is split into training, validation and test sets using a ratio of 8:1:1. For each conversation, we start from the first utterance, and generate reply utterances or recommendations in turn by our model. We perform the evaluation on the three sub-tasks.
 
 ### Recommendation Task
 
@@ -207,7 +207,7 @@ We have trained our models on the TG-Redial datasets and recorded relevant evalu
 | TG-ReDial | **0.00793** |   0.0251   |   0.0524   | **0.00793** | **0.0122** |   0.0134   | **0.00793** |   0.0152   |   0.0211   |
 
 
-### Generation Task
+### Conversation Task
 
 |    Model    |  BLEU@1   |  BLEU@2   |   BLEU@3   |   BLEU@4   |  Dist@1  |  Dist@2  |  Dist@3  |  Dist@4  |  Average  |  Extreme  |  Greedy   |   PPL    |
 | :---------: | :-------: | :-------: | :--------: | :--------: | :------: | :------: | :------: | :------: | :-------: | :-------: | :-------: | :------: |
