@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    crslab.model.recommendation.bert
    crslab.model.recommendation.gru4rec

@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    crslab.model.policy.conv_bert
    crslab.model.policy.mgcg

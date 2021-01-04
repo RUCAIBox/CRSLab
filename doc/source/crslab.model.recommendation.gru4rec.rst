@@ -12,6 +12,7 @@ crslab.model.recommendation.gru4rec.gru4rec module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 

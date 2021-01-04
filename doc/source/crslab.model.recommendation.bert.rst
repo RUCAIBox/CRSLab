@@ -20,6 +20,7 @@ crslab.model.recommendation.bert.resource module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 

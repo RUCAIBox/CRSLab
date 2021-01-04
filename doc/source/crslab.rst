@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    crslab.config
    crslab.data
@@ -24,13 +23,6 @@ crslab.download module
    :undoc-members:
    :show-inheritance:
 
-crslab.google\_style module
----------------------------
-
-.. automodule:: crslab.google_style
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

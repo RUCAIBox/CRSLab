@@ -12,6 +12,7 @@ crslab.model.recommendation.textcnn.textcnn module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 

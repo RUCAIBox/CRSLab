@@ -5,7 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
 
    crslab.data.dataset.durecdial
    crslab.data.dataset.gorecdial
@@ -24,6 +23,7 @@ crslab.data.dataset.base\_dataset module
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 Module contents
 ---------------

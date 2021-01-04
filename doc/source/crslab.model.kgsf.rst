@@ -20,6 +20,7 @@ crslab.model.kgsf.resource module
    :undoc-members:
    :show-inheritance:
 
+
 Module contents
 ---------------
 
