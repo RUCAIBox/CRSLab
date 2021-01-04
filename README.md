@@ -11,8 +11,8 @@
 - **Comprehensive benchmark models and datasets**: We have integrated commonly-used 6 datasets and 18 models, including graph neural network and pre-training models such as R-GCN, BERT and GPT-2. We have preprocessed these datasets to support these models, and release for downloading.
 - **Extensive and standard evaluation protocols**: We support a series of widely-adopted evaluation protocols for testing and comparing different CRS.
 - **General and extensible structure**: We design a general and extensible structure to unify various conversational recommendation datasets and models, in which we integrate various built-in interfaces and functions for quickly development.
-- **Easy to quick start**: We provide simple yet flexible configuration for new researchers to quickly start integrated models in our library. 
-- **Human-machine interaction interfaces**: We provide flexible human-machine interaction interfaces for researchers to do quantitive analysis.
+- **Easy to quick start**: We provide simple yet flexible configuration for new researchers easy to get started in our library. 
+- **Human-machine interaction interfaces**: We provide flexible human-machine interaction interfaces for researchers to conduct qualiative analysis.
 
 <p align="center">
   <img src="https://i.loli.net/2020/12/30/6TPVG4pBg2rcDf9.png" alt="RecBole v0.1 architecture" width="400">
@@ -141,7 +141,7 @@ In summary, there are following arguments in `run_crslab.py`:
 - `--restore_data` or `-rd`: restore pre-processed dataset from file.
 - `--save_system` or `-ss`: save trained system.
 - `--restore_system` or `-rs`: restore trained system from file.
-- `--debug` or `-d`: use valid dataset to debug your system.
+- `--debug` or `-d`: use validation dataset to debug your system.
 - `--interact` or `-i`: interact with your system instead of training.
 
 
@@ -153,7 +153,7 @@ As the first release version, we have implemented 18 models in the four categori
 |       Category       |                            Model                             |      Graph Neural Network?      |       Pre-training Model?       |
 | :------------------: | :----------------------------------------------------------: | :-----------------------------: | :-----------------------------: |
 |      CRS Model       | [ReDial](https://arxiv.org/abs/1812.07617)<br/>[KBRD](https://arxiv.org/abs/1908.05391)<br/>[KGSF](https://arxiv.org/abs/2007.04032)<br/>[TG-ReDial](https://arxiv.org/abs/2010.04125) |       ×<br/>√<br/>√<br/>×       |       ×<br/>×<br/>×<br/>√       |
-| Recommendation model | Popularity<br/>[GRU4Rec](https://arxiv.org/abs/1609.05787)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
+| Recommendation model | Popularity<br/>[GRU4Rec](https://arxiv.org/pdf/1511.06939.pdf)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
 |     Policy model     | PMI<br/>[MGCG](https://arxiv.org/abs/2005.03954)<br/>[Conv-BERT](https://arxiv.org/abs/2010.04125)<br/>[Topic-BERT](https://arxiv.org/abs/2010.04125)<br/>[Profile-BERT](https://arxiv.org/abs/2010.04125) |    ×<br/>×<br/>×<br/>×<br/>×    |    ×<br/>×<br/>√<br/>√<br/>√    |
 |  Conversation model  | [HERD](https://arxiv.org/abs/1507.04808)<br/>[Transformer](https://arxiv.org/abs/1706.03762)<br/>[GPT-2](http://www.persagen.com/files/misc/radford2019language.pdf) |          ×<br/>×<br/>×          |          ×<br/>×<br/>√          |
 
