@@ -27,9 +27,8 @@ def edge_to_pyg_format(edge, type='RGCN'):
 def sort_for_packed_sequence(lengths: torch.Tensor):
     """
     :param lengths: 1D array of lengths
-    :return: sorted_lengths (lengths in descending order,
-    sorted_idx (indices to sort),
-    rev_idx (indices to retrieve original order)
+    :return: sorted_lengths (lengths in descending order), sorted_idx (indices to sort), rev_idx (indices to retrieve original order)
+
     """
     sorted_idx = torch.argsort(lengths, descending=True)  # idx to sort by length
     rev_idx = torch.argsort(sorted_idx)  # idx to retrieve original order

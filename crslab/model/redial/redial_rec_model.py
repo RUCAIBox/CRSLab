@@ -65,8 +65,17 @@ class ReDialRecModel(BaseModel):
 
     def recommend(self, batch, mode):
         """
-        :param batch: {'context_entities': (batch_size, n_entity), 'item': (batch_size)}
-        :param mode
+
+        Args:
+            batch: ::
+
+                {
+                    'context_entities': (batch_size, n_entity),
+                    'item': (batch_size)
+                }
+
+            mode (str)
+
         """
         context_entities = batch['context_entities']
         for i, layer in enumerate(self.encoder):

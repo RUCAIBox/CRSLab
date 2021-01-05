@@ -35,7 +35,7 @@ def padded_tensor(
     :param int max_len: if None, the max length is the maximum item length
 
     :returns: padded tensor.
-    :rtype: (Tensor[int64], list[int])
+    :rtype: Tensor[int64]
 
     """
     # number of items

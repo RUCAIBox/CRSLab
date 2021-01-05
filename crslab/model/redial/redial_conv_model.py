@@ -43,6 +43,7 @@ class ReDialConvModel(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model
             vocab (dict): A dictionary record the vocabulary information
             side_data (dict): A dictionary record the side data
+
         """
         # dataset
         self.vocab_size = vocab['vocab_size']
@@ -97,14 +98,18 @@ class ReDialConvModel(BaseModel):
 
     def converse(self, batch, mode):
         """
-        batch: {
-            context: (batch_size, max_context_length, max_utterance_length),
-            context_lengths: (batch_size),
-            utterance_lengths: (batch_size, max_context_length),
-            request: (batch_size, max_utterance_length),
-            request_lengths: (batch_size),
-            response: (batch_size, max_utterance_length)
-        }
+        Args:
+            batch: ::
+
+                {
+                    'context': (batch_size, max_context_length, max_utterance_length),
+                    'context_lengths': (batch_size),
+                    'utterance_lengths': (batch_size, max_context_length),
+                    'request': (batch_size, max_utterance_length),
+                    'request_lengths': (batch_size),
+                    'response': (batch_size, max_utterance_length)
+                }
+
         """
         assert mode in ('train', 'valid', 'test')
         if mode == 'train':

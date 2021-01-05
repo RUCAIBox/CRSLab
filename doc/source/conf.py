@@ -12,7 +12,10 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../../'))
+
+from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
@@ -36,6 +39,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'recommonmark'
 ]
 
 # napoleon_include_init_with_doc = True
@@ -45,6 +49,8 @@ napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
 
 autoclass_content = "both"
+
+source_suffix = ['.rst', '.md']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,3 +71,10 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+        'auto_toc_tree_section': 'Contents',
+    }, True)
+    app.add_transform(AutoStructify)

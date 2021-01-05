@@ -29,6 +29,7 @@ class SASRecModel(nn.Module):
         attention_probs_dropout_prob: A float indicating the dropout rate in attention layers
         hidden_act: A string indicating the activation function type in SASRec
         num_hidden_layers: A integer indicating the number of hidden layers in SASRec
+
     """
     def __init__(self, hidden_dropout_prob, device, initializer_range,
                  hidden_size, max_seq_length, item_size, num_attention_heads,
@@ -305,12 +306,12 @@ class SelfAttention(nn.Module):
 
     def transpose_for_scores(self, x):
         """
-            args:
-            x:
-                (bs, seq_len, all_head_size)
-            return:
-            x.permute(0, 2, 1, 3):
-                (bs, num_heads, seq_len, head_size)
+        Args:
+            x: (bs, seq_len, all_head_size)
+
+        Returns:
+            x.permute(0, 2, 1, 3), (bs, num_heads, seq_len, head_size)
+
         """
         new_x_shape = x.size()[:-1] + (self.num_attention_heads,
                                        self.attention_head_size)
