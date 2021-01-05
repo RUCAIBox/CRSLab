@@ -4,10 +4,13 @@
 [![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/rucaibox/crslab/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://raw.githubusercontent.com/RUCAIBox/CRSLab/main/LICENSE)
 [![arXiv](https://img.shields.io/badge/arXiv-CRSLab-%23B21B1B)](https://arxiv.org/abs/2101.00939)
+[![Documentation Status](https://readthedocs.org/projects/crslab/badge/?version=latest)](https://crslab.readthedocs.io/en/latest/?badge=latest)
 
-[Paper](https://arxiv.org/pdf/2101.00939.pdf) | [中文版](./README_CN.md)
+[Paper](https://arxiv.org/pdf/2101.00939.pdf) | [Docs](https://crslab.readthedocs.io/en/latest/?badge=latest)
+| [中文版](./README_CN.md)
 
-**CRSLab** is an open-source toolkit for building Conversational Recommender System (CRS). It is developed based on Python and PyTorch. CRSLab has the following highlights:
+**CRSLab** is an open-source toolkit for building Conversational Recommender System (CRS). It is developed based on
+Python and PyTorch. CRSLab has the following highlights:
 
 - **Comprehensive benchmark models and datasets**: We have integrated commonly-used 6 datasets and 18 models, including graph neural network and pre-training models such as R-GCN, BERT and GPT-2. We have preprocessed these datasets to support these models, and release for downloading.
 - **Extensive and standard evaluation protocols**: We support a series of widely-adopted evaluation protocols for testing and comparing different CRS.
