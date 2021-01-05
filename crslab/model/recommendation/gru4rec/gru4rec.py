@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/29, 2020/12/26
+# @Time   : 2020/12/29, 2021/1/4
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -17,20 +17,20 @@ from crslab.model.base_model import BaseModel
 
 
 class GRU4RECModel(BaseModel):
-    """The model was proposed in XXX.
+    """The model was proposed in Session-based recommendations with recurrent neural networks
 
     Attributes:
         item_size: A integer indicating the number of items
         hidden_size: A integer indicating the hidden state size in GRU
         num_layers: A integer indicating the number of GRU layers
-        dropout_hidden: A integer indicating the dropout rate to dropout hidden state
-        dropout_input: A boolean indicating if we dropout the input of model
+        dropout_hidden: A float indicating the dropout rate to dropout hidden state
+        dropout_input: A integer indicating if we dropout the input of model
         embedding_dim: A integer indicating the dimension of item embedding
         batch_size: A integer indicating the batch size
     """
 
     def __init__(self, opt, device, vocab, side_data):
-        """The model was proposed in XXX.
+        """
 
         Args:
             opt (dict): A dictionary record the hyper parameters

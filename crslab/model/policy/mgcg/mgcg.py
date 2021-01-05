@@ -3,10 +3,9 @@
 # @Email  : sdzyh002@gmail
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
-
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
@@ -15,7 +14,26 @@ from crslab.model.base_model import BaseModel
 
 
 class MGCGModel(BaseModel):
+    """This model was proposed in Towards topic-guided conversational recommender system
+
+    Attributes:
+        topic_class_num: A integer indicating the number of topic
+        vocab_size: A integer indicating the size of vocabulary
+        embedding_dim: A integer indicating the dimension of embedding layer
+        hidden_size: A integer indicating the size of hidden state
+        num_layers: A integer indicating the number of layers in GRU
+        dropout_hidden: A float indicating the dropout rate of hidden state
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        
+        """
         self.topic_class_num = vocab['n_topic']
         self.vocab_size = vocab['vocab_size']
         self.embedding_dim = opt['embedding_dim']

@@ -3,9 +3,9 @@
 # @Email  : sdzyh002@gmail
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 from collections import defaultdict
 
@@ -15,7 +15,21 @@ from crslab.model.base_model import BaseModel
 
 
 class PMIModel(BaseModel):
+    """
+
+    Attributes:
+        topic_class_num: A integer indicating the number of topic
+        pad_topic: A integer indicating the id of topic padding 
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         self.topic_class_num = vocab['n_topic']
         self.pad_topic = vocab['pad_topic']
         super(PMIModel, self).__init__(opt, device)

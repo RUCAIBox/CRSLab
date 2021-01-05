@@ -3,9 +3,9 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import torch
 import torch.nn.functional as F
@@ -18,14 +18,49 @@ from crslab.model.utils import edge_to_pyg_format
 
 
 class TransformerModel(BaseModel):
+    """This model was proposed in Towards topic-guided conversational recommender system
+
+    Attributes:
+        vocab_size: A integer indicating the vocabulary size
+        pad_token_idx: A integer indicating the id of padding token
+        start_token_idx: A integer indicating the id of start token
+        end_token_idx: A integer indicating the id of end token
+        token_emb_dim: A integer indicating the dimension of token embedding layer
+        pretrain_embedding: A string indicating the path of pretrained embedding
+        n_word: A integer indicating the number of words
+        n_entity: A integer indicating the number of entities
+        pad_word_idx: A integer indicating the id of word padding 
+        pad_entity_idx: A integer indicating the id of entity padding
+        num_bases: A integer indicating the number of bases 
+        kg_emb_dim: A integer indicating the dimension of kg embedding
+        n_heads: A integer indicating the number of heads
+        n_layers: A integer indicating the number of layer
+        ffn_size: A integer indicating the size of ffn hidden
+        dropout: A float indicating the drouput rate
+        attention_dropout: A integer indicating the drouput rate of attention layer
+        relu_dropout: A integer indicating the drouput rate of relu layer
+        learn_positional_embeddings: A boolean indicating if we learn the positional embedding
+        embeddings_scale: A boolean indicating if we use the embeddings scale
+        reduction: A boolean indicating if we use the reduction
+        n_positions: A integer indicating the number of position
+        longest_label = A integer indicating the longest length for response generation
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         # vocab
         self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
         self.end_token_idx = vocab['end']
         self.token_emb_dim = opt['token_emb_dim']
-        self.pretrain_embedding = side_data.get('embedding', None)
+        self.pretrain_embedding: side_data.get('embedding', None)
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']

@@ -3,9 +3,9 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import torch.nn as nn
 
@@ -13,7 +13,23 @@ from crslab.model.base_model import BaseModel
 
 
 class ReDialRecModel(BaseModel):
+    """This model was proposed in Towards deep conversational recommendations.
+
+    Attributes:
+        n_entity: A integer indicating the number of entities
+        layer_sizes: A integer indicating the size of layer in autorec
+        pad_entity_idx: A integer indicating the id of entity padding
+
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         self.n_entity = vocab['n_entity']
         self.layer_sizes = opt['autorec_layer_sizes']
         self.pad_entity_idx = vocab['pad_entity']
