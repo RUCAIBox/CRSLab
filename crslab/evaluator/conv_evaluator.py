@@ -22,6 +22,14 @@ from ..download import build
 
 
 class ConvEvaluator(BaseEvaluator):
+    """The evaluator specially for conversational model
+    
+    Args:
+        dist_set: the set to record dist n-gram
+        dist_cnt: the count of dist n-gram evaluation
+        gen_metrics: the metrics to evaluate conversational model, including bleu, dist, embedding metrics, f1
+        optim_metrics: the metrics to optimize in training
+    """
     def __init__(self):
         super(ConvEvaluator, self).__init__()
         self.dist_set = defaultdict(set)

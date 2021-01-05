@@ -16,7 +16,7 @@ from crslab.model.sasrec_model import SASRecModel
 
 
 class SASRECModel(BaseModel):
-    """This model was proposed in Selfattentive sequential recommendation.
+    """This model was proposed in Self-attentive sequential recommendation.
         
     Attributes:
         hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec

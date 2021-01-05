@@ -2,10 +2,10 @@
 # @Author : Kun Zhou
 # @Email  : wxl1999@foxmail.com
 
-# UPDATE:
-# @Time   : 2020/12/13
-# @Author : Xiaolei Wang
-# @Email  : wxl1999@foxmail.com
+# UPDATE
+# @Time   : 2020/12/13, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import copy
 import math
@@ -16,9 +16,37 @@ import torch.nn.functional as F
 
 
 class SASRecModel(nn.Module):
+    """This model was proposed in Self-attentive sequential recommendation.
+        
+    Attributes:
+        hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec
+        initializer_range: A float indicating the range of parameters initization in SASRec
+        device: A variable indicating the device to place the data and model
+        hidden_size: A integer indicating the size of hidden state in SASRec
+        max_seq_length: A integer indicating the max interaction history length
+        item_size: A integer indicating the number of items
+        num_attention_heads: A integer indicating the head number in SASRec
+        attention_probs_dropout_prob: A float indicating the dropout rate in attention layers
+        hidden_act: A string indicating the activation function type in SASRec
+        num_hidden_layers: A integer indicating the number of hidden layers in SASRec
+    """
     def __init__(self, hidden_dropout_prob, device, initializer_range,
                  hidden_size, max_seq_length, item_size, num_attention_heads,
                  attention_probs_dropout_prob, hidden_act, num_hidden_layers):
+        """
+
+        Args:
+            hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec
+            initializer_range: A float indicating the range of parameters initization in SASRec
+            device: A variable indicating the device to place the data and model
+            hidden_size: A integer indicating the size of hidden state in SASRec
+            max_seq_length: A integer indicating the max interaction history length
+            item_size: A integer indicating the number of items
+            num_attention_heads: A integer indicating the head number in SASRec
+            attention_probs_dropout_prob: A float indicating the dropout rate in attention layers
+            hidden_act: A string indicating the activation function type in SASRec
+            num_hidden_layers: A integer indicating the number of hidden layers in SASRec
+        """
         super(SASRecModel, self).__init__()
         self.hidden_dropout_prob = hidden_dropout_prob
         self.device = device
