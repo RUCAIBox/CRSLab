@@ -1,10 +1,11 @@
 from setuptools import setup, find_packages
 
+setup_requires = []
 
 install_requires = [
     'numpy~=1.19.4',
     'sentencepiece<0.1.92',
-    'dataclasses~=0.7',
+    "dataclasses~=0.7;python_version<'3.7'",
     'transformers~=4.1.1',
     'fasttext~=0.9.2',
     'pkuseg~=0.0.25',
@@ -16,8 +17,6 @@ install_requires = [
     'scikit-learn~=0.24.0',
     'fuzzywuzzy~=0.18.0',
 ]
-
-setup_requires = []
 
 classifiers = [
     "Programming Language :: Python :: 3",
