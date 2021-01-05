@@ -18,7 +18,24 @@ from crslab.download import build
 
 
 class BaseDataset(ABC):
+    """Abstract class of dataset
+
+    Notes:
+        ``'embedding'`` can be specified in config to use pretrained word embedding.
+
+    """
+
     def __init__(self, opt, dpath, resource, restore=False, save=False):
+        """Download resource, load, process data. Support restore and save processed dataset.
+
+        Args:
+            opt (Config or dict): config for dataset or the whole system.
+            dpath (str): where to store dataset.
+            resource (dict): version, download file and special token idx of tokenized dataset.
+            restore (bool): whether to restore saved dataset which has been processed. Defaults to False.
+            save (bool): whether to save dataset after processing. Defaults to False.
+
+        """
         self.opt = opt
         self.dpath = dpath
 
@@ -47,50 +64,83 @@ class BaseDataset(ABC):
 
     @abstractmethod
     def _load_data(self):
-        """return train, valid, test data and vocab(all kinds of size and idx and map between token and idx)"""
+        """Load dataset.
+
+        Returns:
+            (any, any, any, dict):
+
+            raw train, valid and test data.
+
+            vocab: all kinds of useful size, idx and map between token and idx.
+
+        """
         pass
 
     @abstractmethod
     def _data_preprocess(self, train_data, valid_data, test_data):
-        """preprocess train, valid, test data after load
+        """Process raw train, valid, test data.
 
         Args:
-            train_data (list of dict):
-            valid_data (list of dict):
-            test_data (list of dict):
+            train_data: train dataset.
+            valid_data: valid dataset.
+            test_data: test dataset.
 
         Returns:
-            list of dict: 
-                train/valid/test_data: {
-                    'role' (str): 'Seeker' or 'Recommender';
-                    'user_profile' (list of list of int): id of tokens of sentences of user profile
-                    'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
-                    'response' (list of int): token ids of the ground-truth response;
-                    'interaction_history' (list of int): id of items which have interaction of the user in current turn;
-                    'context_items' (list of int): item ids mentioned in context
-                    'items' (list of int): item ids mentioned in current turn, we only keep those in entity kg for comparison;
-                    'context_entities' (list of int): if necessary, id of entities in context;
-                    'context_words' (list of int): if necessary, id of words in context;
-                    'context_policy' (list of list of list): policy of each context turn, ont turn may have several policies, where first is action and second is keyword;
-                    'target' (list): policy of current turn;
-                    'final' (list): final goal for current turn;
+            (list of dict, dict):
+
+            train/valid/test_data, each dict is in the following format::
+
+                 {
+                    'role' (str):
+                        'Seeker' or 'Recommender',
+                    'user_profile' (list of list of int):
+                        id of tokens of sentences of user profile,
+                    'context_tokens' (list of list int):
+                        token ids of preprocessed contextual dialogs,
+                    'response' (list of int):
+                        token ids of the ground-truth response,
+                    'interaction_history' (list of int):
+                        id of items which have interaction of the user in current turn,
+                    'context_items' (list of int):
+                        item ids mentioned in context,
+                    'items' (list of int):
+                        item ids mentioned in current turn, we only keep
+                        those in entity kg for comparison,
+                    'context_entities' (list of int):
+                        if necessary, id of entities in context,
+                    'context_words' (list of int):
+                        if necessary, id of words in context,
+                    'context_policy' (list of list of list):
+                        policy of each context turn, one turn may have several policies,
+                        where first is action and second is keyword,
+                    'target' (list): policy of current turn,
+                    'final' (list): final goal for current turn
                 }
-                side_data: {
-                    'entity_kg' (dict): {
-                        'edge': edges of entity kg;
-                        'n_relation': #relation;
-                    } if necessary
-                    'word_kg' (list of tuple): if necessary, edges of word knowledge graph;
-                    'item_entity_ids' (list of int): if necessary, entity id of each item;
+
+            side_data, which is in the following format::
+
+                {
+                    'entity_kg': {
+                        'edge' (list of tuple): (head_entity_id, tail_entity_id, relation_id),
+                        'n_relation' (int): number of distinct relations,
+                        'entity' (list of str): str of entities, used for entity linking
+                    }
+                    'word_kg': {
+                        'edge' (list of tuple): (head_entity_id, tail_entity_id),
+                        'entity' (list of str): str of entities, used for entity linking
+                    }
+                    'item_entity_ids' (list of int): entity id of each item;
                 }
+
         """
         pass
 
     def _load_from_restore(self, file_name="all_data.pkl"):
-        """Restore saved dataset from ``saved_dataset``.
+        """Restore saved dataset.
 
         Args:
-            file_name (str): file for the saved dataset.
+            file_name (str): file of saved dataset. Defaults to "all_data.pkl".
+
         """
         if not os.path.exists(os.path.join(self.dpath, file_name)):
             raise ValueError(f'Saved dataset [{file_name}] does not exist')
@@ -100,11 +150,12 @@ class BaseDataset(ABC):
         return dataset
 
     def _save_to_one(self, data, file_name="all_data.pkl"):
-        """save all data and vocab into one file
+        """Save all processed dataset and vocab into one file.
 
         Args:
-            data (tuple): all data and vocab
-            file_name (str, optional): Defaults to "all_data.pkl".
+            data (tuple): all dataset and vocab.
+            file_name (str, optional): file to save dataset. Defaults to "all_data.pkl".
+
         """
         if not os.path.exists(self.dpath):
             os.makedirs(self.dpath)

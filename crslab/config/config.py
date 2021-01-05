@@ -18,7 +18,21 @@ from tqdm import tqdm
 
 
 class Config:
-    def __init__(self, config_file=None, debug=False):
+    """Configurator module that load the defined parameters."""
+
+    def __init__(self, config_file, debug=False):
+        """Load parameters and set log level.
+
+        Args:
+            config_file (str): path to the config file, which should be in ``yaml`` format.
+                You can use default config provided in the `Github repo`_, or write it by yourself.
+            debug (bool, optional): whether to enable debug function during running. Defaults to False.
+
+        .. _Github repo:
+            https://github.com/RUCAIBox/CRSLab
+
+        """
+
         self.opt = self.load_yaml_configs(config_file)
         dataset = self.opt['dataset']
         tokenize = self.opt['tokenize']
@@ -66,8 +80,14 @@ class Config:
 
     @staticmethod
     def load_yaml_configs(filename):
-        """
-        This function reads yaml file to build config dictionary
+        """This function reads ``yaml`` file to build config dictionary
+
+        Args:
+            filename (str): path to ``yaml`` config
+
+        Returns:
+            dict: config
+
         """
         config_dict = dict()
         with open(filename, 'r', encoding='utf-8') as f:
@@ -86,6 +106,16 @@ class Config:
             return None
 
     def get(self, item, default=None):
+        """Get value of corrsponding item in config
+
+        Args:
+            item (str): key to query in config
+            default (optional): default value for item if not found in config. Defaults to None.
+
+        Returns:
+            value of corrsponding item in config
+
+        """
         if item in self.opt:
             return self.opt[item]
         else:

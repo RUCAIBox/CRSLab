@@ -38,8 +38,13 @@ extensions = [
     'sphinx.ext.mathjax',
 ]
 
-napoleon_include_init_with_doc = True
+# napoleon_include_init_with_doc = True
 napoleon_include_private_with_doc = True
+napoleon_use_admonition_for_examples = True
+napoleon_use_admonition_for_notes = True
+napoleon_use_admonition_for_references = True
+
+autoclass_content = "both"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

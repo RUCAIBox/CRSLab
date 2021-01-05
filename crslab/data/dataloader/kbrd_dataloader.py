@@ -15,7 +15,35 @@ from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor,
 
 
 class KBRDDataLoader(BaseDataLoader):
+    """Dataloader for model KBRD.
+
+    Notes:
+        You can set the following parameters in config:
+
+        - ``'context_truncate'``: the maximum length of context.
+        - ``'response_truncate'``: the maximum length of response.
+        - ``'entity_truncate'``: the maximum length of mentioned entities in context.
+
+        The following values must be specified in ``vocab``:
+
+        - ``'pad'``
+        - ``'start'``
+        - ``'end'``
+        - ``'pad_entity'``
+
+        the above values specify the id of needed special token.
+
+    """
+
     def __init__(self, opt, dataset, vocab):
+        """
+
+        Args:
+            opt (Config or dict): config for dataloader or the whole system.
+            dataset: data for model.
+            vocab (dict): all kinds of useful size, idx and map between token and idx.
+
+        """
         super().__init__(opt, dataset)
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
@@ -26,10 +54,6 @@ class KBRDDataLoader(BaseDataLoader):
         self.entity_truncate = opt.get('entity_truncate', None)
 
     def rec_process_fn(self):
-        """
-        Sometimes, the recommender may recommend more than one movies to seeker,
-        hence we need to augment data for each recommended movie
-        """
         augment_dataset = []
         for conv_dict in tqdm(self.dataset):
             if conv_dict['role'] == 'Recommender':
@@ -39,16 +63,6 @@ class KBRDDataLoader(BaseDataLoader):
         return augment_dataset
 
     def rec_batchify(self, batch):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "item": id,  # int
-                }
-        output: torch.tensors (context_entities, movie)
-        """
         batch_context_entities = []
         batch_movies = []
         for conv_dict in batch:
@@ -64,16 +78,6 @@ class KBRDDataLoader(BaseDataLoader):
         return self.retain_recommender_target()
 
     def conv_batchify(self, batch):
-        """
-        input: conv_dict = {
-                    "context_tokens": [id1, id2, ..., ],  # [int]
-                    "context_entities": [id1, id2, ..., ],  # [int]
-                    "context_words": [id1, id2, ..., ],  # [int]
-                    "response": [id1, id2, ..., ],  # [int]
-                    "items": [id1, id2, ..., ],  # [int]
-                }
-        output: torch.tensors (context_tokens, context_entities, response)
-        """
         batch_context_tokens = []
         batch_context_entities = []
         batch_response = []

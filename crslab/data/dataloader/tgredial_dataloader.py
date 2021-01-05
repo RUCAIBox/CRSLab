@@ -18,7 +18,49 @@ from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor,
 
 
 class TGReDialDataLoader(BaseDataLoader):
+    """Dataloader for model TGReDial.
+
+    Notes:
+        You can set the following parameters in config:
+
+        - ``'context_truncate'``: the maximum length of context.
+        - ``'response_truncate'``: the maximum length of response.
+        - ``'entity_truncate'``: the maximum length of mentioned entities in context.
+        - ``'word_truncate'``: the maximum length of mentioned words in context.
+        - ``'item_truncate'``: the maximum length of mentioned items in context.
+
+        The following values must be specified in ``vocab``:
+
+        - ``'pad'``
+        - ``'start'``
+        - ``'end'``
+        - ``'unk'``
+        - ``'pad_entity'``
+        - ``'pad_word'``
+
+        the above values specify the id of needed special token.
+
+        - ``'ind2tok'``: map from index to token.
+        - ``'tok2ind'``: map from token to index.
+        - ``'vocab_size'``: size of vocab.
+        - ``'id2entity'``: map from index to entity.
+        - ``'n_entity'``: number of entities in the entity KG of dataset.
+        - ``'sent_split'`` (optional): token used to split sentence. Defaults to ``'end'``.
+        - ``'word_split'`` (optional): token used to split word. Defaults to ``'end'``.
+        - ``'pad_topic'`` (optional): token used to pad topic.
+        - ``'ind2topic'`` (optional): map from index to topic.
+
+    """
+
     def __init__(self, opt, dataset, vocab):
+        """
+
+        Args:
+            opt (Config or dict): config for dataloader or the whole system.
+            dataset: data for model.
+            vocab (dict): all kinds of useful size, idx and map between token and idx.
+
+        """
         super().__init__(opt, dataset)
 
         self.n_entity = vocab['n_entity']
@@ -44,17 +86,17 @@ class TGReDialDataLoader(BaseDataLoader):
         if 'pad_topic' in vocab:
             self.pad_topic_idx = vocab['pad_topic']
 
-        self.context_truncate = opt.get('context_truncate', None)
-        self.response_truncate = opt.get('response_truncate', None)
-        self.entity_truncate = opt.get('entity_truncate', None)
-        self.word_truncate = opt.get('word_truncate', None)
-        self.item_truncate = opt.get('item_truncate', None)
-
         self.tok2ind = vocab['tok2ind']
         self.ind2tok = vocab['ind2tok']
         self.id2entity = vocab['id2entity']
         if 'ind2topic' in vocab:
             self.ind2topic = vocab['ind2topic']
+
+        self.context_truncate = opt.get('context_truncate', None)
+        self.response_truncate = opt.get('response_truncate', None)
+        self.entity_truncate = opt.get('entity_truncate', None)
+        self.word_truncate = opt.get('word_truncate', None)
+        self.item_truncate = opt.get('item_truncate', None)
 
     def rec_process_fn(self, *args, **kwargs):
         augment_dataset = []
@@ -66,15 +108,6 @@ class TGReDialDataLoader(BaseDataLoader):
         return augment_dataset
 
     def _process_rec_context(self, context_tokens):
-        """convert the context form dataset format to dataloader format
-
-        Args:
-            context_tokens: list of list of int, no padding and no adding special token
-
-        Returns:
-            compat_context: list of int, padding and adding special token
-                [CLS, ID1, ID2, sent_split_idx, ID3, ID4, ..., SEP]
-        """
         compact_context = []
         for i, utterance in enumerate(context_tokens):
             if i != 0:
@@ -95,11 +128,6 @@ class TGReDialDataLoader(BaseDataLoader):
         return item
 
     def _process_history(self, context_items, item_id=None):
-        """
-        Args:
-            context_items: 历史交互记录
-            item_id: 要预测的item id
-        """
         input_ids = truncate(context_items,
                              max_length=self.item_truncate,
                              truncate_tail=False)
@@ -198,14 +226,6 @@ class TGReDialDataLoader(BaseDataLoader):
                 None)
 
     def conv_batchify(self, batch):
-        """collate batch data for conversation
-
-        Args:
-            batch (list of dict):
-
-        Returns:
-            response: [BOS, TOKEN, TOKEN, EOS] length=response_truncate
-        """
         batch_context_tokens = []
         batch_enhanced_context_tokens = []
         batch_response = []
@@ -325,13 +345,6 @@ class TGReDialDataLoader(BaseDataLoader):
         return augment_dataset
 
     def policy_batchify(self, batch):
-        """
-        Args:
-            batch: batch format of tgredial dataset format in the top of file
-
-        Returns:
-            policy batch data, like the policy in the top of file
-        """
         batch_context = []
         batch_context_policy = []
         batch_user_profile = []

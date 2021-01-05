@@ -14,23 +14,13 @@ from typing import List, Union, Optional
 import torch
 
 
-def add_start_end_token_idx(vec: list, start_token_idx=None, end_token_idx=None):
-    res = copy(vec)
-    if start_token_idx:
-        res.insert(0, start_token_idx)
-    if end_token_idx:
-        res.append(end_token_idx)
-    return res
-
-
 def padded_tensor(
         items: List[Union[List[int], torch.LongTensor]],
         pad_idx: int = 0,
         pad_tail: bool = True,
         max_len: Optional[int] = None,
 ) -> torch.LongTensor:
-    """
-    Create a padded matrix from an uneven list of lists.
+    """Create a padded matrix from an uneven list of lists.
 
     Returns padded matrix.
 
@@ -44,10 +34,10 @@ def padded_tensor(
     :param bool pad_tail:
     :param int max_len: if None, the max length is the maximum item length
 
-    :returns: padded
+    :returns: padded tensor.
     :rtype: (Tensor[int64], list[int])
-    """
 
+    """
     # number of items
     n = len(items)
     # length of each item
@@ -82,14 +72,15 @@ def padded_tensor(
 
 
 def get_onehot(data_list, categories) -> torch.Tensor:
-    """transform lists of label into one-hot
+    """Transform lists of label into one-hot.
 
     Args:
-        data_list (list of list of int):
-        categories (int): #label class
+        data_list (list of list of int): source data.
+        categories (int): #label class.
 
     Returns:
-        torch.Tensor: onehot labels
+        torch.Tensor: one-hot labels.
+
     """
     onehot_labels = []
     for label_list in data_list:
@@ -100,16 +91,37 @@ def get_onehot(data_list, categories) -> torch.Tensor:
     return torch.stack(onehot_labels, dim=0)
 
 
-def truncate(vec, max_length, truncate_tail=True):
-    """truncate vec to make its length within max length
+def add_start_end_token_idx(vec: list, start_token_idx: int = None, end_token_idx: int = None):
+    """Can choose to add start token in the beginning and end token in the end.
 
     Args:
-        vec (list):
-        max_length (int):
+        vec: source list composed of indexes.
+        start_token_idx: index of start token.
+        end_token_idx: index of end token.
+
+    Returns:
+        list: list added start or end token index.
+
+    """
+    res = copy(vec)
+    if start_token_idx:
+        res.insert(0, start_token_idx)
+    if end_token_idx:
+        res.append(end_token_idx)
+    return res
+
+
+def truncate(vec, max_length, truncate_tail=True):
+    """truncate vec to make its length no more than max length.
+
+    Args:
+        vec (list): source list.
+        max_length (int)
         truncate_tail (bool, optional): Defaults to True.
 
     Returns:
-        list: truncated vec
+        list: truncated vec.
+
     """
     if max_length is None:
         return vec
@@ -121,17 +133,21 @@ def truncate(vec, max_length, truncate_tail=True):
         return vec[-max_length:]
 
 
-def merge_utt(conv, split_token_idx=None, split_in_tail=False, final_token_idx=None):
-    """merge utterances in one conversation
+def merge_utt(conversation, split_token_idx=None, split_in_tail=False, final_token_idx=None):
+    """merge utterances in one conversation.
 
     Args:
-        conv (list of list of int): conversation consist of utterances consist of tokens
+        conversation (list of list of int): conversation consist of utterances consist of tokens.
+        split_token_idx (int): index of split token. Defaults to None.
+        split_in_tail (bool): split in tail or head. Defaults to False.
+        final_token_idx (int): index of final token. Defaults to None.
 
     Returns:
-        list: tokens of all utterances in one conversation
+        list: tokens of all utterances in one list.
+
     """
     merged_conv = []
-    for utt in conv:
+    for utt in conversation:
         for token in utt:
             merged_conv.append(token)
         if split_token_idx:

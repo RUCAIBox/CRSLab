@@ -21,7 +21,43 @@ from .resource import resources
 
 
 class TGReDialDataset(BaseDataset):
+    """TGReDial dataset
+
+    Notes:
+        ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resource.py``.
+
+    Attributes:
+        train_data: train dataset.
+        valid_data: valid dataset.
+        test_data: test dataset.
+        vocab (dict): ::
+
+            {
+                'tok2ind': map from token to index,
+                'ind2tok': map from index to token,
+                'topic2ind': map from topic to index,
+                'ind2topic': map from index to topic,
+                'entity2id': map from entity to index,
+                'id2entity': map from index to entity,
+                'word2id': map from word to index,
+                'vocab_size': len(self.tok2ind),
+                'n_topic': len(self.topic2ind) + 1,
+                'n_entity': max(self.entity2id.values()) + 1,
+                'n_word': max(self.word2id.values()) + 1,
+            }
+
+    """
+
     def __init__(self, opt, tokenize, restore=False, save=False):
+        """Specify tokenized resource and init base dataset.
+
+        Args:
+            opt (Config or dict): config for dataset or the whole system.
+            tokenize (str): how to tokenize dataset.
+            restore (bool): whether to restore saved dataset which has been processed. Defaults to False.
+            save (bool): whether to save dataset after processing. Defaults to False.
+
+        """
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
@@ -120,38 +156,6 @@ class TGReDialDataset(BaseDataset):
         return processed_train_data, processed_valid_data, processed_test_data, processed_side_data
 
     def _raw_data_process(self, raw_data):
-        """process raw data
-
-        Args:
-            raw_data (list of dict): {
-                'conv_id' (int):
-                'messages' (list of dict): {
-                    'local_id' (int): id of current utterance
-                    'role' (str): 'Seeker' or 'Recommender'
-                    'text' (list of str): utterance which has benn tokenized into tokens
-                    'movie' (list of str): mentioned movies in text
-                    'entity' (list of str): mentioned entities of cn-dbpedia in text
-                    'word' (list of str): mentioned words of hownet in text
-                    'target' (list of str): topic in current turn
-                    'final' (list): final goal for current turn
-                }
-            }
-
-        Returns:
-            list of dict: {
-                'role' (str): 'Seeker' or 'Recommender';
-                'user_profile' (list of list of int): id of tokens of sentences of user profile
-                'context_tokens' (list of list int): token ids of the preprocessed contextual dialog;
-                'response' (list of int): token ids of the ground-truth response;
-                'interaction_history' (list of int): id of items which have interaction of the user in current turn;
-                'items' (list of int): item ids mentioned in current turn, we only keep those in dbpedia for comparison;
-                'context_entities' (list of int): if necessary, id of entities in context;
-                'context_words' (list of int): if necessary, id of words in context;
-                'context_policy' (list of list of list): policy of each context turn, ont turn may have several policies, where first is action and second is keyword;
-                'target' (list): policy of current turn;
-                'final' (list): final goal for current turn;
-            }
-        """
         augmented_convs = [self._convert_to_id(conversation) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
@@ -159,9 +163,6 @@ class TGReDialDataset(BaseDataset):
         return augmented_conv_dicts
 
     def _convert_to_id(self, conversation):
-        """
-        convert token/word/entity/movie into ids;
-        """
         augmented_convs = []
         last_role = None
         for utt in conversation['messages']:
@@ -202,9 +203,6 @@ class TGReDialDataset(BaseDataset):
         return augmented_convs
 
     def _augment_and_add(self, raw_conv_dict):
-        """
-        augment one conversation into several instances;
-        """
         augmented_conv_dicts = []
         context_tokens, context_entities, context_words, context_policy, context_items = [], [], [], [], []
         entity_set, word_set = set(), set()
@@ -243,15 +241,6 @@ class TGReDialDataset(BaseDataset):
         return augmented_conv_dicts
 
     def _side_data_process(self):
-        """process side data
-
-        Returns:
-            dict: {
-                'entity_kg' (list of tuple): entity knowledge graph;
-                'word_kg' (list of tuple): word knowledge graph;
-                'item_entity_ids' (list of int): entity id of each item
-            }
-        """
         processed_entity_kg = self._entity_kg_process()
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
@@ -267,13 +256,6 @@ class TGReDialDataset(BaseDataset):
         return side_data
 
     def _entity_kg_process(self):
-        """get cn-dbpedia edge information
-
-        Args:
-
-        Returns:
-            list: edge list [(head_entity_id, tail_entity_id, new_relation_id)]
-        """
         edge_list = []  # [(entity, entity, relation)]
         for line in self.entity_kg:
             triple = line.strip().split('\t')
@@ -303,7 +285,6 @@ class TGReDialDataset(BaseDataset):
         }
 
     def _word_kg_process(self):
-        """return [(head_word, tail_word)]"""
         edges = set()  # {(entity, entity)}
         entities = set()
         for line in self.word_kg:

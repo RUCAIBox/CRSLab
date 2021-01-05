@@ -8,6 +8,15 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
+"""Config module which loads parameters for the whole system.
+
+Attributes:
+    SAVE_PATH (str): where system to save.
+    DATASET_PATH (str): where dataset to save.
+    MODEL_PATH (str): where model related data to save.
+    EMBEDDING_PATH (str): where pretrained embedding to save, used for evaluate embedding related metrics.
+"""
+
 import os
 from os.path import dirname, realpath
 

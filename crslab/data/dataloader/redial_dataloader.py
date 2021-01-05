@@ -20,7 +20,38 @@ movie_pattern = re.compile(r'^@\d{5,6}$')
 
 
 class ReDialDataLoader(BaseDataLoader):
+    """Dataloader for model ReDial.
+
+    Notes:
+        You can set the following parameters in config:
+
+        - ``'utterance_truncate'``: the maximum length of a single utterance.
+        - ``'conversation_truncate'``: the maximum length of the whole conversation.
+
+        The following values must be specified in ``vocab``:
+
+        - ``'pad'``
+        - ``'start'``
+        - ``'end'``
+        - ``'unk'``
+
+        the above values specify the id of needed special token.
+
+        - ``'ind2tok'``: map from index to token.
+        - ``'n_entity'``: number of entities in the entity KG of dataset.
+        - ``'vocab_size'``: size of vocab.
+
+    """
+
     def __init__(self, opt, dataset, vocab):
+        """
+
+        Args:
+            opt (Config or dict): config for dataloader or the whole system.
+            dataset: data for model.
+            vocab (dict): all kinds of useful size, idx and map between token and idx.
+
+        """
         super().__init__(opt, dataset)
         self.ind2tok = vocab['ind2tok']
         self.n_entity = vocab['n_entity']
@@ -113,24 +144,3 @@ class ReDialDataLoader(BaseDataLoader):
 
     def policy_batchify(self, batch):
         pass
-
-    def rec_interact(self, data):
-        context_entities = get_onehot(data['context_entities'], self.n_entity)
-        return context_entities
-
-    # def conv_interact(self, data):
-    #     context_tokens = [truncate(utterance, self.utterance_truncate, truncate_tail=True) for utterance in data['context_tokens']]
-    #     context_tokens = truncate(context_tokens, self.conversation_truncate, truncate_tail=True)
-    #     context_length = len(context_tokens)
-    #     utterance_lengths = [len(utterance) for utterance in context_tokens]
-    #     max_utterance_length = max(utterance_lengths)
-    #     request = context_tokens[-1]
-    #     response = None
-    #
-    #     padded_context = padded_tensor(conversation['context_tokens'], pad_idx=self.pad_token_idx,
-    #                                    pad_tail=True, max_len=max_utterance_length)
-    #     if len(conversation['context_tokens']) < max_context_length:
-    #         pad_tensor = padded_context.new_full(
-    #             (max_context_length - len(conversation['context_tokens']), max_utterance_length), self.pad_token_idx
-    #         )
-    #         padded_context = torch.cat((padded_context, pad_tensor), 0)

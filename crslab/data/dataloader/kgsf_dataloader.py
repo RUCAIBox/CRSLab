@@ -17,7 +17,39 @@ from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor,
 
 
 class KGSFDataLoader(BaseDataLoader):
+    """Dataloader for model KGSF.
+
+    Notes:
+        You can set the following parameters in config:
+
+        - ``'context_truncate'``: the maximum length of context.
+        - ``'response_truncate'``: the maximum length of response.
+        - ``'entity_truncate'``: the maximum length of mentioned entities in context.
+        - ``'word_truncate'``: the maximum length of mentioned words in context.
+
+        The following values must be specified in ``vocab``:
+
+        - ``'pad'``
+        - ``'start'``
+        - ``'end'``
+        - ``'pad_entity'``
+        - ``'pad_word'``
+
+        the above values specify the id of needed special token.
+
+        - ``'n_entity'``: the number of entities in the entity KG of dataset.
+
+    """
+
     def __init__(self, opt, dataset, vocab):
+        """
+
+        Args:
+            opt (Config or dict): config for dataloader or the whole system.
+            dataset: data for model.
+            vocab (dict): all kinds of useful size, idx and map between token and idx.
+
+        """
         super().__init__(opt, dataset)
         self.n_entity = vocab['n_entity']
         self.pad_token_idx = vocab['pad']
@@ -34,15 +66,6 @@ class KGSFDataLoader(BaseDataLoader):
         return self.get_data(self.pretrain_batchify, batch_size, shuffle, self.retain_recommender_target)
 
     def pretrain_batchify(self, batch):
-        """collate batch data for pretrain
-
-        Args:
-            batch (list of dict):
-
-        Returns:
-            torch.LongTensor: padded context words
-            torch.Tensor: one-hot label for context entities
-        """
         batch_context_entities = []
         batch_context_words = []
         for conv_dict in batch:
@@ -54,10 +77,6 @@ class KGSFDataLoader(BaseDataLoader):
                 get_onehot(batch_context_entities, self.n_entity))
 
     def rec_process_fn(self):
-        """
-        Sometimes, the recommender may recommend more than one movies to seeker,
-        hence we need to augment data for each recommended movie
-        """
         augment_dataset = []
         for conv_dict in tqdm(self.dataset):
             if conv_dict['role'] == 'Recommender':
@@ -68,17 +87,6 @@ class KGSFDataLoader(BaseDataLoader):
         return augment_dataset
 
     def rec_batchify(self, batch):
-        """collate batch data for rec
-
-        Args:
-            batch (list of dict):
-
-        Returns:
-            torch.LongTensor: padded context entities
-            torch.LongTensor: padded context words
-            torch.Tensor: one-hot label for context entities
-            torch.LongTensor: label for items to rec
-        """
         batch_context_entities = []
         batch_context_words = []
         batch_item = []
@@ -97,17 +105,6 @@ class KGSFDataLoader(BaseDataLoader):
         return self.retain_recommender_target()
 
     def conv_batchify(self, batch):
-        """collate batch data for conversation
-
-        Args:
-            batch (list of dict):
-
-        Returns:
-            torch.LongTensor: padded context tokens
-            torch.LongTensor: padded context entities
-            torch.LongTensor: padded context words
-            torch.LongTensor: padded response
-        """
         batch_context_tokens = []
         batch_context_entities = []
         batch_context_words = []
