@@ -4,14 +4,14 @@
 [![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/RUCAIBox/CRSlab/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-[论文]() | [English Version](./README.md)
+[论文](https://arxiv.org/pdf/2101.00939.pdf) | [English Version](./README.md)
 
 **CRSLab** 是**第一个**用于构建对话推荐系统（CRS）的开源工具包，其基于 PyTorch 实现、主要面向研究者使用，并具有如下特色：
 
-- **全面的基准模型和数据集**：我们集成了常用的 6 个数据集和 18 个模型，包括基于知识图谱的模型和预训练模型，比如  GCN，BERT 和 GPT-2；我们还对数据集进行相关处理以支持这些模型，并提供预处理后的版本供大家下载。
+- **全面的基准模型和数据集**：我们集成了常用的 6 个数据集和 18 个模型，包括基于图神经网络和预训练模型，比如  GCN，BERT 和 GPT-2；我们还对数据集进行相关处理以支持这些模型，并提供预处理后的版本供大家下载。
 - **大规模的标准评测**：我们支持一系列被广泛认可的评估方式来测试和比较不同的 CRS。
 - **通用和可扩展的结构**：我们设计了通用和可扩展的结构来统一各种对话推荐数据集和模型，并集成了多种内置接口和函数以便于快速开发。
-- **便捷的使用方法**：我们为新手提供了简单而灵活的配置，以快速启动集成在 CRSLab 中的模型。
+- **便捷的使用方法**：我们为新手提供了简单而灵活的配置，方便其快速启动集成在 CRSLab 中的模型。
 - **人性化的人机交互接口**：我们提供了人性化的人机交互界面，以供研究者对比和测试不同的模型系统。
 
 <p align="center">
@@ -46,7 +46,7 @@ CRSLab 可以在以下几种系统上运行：
 
 CRSLab 需要在 Python 3.6 或更高的环境下运行。
 
-CRSLab 要求 torch 版本在 1.4.0 及以上，如果你想在 GPU 上运行 CRSLab，请确保你的 CUDA 版本或者 CUDAToolkit 版本在 9.2 及以上。为保证 PyTorch Geometric 库的正常运行，请使用[链接](https://pytorch-geometric.com/whl/)所示的组合方式。
+CRSLab 要求 torch 版本在 1.4.0 及以上，如果你想在 GPU 上运行 CRSLab，请确保你的 CUDA 版本或者 CUDAToolkit 版本在 9.2 及以上。为保证 PyTorch Geometric 库的正常运行，请使用[链接](https://pytorch-geometric.com/whl/)所示的安装方式。
 
 
 
@@ -128,7 +128,7 @@ pip install -e .
 
 ## 快速上手
 
-从 GitHub 下载 CRSLab 后，可以使用提供的脚本进行简单的运行：
+从 GitHub 下载 CRSLab 后，可以使用提供的脚本快速运行和测试：
 
 ```bash
 python run_crslab.py --config config/kgsf/redial.yaml
@@ -150,7 +150,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 - `--save_system` 或 `-ss`：保存训练好的 CRS 系统。
 - `--restore_system` 或 `-rs`：从文件载入提前训练好的系统。
 - `--debug` 或 `-d`：用验证集代替训练集以方便调试。
-- `--interact` 或 `-i`：与你的系统对话交互，而非进行训练。
+- `--interact` 或 `-i`：与你的系统进行对话交互，而非进行训练。
 
 
 
@@ -256,10 +256,15 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 
 ## 引用
 
-如果你觉得 CRSLab 对你的科研工作有帮助，请引用我们的[论文]()：
+如果你觉得 CRSLab 对你的科研工作有帮助，请引用我们的[论文](https://arxiv.org/pdf/2101.00939.pdf)：
 
 ```
-
+@article{crslab,
+    title={CRSLab: An Open-Source Toolkit for Building Conversational Recommender System},
+    author={Kun Zhou, Xiaolei Wang, Yuanhang Zhou, Chenzhan Shang, Yuan Cheng, Wayne Xin Zhao, Yaliang Li, Ji-Rong Wen},
+    year={2021},
+    journal={arXiv preprint arXiv:2101.00939}
+}
 ```
 
 

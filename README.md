@@ -4,14 +4,14 @@
 [![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/rucaibox/crslab/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-[Paper]() | [中文版](./README_CN.md)
+[Paper](https://arxiv.org/pdf/2101.00939.pdf) | [中文版](./README_CN.md)
 
 **CRSLab** is an open-source toolkit for building Conversational Recommender System (CRS). It is developed based on Python and PyTorch. CRSLab has the following highlights:
 
 - **Comprehensive benchmark models and datasets**: We have integrated commonly-used 6 datasets and 18 models, including graph neural network and pre-training models such as R-GCN, BERT and GPT-2. We have preprocessed these datasets to support these models, and release for downloading.
 - **Extensive and standard evaluation protocols**: We support a series of widely-adopted evaluation protocols for testing and comparing different CRS.
 - **General and extensible structure**: We design a general and extensible structure to unify various conversational recommendation datasets and models, in which we integrate various built-in interfaces and functions for quickly development.
-- **Easy to get started**: We provide simple yet flexible configuration for new researchers easy to get started in our library. 
+- **Easy to get started**: We provide simple yet flexible configuration for new researchers to quickly start in our library. 
 - **Human-machine interaction interfaces**: We provide flexible human-machine interaction interfaces for researchers to conduct qualitative analysis.
 
 <p align="center">
@@ -251,10 +251,15 @@ We expect all contributions discussed in the issue tracker and going through PRs
 
 ## Citing
 
-If you find CRSLab useful for your research or development, please cite the following [Paper]():
+If you find CRSLab useful for your research or development, please cite the our [Paper](https://arxiv.org/pdf/2101.00939.pdf):
 
 ```
-
+@article{crslab,
+    title={CRSLab: An Open-Source Toolkit for Building Conversational Recommender System},
+    author={Kun Zhou, Xiaolei Wang, Yuanhang Zhou, Chenzhan Shang, Yuan Cheng, Wayne Xin Zhao, Yaliang Li, Ji-Rong Wen},
+    year={2021},
+    journal={arXiv preprint arXiv:2101.00939}
+}
 ```
 
 
