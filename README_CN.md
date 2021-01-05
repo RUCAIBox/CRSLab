@@ -2,7 +2,8 @@
 
 [![Pypi Latest Version](https://img.shields.io/pypi/v/crslab)](https://pypi.org/project/crslab)
 [![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/RUCAIBox/CRSlab/releases)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)[![arXiv](https://img.shields.io/badge/arXiv-CRSLab-%23B21B1B)](https://arxiv.org/abs/2101.00939)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![arXiv](https://img.shields.io/badge/arXiv-CRSLab-%23B21B1B)](https://arxiv.org/abs/2101.00939)
 
 [论文](https://arxiv.org/pdf/2101.00939.pdf) | [English Version](./README.md)
 
