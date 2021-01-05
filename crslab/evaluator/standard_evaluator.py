@@ -23,6 +23,15 @@ from ..download import build
 
 
 class StandardEvaluator(BaseEvaluator):
+    """The evaluator for all kind of model(recommender, conversation, policy)
+    
+    Args:
+        rec_metrics: the metrics to evaluate recommender model, including hit@K, ndcg@K and mrr@K
+        dist_set: the set to record dist n-gram
+        dist_cnt: the count of dist n-gram evaluation
+        gen_metrics: the metrics to evaluate conversational model, including bleu, dist, embedding metrics, f1
+        optim_metrics: the metrics to optimize in training
+    """
     def __init__(self, language):
         super(StandardEvaluator, self).__init__()
         # rec

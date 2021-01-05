@@ -3,9 +3,9 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import torch
 import torch.nn.functional as F
@@ -16,7 +16,24 @@ from crslab.model.base_model import BaseModel
 
 
 class TextCNNModel(BaseModel):
+    """This model was proposed in Selfattentive sequential recommendation.
+        
+    Attributes:
+        movie_num: A integer indicating the number of items
+        num_filters: A string indicating the number of filter in CNN
+        embed: A integer indicating the size of embedding layer
+        filter_sizes: A string indicating the size of filter in CNN
+        dropout: A float indicating the dropout rate
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         self.movie_num = vocab['n_entity']
         self.num_filters = opt['num_filters']
         self.embed = opt['embed']

@@ -11,6 +11,8 @@ from abc import ABC, abstractmethod
 
 
 class BaseEvaluator(ABC):
+    """This is the base class for evaluator"""
+    
     def rec_evaluate(self, preds, label):
         pass
 

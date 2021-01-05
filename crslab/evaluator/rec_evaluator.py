@@ -15,6 +15,12 @@ from .metrics import *
 
 
 class RecEvaluator(BaseEvaluator):
+    """The evaluator specially for reommender model
+    
+    Args:
+        rec_metrics: the metrics to evaluate recommender model, including hit@K, ndcg@K and mrr@K
+        optim_metrics: the metrics to optimize in training
+    """
     def __init__(self):
         super(RecEvaluator, self).__init__()
         self.rec_metrics = Metrics()

@@ -3,9 +3,9 @@
 # @Email  : czshang@outlook.com
 
 # UPDATE
-# @Time   : 2020/12/29
-# @Author : Xiaolei Wang
-# @email  : wxl1999@foxmail.com
+# @Time   : 2020/12/29, 2021/1/4
+# @Author : Xiaolei Wang, Yuanhang Zhou
+# @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import torch
 from torch import nn
@@ -15,7 +15,35 @@ from crslab.model.redial.layers import HRNN, SwitchingDecoder
 
 
 class ReDialConvModel(BaseModel):
+    """This model was proposed in Towards deep conversational recommendations.
+
+    Attributes:
+        vocab_size: A integer indicating the vocabulary size
+        pad_token_idx: A integer indicating the id of padding token
+        start_token_idx: A integer indicating the id of start token
+        end_token_idx: A integer indicating the id of end token
+        unk_token_idx: A integer indicating the id of unk token
+        pretrained_embedding: A string indicating the path of pretrained embedding
+        embedding_dim: A integer indicating the dimension of item embedding
+        utterance_encoder_hidden_size: A integer indicating the size of hidden size in utterance encoder
+        dialog_encoder_hidden_size: A integer indicating the size of hidden size in dialog encoder
+        dialog_encoder_num_layers: A integer indicating the number of layers in dialog encoder
+        use_dropout: A boolean indicating if we use the dropout
+        dropout: A float indicating the dropout rate
+        decoder_hidden_size: A integer indicating the size of hidden size in decoder
+        decoder_num_layers: A integer indicating the number of layer in decoder
+        decoder_embedding_dim: A integer indicating the demension of embedding in decoder
+
+    """
     def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters
+            device (torch.device): A variable indicating which device to place the data and model
+            vocab (dict): A dictionary record the vocabulary information
+            side_data (dict): A dictionary record the side data
+        """
         # dataset
         self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
