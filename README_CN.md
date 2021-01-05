@@ -156,7 +156,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 
 ## 模型
 
-在第一个发行版中，我们实现了 4 类共 18 个模型：
+在第一个发行版中，我们实现了 4 类共 18 个模型。这里我们将对话推荐任务主要拆分成三个任务：推荐任务（生成推荐的商品），对话任务（生成对话的回复）和策略任务（规划对话推荐的策略）。其中所有的对话推荐系统都具有对话和推荐任务，他们是对话推荐系统的核心功能。而策略任务是一个辅助任务，其致力于更好的控制对话推荐系统，在不同的模型中的实现也可能不同（如TG-ReDial采用一个主题预测模型，DuRecDial中采用一个对话规划模型等）：
 
 
 
@@ -164,19 +164,19 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 | :------: | :----------------------------------------------------------: | :-----------------------------: | :-----------------------------: |
 | CRS 模型 | [ReDial](https://arxiv.org/abs/1812.07617)<br/>[KBRD](https://arxiv.org/abs/1908.05391)<br/>[KGSF](https://arxiv.org/abs/2007.04032)<br/>[TG-ReDial](https://arxiv.org/abs/2010.04125) |       ×<br/>√<br/>√<br/>×       |       ×<br/>×<br/>×<br/>√       |
 | 推荐模型 | Popularity<br/>[GRU4Rec](https://arxiv.org/abs/1511.06939)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
-| 策略模型 | PMI<br/>[MGCG](https://arxiv.org/abs/2005.03954)<br/>[Conv-BERT](https://arxiv.org/abs/2010.04125)<br/>[Topic-BERT](https://arxiv.org/abs/2010.04125)<br/>[Profile-BERT](https://arxiv.org/abs/2010.04125) |    ×<br/>×<br/>×<br/>×<br/>×    |    ×<br/>×<br/>√<br/>√<br/>√    |
 | 对话模型 | [HERD](https://arxiv.org/abs/1507.04808)<br/>[Transformer](https://arxiv.org/abs/1706.03762)<br/>[GPT-2](http://www.persagen.com/files/misc/radford2019language.pdf) |          ×<br/>×<br/>×          |          ×<br/>×<br/>√          |
+| 策略模型 | PMI<br/>[MGCG](https://arxiv.org/abs/2005.03954)<br/>[Conv-BERT](https://arxiv.org/abs/2010.04125)<br/>[Topic-BERT](https://arxiv.org/abs/2010.04125)<br/>[Profile-BERT](https://arxiv.org/abs/2010.04125) |    ×<br/>×<br/>×<br/>×<br/>×    |    ×<br/>×<br/>√<br/>√<br/>√    |
 
 
+其中，CRS模型是指直接融合推荐模型和对话模型，以相互增强彼此的效果，故其内部往往已经包含了推荐、对话和策略模型。其他如推荐模型、对话模型、策略模型往往只关注以上任务中的某一个。
 
-其中，四种 CRS 模型集成了推荐模型和对话模型，以相互促进性能表现的提升。
-
-我们对于推荐模型和对话模型，分别实现了如下的自动评测指标模块：
+我们对于这几类模型，我们还分别实现了如下的自动评测指标模块：
 
 |   类别   |                             指标                             |
 | :------: | :----------------------------------------------------------: |
 | 推荐指标 |      Hit@{1, 10, 50}, MRR@{1, 10, 50}, NDCG@{1, 10, 50}      |
 | 对话指标 | PPL, BLEU-{1, 2, 3, 4}, Embedding Average/Extreme/Greedy, Distinct-{1, 2, 3, 4} |
+| 策略指标 | Accuracy, Hit@{1,3,5} |
 
 
 
@@ -199,7 +199,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 
 ## 评测结果
 
-我们在 TG-ReDial 数据集上对模型进行了训练，并记录了相关的评测结果。
+我们在 TG-ReDial 数据集上对模型进行了训练和测试，这里我们将数据集按照8:1:1切分。其中对于每条数据，我们从对话的第一轮开始，一轮一轮的进行推荐、策略生成、回复生成任务。下表记录了相关的评测结果。
 
 ### 推荐任务
 
@@ -214,18 +214,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 
 
 
-### 策略任务
-
-|    模型    |   Hit@1   |  Hit@10   |  Hit@50   |   MRR@1   |  MRR@10   |  MRR@50   |  NDCG@1   |  NDCG@10  |  NDCG@50  |
-| :--------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: |
-|    MGCG    |   0.591   |   0.818   |   0.883   |   0.591   |   0.680   |   0.683   |   0.591   |   0.712   |   0.729   |
-| Conv-BERT  |   0.597   |   0.814   |   0.881   |   0.597   |   0.684   |   0.687   |   0.597   |   0.716   |   0.731   |
-| Topic-BERT |   0.598   |   0.828   |   0.885   |   0.598   |   0.690   |   0.693   |   0.598   |   0.724   |   0.737   |
-| TG-ReDial  | **0.600** | **0.830** | **0.893** | **0.600** | **0.693** | **0.696** | **0.600** | **0.727** | **0.741** |
-
-
-
-### 生成任务
+### 对话任务
 
 |    模型     |  BLEU@1   |  BLEU@2   |   BLEU@3   |   BLEU@4   |  Dist@1  |  Dist@2  |  Dist@3  |  Dist@4  |  Average  |  Extreme  |  Greedy   |   PPL    |
 | :---------: | :-------: | :-------: | :--------: | :--------: | :------: | :------: | :------: | :------: | :-------: | :-------: | :-------: | :------: |
@@ -237,6 +226,15 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 |  TG-ReDial  |   0.125   |  0.0204   |  0.00354   |  0.000803  |  0.881   |   1.75   |   7.00   |   12.0   |   0.810   |   0.332   |   0.598   | **7.41** |
 
 
+
+### 策略任务
+
+|    模型    |   Hit@1   |  Hit@10   |  Hit@50   |   MRR@1   |  MRR@10   |  MRR@50   |  NDCG@1   |  NDCG@10  |  NDCG@50  |
+| :--------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: | :-------: |
+|    MGCG    |   0.591   |   0.818   |   0.883   |   0.591   |   0.680   |   0.683   |   0.591   |   0.712   |   0.729   |
+| Conv-BERT  |   0.597   |   0.814   |   0.881   |   0.597   |   0.684   |   0.687   |   0.597   |   0.716   |   0.731   |
+| Topic-BERT |   0.598   |   0.828   |   0.885   |   0.598   |   0.690   |   0.693   |   0.598   |   0.724   |   0.737   |
+| TG-ReDial  | **0.600** | **0.830** | **0.893** | **0.600** | **0.693** | **0.696** | **0.600** | **0.727** | **0.741** |
 
 ## 发行版本
 
