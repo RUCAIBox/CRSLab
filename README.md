@@ -256,7 +256,7 @@ We expect all contributions discussed in the issue tracker and going through PRs
 
 ## Citing
 
-If you find CRSLab useful for your research or development, please cite the our [Paper](https://arxiv.org/pdf/2101.00939.pdf):
+If you find CRSLab useful for your research or development, please cite our [Paper](https://arxiv.org/pdf/2101.00939.pdf):
 
 ```
 @article{crslab,
