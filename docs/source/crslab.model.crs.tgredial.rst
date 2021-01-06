@@ -4,14 +4,6 @@ crslab.model.crs.tgredial package
 Submodules
 ----------
 
-crslab.model.crs.tgredial.resource module
------------------------------------------
-
-.. automodule:: crslab.model.crs.tgredial.resource
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crslab.model.crs.tgredial.tg\_conv module
 -----------------------------------------
 

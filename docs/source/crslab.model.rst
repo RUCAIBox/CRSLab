@@ -24,6 +24,14 @@ crslab.model.base\_model module
    :undoc-members:
    :show-inheritance:
 
+crslab.model.pretrain\_model module
+-----------------------------------
+
+.. automodule:: crslab.model.pretrain_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 crslab.model.utils module
 -------------------------
 

@@ -12,14 +12,6 @@ crslab.model.recommendation.bert.bert module
    :undoc-members:
    :show-inheritance:
 
-crslab.model.recommendation.bert.resource module
-------------------------------------------------
-
-.. automodule:: crslab.model.recommendation.bert.resource
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

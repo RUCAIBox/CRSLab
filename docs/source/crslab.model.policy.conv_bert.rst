@@ -12,14 +12,6 @@ crslab.model.policy.conv\_bert.conv\_bert module
    :undoc-members:
    :show-inheritance:
 
-crslab.model.policy.conv\_bert.resource module
-----------------------------------------------
-
-.. automodule:: crslab.model.policy.conv_bert.resource
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
