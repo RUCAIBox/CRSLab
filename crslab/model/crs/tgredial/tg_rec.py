@@ -14,11 +14,11 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import MODEL_PATH
+from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from crslab.model.layers.sasrec import SASRecModel
-from .resource import resources
+from ...pretrain_model import BERT
 
 
 class TGRecModel(BaseModel):
@@ -34,7 +34,9 @@ class TGRecModel(BaseModel):
         attention_probs_dropout_prob: A float indicating the dropout rate in attention layers
         hidden_act: A string indicating the activation function type in SASRec
         num_hidden_layers: A integer indicating the number of hidden layers in SASRec
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
@@ -43,6 +45,7 @@ class TGRecModel(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model
             vocab (dict): A dictionary record the vocabulary information
             side_data (dict): A dictionary record the side data
+
         """
         self.hidden_dropout_prob = opt['hidden_dropout_prob']
         self.initializer_range = opt['initializer_range']
@@ -55,13 +58,13 @@ class TGRecModel(BaseModel):
         self.num_hidden_layers = opt['num_hidden_layers']
 
         language = dataset_language_map[opt['dataset']]
-        dpath = os.path.join(MODEL_PATH, "tgredial", language)
-        resource = resources[language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        resource = BERT[language]
         super(TGRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
+        self.bert = BertModel.from_pretrained(self.dpath)
         self.bert_hidden_size = self.bert.config.hidden_size
         self.concat_embed_size = self.bert_hidden_size + self.hidden_size
         self.fusion = nn.Linear(self.concat_embed_size, self.item_size)

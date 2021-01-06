@@ -22,7 +22,7 @@ class BaseModel(ABC, nn.Module):
         self.opt = opt
         self.device = device
 
-        if resource:
+        if resource is not None:
             self.dpath = dpath
             dfile = resource['file']
             build(dpath, dfile, version=resource['version'])

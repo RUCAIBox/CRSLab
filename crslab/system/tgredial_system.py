@@ -13,7 +13,7 @@ from math import floor
 import torch
 from loguru import logger
 
-from crslab.config import MODEL_PATH
+from crslab.config import PRETRAIN_PATH
 from crslab.data import get_dataloader, dataset_language_map
 from crslab.evaluator.metrics.base_metrics import AverageMetric
 from crslab.evaluator.metrics.gen_metrics import PPLMetric
@@ -350,7 +350,7 @@ class TGReDialSystem(BaseSystem):
 
         if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
             language = dataset_language_map[self.opt['dataset']]
-            path = os.path.join(MODEL_PATH, "tgredial", language, self.opt['tokenize'][stage])
+            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
             tokens = self.tokenize(text, 'bert', path)
 
         token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]

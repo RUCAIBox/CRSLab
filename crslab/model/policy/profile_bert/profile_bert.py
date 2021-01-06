@@ -13,10 +13,10 @@ import torch
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import MODEL_PATH
+from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from .resource import resources
+from ...pretrain_model import BERT
 
 
 class ProfileBERTModel(BaseModel):
@@ -24,7 +24,9 @@ class ProfileBERTModel(BaseModel):
 
     Attributes:
         topic_class_num: A integer indicating the number of topic
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
@@ -37,13 +39,13 @@ class ProfileBERTModel(BaseModel):
         """
         self.topic_class_num = vocab['n_topic']
         language = dataset_language_map[opt['dataset']]
-        dpath = os.path.join(MODEL_PATH, "tgredial", language)
-        resource = resources[language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        resource = BERT[language]
         super(ProfileBERTModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self, *args, **kwargs):
         """build model"""
-        self.profile_bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
+        self.profile_bert = BertModel.from_pretrained(self.dpath)
 
         self.bert_hidden_size = self.profile_bert.config.hidden_size
         self.state2topic_id = nn.Linear(self.bert_hidden_size,

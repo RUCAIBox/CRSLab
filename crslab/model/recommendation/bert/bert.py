@@ -13,10 +13,10 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import MODEL_PATH
+from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from .resource import resources
+from ...pretrain_model import BERT
 
 
 class BERTModel(BaseModel):
@@ -24,7 +24,9 @@ class BERTModel(BaseModel):
 
     Attributes:
         item_size: A integer indicating the number of items
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
@@ -33,17 +35,18 @@ class BERTModel(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model
             vocab (dict): A dictionary record the vocabulary information
             side_data (dict): A dictionary record the side data
+
         """
         self.item_size = vocab['n_entity']
 
         language = dataset_language_map[opt['dataset']]
-        dpath = os.path.join(MODEL_PATH, "tgredial", language)
-        resource = resources[language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        resource = BERT[language]
         super(BERTModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.bert = BertModel.from_pretrained(os.path.join(self.dpath, 'bert'))
+        self.bert = BertModel.from_pretrained(self.dpath)
         # print(self.item_size)
         self.bert_hidden_size = self.bert.config.hidden_size
         self.mlp = nn.Linear(self.bert_hidden_size, self.item_size)

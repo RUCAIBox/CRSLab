@@ -13,10 +13,10 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
-from crslab.config import MODEL_PATH
+from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from .resource import resources
+from ...pretrain_model import GPT2
 
 
 class GPT2Model(BaseModel):
@@ -26,7 +26,9 @@ class GPT2Model(BaseModel):
         context_truncate: A integer indicating the length of dialogue context
         response_truncate: A integer indicating the length of dialogue response
         pad_id: A integer indicating the id of padding token
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
@@ -35,19 +37,20 @@ class GPT2Model(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model
             vocab (dict): A dictionary record the vocabulary information
             side_data (dict): A dictionary record the side data
+
         """
         self.context_truncate = opt['context_truncate']
         self.response_truncate = opt['response_truncate']
         self.pad_id = vocab['pad']
 
         language = dataset_language_map[opt['dataset']]
-        dpath = os.path.join(MODEL_PATH, "tgredial", language)
-        resource = resources[language]
+        dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
+        resource = GPT2[language]
         super(GPT2Model, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         """build model"""
-        self.model = GPT2LMHeadModel.from_pretrained(os.path.join(self.dpath, 'gpt2'))
+        self.model = GPT2LMHeadModel.from_pretrained(self.dpath)
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
     def converse(self, batch, mode):
