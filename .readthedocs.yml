@@ -3,7 +3,7 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-  configuration: doc/source/conf.py
+  configuration: docs/source/conf.py
 
 # Build documentation with MkDocs
 #mkdocs:
@@ -16,7 +16,7 @@ formats: all
 python:
   version: 3.6
   install:
-    - requirements: doc/requirements_torch.txt
-    - requirements: doc/requirements_geometric.txt
-    - requirements: doc/requirements.txt
-    - requirements: doc/requirements_sphinx.txt
+    - requirements: docs/requirements_torch.txt
+    - requirements: docs/requirements_geometric.txt
+    - requirements: docs/requirements.txt
+    - requirements: docs/requirements_sphinx.txt

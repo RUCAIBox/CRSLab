@@ -11,7 +11,7 @@ import torch
 from torch import nn
 
 from crslab.model.base_model import BaseModel
-from crslab.model.redial.layers import HRNN, SwitchingDecoder
+from .modules import HRNN, SwitchingDecoder
 
 
 class ReDialConvModel(BaseModel):

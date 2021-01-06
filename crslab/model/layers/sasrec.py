@@ -38,7 +38,7 @@ class SASRecModel(nn.Module):
 
         Args:
             hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec
-            initializer_range: A float indicating the range of parameters initization in SASRec
+            initializer_range: A float indicating the range of parameters initiation in SASRec
             device: A variable indicating the device to place the data and model
             hidden_size: A integer indicating the size of hidden state in SASRec
             max_seq_length: A integer indicating the max interaction history length

@@ -12,7 +12,7 @@ from loguru import logger
 from torch import nn
 
 from crslab.model.base_model import BaseModel
-from crslab.model.sasrec_model import SASRecModel
+from crslab.model.layers.sasrec import SASRecModel
 
 
 class SASRECModel(BaseModel):

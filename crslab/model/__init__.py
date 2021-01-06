@@ -10,12 +10,9 @@
 from loguru import logger
 
 from .conversation import *
-from .kbrd import *
-from .kgsf import *
+from .crs import *
 from .policy import *
 from .recommendation import *
-from .redial import *
-from .tgredial import *
 
 Model_register_table = {
     'KGSF': KGSFModel,

@@ -13,16 +13,17 @@ import torch
 from torch import nn
 from transformers import BertModel
 
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from .resource import resources
-from ...config import MODEL_PATH
-from ...data import dataset_language_map
 
 
 class TGPolicyModel(BaseModel):
     """This model was proposed in Towards topic-guided conversational recommender system
         
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 

@@ -9,11 +9,10 @@
 
 import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-
 
 """Near infinity, useful as a large penalty for scoring when inf is bad."""
 NEAR_INF = 1e20

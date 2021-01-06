@@ -14,11 +14,11 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from crslab.model.sasrec_model import SASRecModel
+from crslab.model.layers.sasrec import SASRecModel
 from .resource import resources
-from ...config import MODEL_PATH
-from ...data import dataset_language_map
 
 
 class TGRecModel(BaseModel):

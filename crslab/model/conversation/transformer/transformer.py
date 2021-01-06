@@ -13,7 +13,7 @@ from loguru import logger
 from torch import nn
 
 from crslab.model.base_model import BaseModel
-from crslab.model.transformer import TransformerEncoder, TransformerDecoder
+from crslab.model.layers.transformer import TransformerEncoder, TransformerDecoder
 from crslab.model.utils import edge_to_pyg_format
 
 

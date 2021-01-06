@@ -13,10 +13,10 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
+from crslab.config import MODEL_PATH
+from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from .resource import resources
-from ...config import MODEL_PATH
-from ...data import dataset_language_map
 
 
 class TGConvModel(BaseModel):

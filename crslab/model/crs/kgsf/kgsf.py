@@ -16,12 +16,13 @@ from loguru import logger
 from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
+from crslab.config import MODEL_PATH
 from crslab.model.base_model import BaseModel
-from crslab.model.layers import SelfAttentionSeq, GateLayer
-from crslab.model.transformer import TransformerEncoder, TransformerDecoderKG
+from crslab.model.layers.attention import SelfAttentionSeq
+from crslab.model.layers.transformer import TransformerEncoder, TransformerDecoderKG
 from crslab.model.utils import edge_to_pyg_format
+from .modules import GateLayer
 from .resource import resources
-from ...config import MODEL_PATH
 
 
 class KGSFModel(BaseModel):
@@ -52,7 +53,9 @@ class KGSFModel(BaseModel):
         n_positions: A integer indicating the number of position
         response_truncate = A integer indicating the longest length for response generation
         pretrained_embedding: A string indicating the path of pretrained embedding
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
@@ -61,6 +64,7 @@ class KGSFModel(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model
             vocab (dict): A dictionary record the vocabulary information
             side_data (dict): A dictionary record the side data
+
         """
         # vocab
         self.vocab_size = vocab['vocab_size']
