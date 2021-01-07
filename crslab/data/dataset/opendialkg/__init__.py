@@ -1,1 +1,1 @@
-from .opendialkg_dataset import OpenDialKGDataset
+from .opendialkg import OpenDialKGDataset

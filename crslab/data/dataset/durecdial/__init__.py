@@ -1,1 +1,1 @@
-from .durecdial_dataset import DuRecDialDataset
+from .durecdial import DuRecDialDataset

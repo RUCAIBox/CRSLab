@@ -1,1 +1,1 @@
-from .gorecdial_dataset import GoRecDialDataset
+from .gorecdial import GoRecDialDataset

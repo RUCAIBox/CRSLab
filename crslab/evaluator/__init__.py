@@ -10,9 +10,9 @@
 
 from loguru import logger
 
-from .conv_evaluator import ConvEvaluator
-from .rec_evaluator import RecEvaluator
-from .standard_evaluator import StandardEvaluator
+from .conv import ConvEvaluator
+from .rec import RecEvaluator
+from .standard import StandardEvaluator
 from ..data import dataset_language_map
 
 Evaluator_register_table = {

@@ -10,7 +10,7 @@
 import torch
 from torch import nn
 
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 from .modules import HRNN, SwitchingDecoder
 
 

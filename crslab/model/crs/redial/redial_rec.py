@@ -9,7 +9,7 @@
 
 import torch.nn as nn
 
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 
 
 class ReDialRecModel(BaseModel):

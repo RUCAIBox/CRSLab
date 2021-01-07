@@ -1,1 +1,1 @@
-from .redial_dataset import ReDialDataset
+from .redial import ReDialDataset

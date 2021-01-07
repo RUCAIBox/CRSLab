@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from loguru import logger
 from torch import nn
 
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 
 
 class TextCNNModel(BaseModel):

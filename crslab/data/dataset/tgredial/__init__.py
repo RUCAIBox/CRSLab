@@ -1,1 +1,1 @@
-from .tgredial_dataset import TGReDialDataset
+from .tgredial import TGReDialDataset

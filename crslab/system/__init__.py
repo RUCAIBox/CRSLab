@@ -9,10 +9,10 @@
 
 from loguru import logger
 
-from .kbrd_system import KBRDSystem
-from .kgsf_system import KGSFSystem
-from .redial_system import ReDialSystem
-from .tgredial_system import TGReDialSystem
+from .kbrd import KBRDSystem
+from .kgsf import KGSFSystem
+from .redial import ReDialSystem
+from .tgredial import TGReDialSystem
 
 system_register_table = {
     'ReDialRec_ReDialConv': ReDialSystem,

@@ -17,7 +17,7 @@ from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
 from crslab.config import MODEL_PATH
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 from crslab.model.layers.attention import SelfAttentionSeq
 from crslab.model.layers.transformer import TransformerEncoder
 from crslab.model.utils import edge_to_pyg_format

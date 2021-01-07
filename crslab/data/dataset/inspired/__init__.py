@@ -1,1 +1,1 @@
-from .inspired_dataset import InspiredDataset
+from .inspired import InspiredDataset

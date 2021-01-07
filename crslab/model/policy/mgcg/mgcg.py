@@ -10,7 +10,7 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 
 
 class MGCGModel(BaseModel):

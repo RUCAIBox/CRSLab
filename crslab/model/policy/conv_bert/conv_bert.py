@@ -14,7 +14,7 @@ from transformers import BertModel
 
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
-from crslab.model.base_model import BaseModel
+from crslab.model.base import BaseModel
 from ...pretrain_models import pretrain_models
 
 

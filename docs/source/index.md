@@ -18,11 +18,11 @@
    :maxdepth: 1
    :caption: API REFERENCE
 
-   crslab.config
-   crslab.data
-   crslab.evaluator
-   crslab.model
-   crslab.system
+   api/crslab.config
+   api/crslab.data
+   api/crslab.evaluator
+   api/crslab.model
+   api/crslab.system
 
 Indices and tables
 ==================
