@@ -6,7 +6,7 @@ tokenize:
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 rec_model: GRU4REC
 gru_hidden_size: 50
@@ -17,10 +17,13 @@ dropout_hidden: 0.0
 hidden_size: 50
 # optim
 rec:
-  epoch: 1
-  batch_size: 8
+  epoch: 50
+  batch_size: 64
   optimizer:
-    name: AdamW
-    lr: !!float 1e-4
+    name: Adam
+    lr: !!float 1e-3
     weight_decay: !!float 0.0000
   lr_bert: !!float 1e-5
+  early_stop: true
+  stop_mode: max
+  impatience: 3

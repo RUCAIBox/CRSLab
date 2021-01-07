@@ -6,7 +6,7 @@ tokenize:
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 policy_model: MGCG
 dropout_hidden: 0
@@ -15,7 +15,7 @@ hidden_size: 300
 embedding_dim: 300
 # optim
 policy:
-  epoch: 1
+  epoch: 100
   batch_size: 1024
   weight_decay: 0.01
   optimizer:

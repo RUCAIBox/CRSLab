@@ -1,14 +1,13 @@
 # dataset
-dataset: TGReDial
-tokenize: pkuseg
+dataset: ReDial
+tokenize: nltk
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
-scale: 0.01
+scale: 1
 # model
 model: KBRD
 token_emb_dim: 300
-n_relation: 56
 kg_emb_dim: 128
 num_bases: 8
 n_heads: 2
@@ -23,14 +22,14 @@ reduction: false
 n_positions: 1024
 # optim
 rec:
-  epoch: 1
+  epoch: 10
   batch_size: 4096
   optimizer:
     name: Adam
     lr: !!float 3e-3
 conv:
-  epoch: 1
-  batch_size: 128
+  epoch: 10
+  batch_size: 32
   early_stop: True
   stop_mode: min
   optimizer:

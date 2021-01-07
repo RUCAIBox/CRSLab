@@ -6,12 +6,12 @@ tokenize:
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 policy_model: ConvBERT
 # optim
 policy:
-  epoch: 1
+  epoch: 50
   batch_size: 8
   weight_decay: 0.01
   optimizer:

@@ -1,12 +1,12 @@
 # dataset
 dataset: TGReDial
 tokenize:
-  rec: pkuseg
+  rec: sougou
 # dataloader
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 rec_model: TextCNN
 hidden_dropout_prob: 0.2
@@ -23,10 +23,13 @@ filter_sizes: (2, 3, 4)
 dropout: 0.5
 # optim
 rec:
-  epoch: 1
-  batch_size: 8
+  epoch: 50
+  batch_size: 64
   optimizer:
-    name: AdamW
+    name: Adam
     lr: !!float 1e-3
     weight_decay: !!float 0.0000
   lr_bert: !!float 1e-5
+  early_stop: true
+  stop_mode: max
+  impatience: 3

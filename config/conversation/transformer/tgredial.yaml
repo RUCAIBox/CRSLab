@@ -5,7 +5,7 @@ tokenize:
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
-scale: 0.1
+scale: 1
 # model
 conv_model: Transformer
 token_emb_dim: 300
@@ -23,14 +23,14 @@ reduction: false
 n_positions: 1024
 # optim
 conv:
-  epoch: 1
+  epoch: 50
   batch_size: 64
   early_stop: True
   stop_mode: min
+  patience: 3
   optimizer:
     name: Adam
     lr: !!float 1e-3
   lr_scheduler:
     name: ReduceLROnPlateau
-    patience: 3
     factor: 0.5

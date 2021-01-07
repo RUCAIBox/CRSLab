@@ -6,15 +6,18 @@ tokenize:
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 conv_model: GPT2
 # optim
 conv:
-  epoch: 1
-  batch_size: 1
+  epoch: 50
+  batch_size: 8
   gradient_clip: 1.0
   update_freq: 1
+  early_stop: true
+  stop_mode: min
+  impatience: 3
   optimizer:
     name: AdamW
     lr: !!float 1.5e-4
