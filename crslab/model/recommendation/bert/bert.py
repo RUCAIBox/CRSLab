@@ -20,10 +20,13 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class BERTModel(BaseModel):
-    """The model was proposed in BERT: pre-training of deep bidirectional transformers for language understanding.
+    """The model was proposed in `BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding`_.
 
     Attributes:
-        item_size: A integer indicating the number of items
+        item_size: A integer indicating the number of items.
+
+    .. _`BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding`:
+       https://www.aclweb.org/anthology/N19-1423/
 
     """
 
@@ -31,10 +34,10 @@ class BERTModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         self.item_size = vocab['n_entity']

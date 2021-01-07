@@ -10,6 +10,20 @@
 
 from crslab.download import DownloadableFile
 
+"""Download links of pretrain models.
+
+Now we provide the following models:
+
+- `BERT`_: zh, en
+- `GPT2`_: zh, en
+
+.. _BERT:
+   https://www.aclweb.org/anthology/N19-1423/
+.. _GPT2:
+   https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
+    
+"""
+
 pretrain_models = {
     'bert': {
         'zh': {

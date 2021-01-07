@@ -21,7 +21,7 @@ from .resources import resources
 
 
 class OpenDialKGDataset(BaseDataset):
-    """OpenDialKG dataset
+    """The dataset was proposed in `OpenDialKG: Explainable Conversational Reasoning with Attention-based Walks over Knowledge Graphs`_.
 
     Notes:
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
@@ -42,6 +42,9 @@ class OpenDialKGDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _`OpenDialKG: Explainable Conversational Reasoning with Attention-based Walks over Knowledge Graphs`:
+       https://www.aclweb.org/anthology/P19-1081/
 
     """
 

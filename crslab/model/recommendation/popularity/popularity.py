@@ -19,16 +19,19 @@ class PopularityModel(BaseModel):
     """
 
     Attributes:
-        item_size: A integer indicating the number of items
+        item_size: A integer indicating the number of items.
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
         """
         self.item_size = vocab['n_entity']
         super(PopularityModel, self).__init__(opt, device)

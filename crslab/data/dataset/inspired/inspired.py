@@ -20,7 +20,7 @@ from .resources import resources
 
 
 class InspiredDataset(BaseDataset):
-    """Inspired dataset
+    """The dataset was proposed in `INSPIRED: Toward Sociable Recommendation Dialog Systems`_.
 
     Notes:
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
@@ -41,6 +41,9 @@ class InspiredDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _`INSPIRED: Toward Sociable Recommendation Dialog Systems`:
+       https://www.aclweb.org/anthology/2020.emnlp-main.654/
 
     """
 

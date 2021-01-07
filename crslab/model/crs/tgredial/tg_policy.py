@@ -20,16 +20,21 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class TGPolicyModel(BaseModel):
-    """This model was proposed in Towards topic-guided conversational recommender system"""
+    """This model was proposed in `Towards topic-guided conversational recommender system`_.
+
+    .. _Towards topic-guided conversational recommender system:
+       https://www.aclweb.org/anthology/2020.coling-main.365/
+
+    """
 
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
         
         """
         self.topic_class_num = vocab['n_topic']

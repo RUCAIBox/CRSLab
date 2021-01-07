@@ -20,7 +20,7 @@ from .resources import resources
 
 
 class GoRecDialDataset(BaseDataset):
-    """GoRecDial dataset
+    """The dataset was proposed in `Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue`_.
 
     Notes:
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
@@ -41,6 +41,9 @@ class GoRecDialDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _`Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue`:
+       https://www.aclweb.org/anthology/D19-1203/
 
     """
 

@@ -29,15 +29,16 @@ class TGReDialSystem(BaseSystem):
         """
 
         Args:
-            opt ([dict]): Indicating the hyper parameters
-            train_dataloader ([BaseDataLoader]): Indicating the train dataloader of corresponding dataset
-            valid_dataloader ([BaseDataLoader]): Indicating the valid dataloader of corresponding dataset
-            test_dataloader ([BaseDataLoader]): Indicating the test dataloader of corresponding dataset
-            vocab ([dict]): Indicating the vocabulary
-            side_data ([dict]): Indicating the side data
+            opt (dict): Indicating the hyper parameters.
+            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
+            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
+            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
+            vocab (dict): Indicating the vocabulary.
+            side_data (dict): Indicating the side data.
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
             interact (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+
         """
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
                                              test_dataloader, vocab, side_data, restore_system, interact, debug)

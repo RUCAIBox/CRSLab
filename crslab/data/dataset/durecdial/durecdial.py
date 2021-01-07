@@ -20,7 +20,7 @@ from .resources import resources
 
 
 class DuRecDialDataset(BaseDataset):
-    """DuRecDial dataset
+    """The dataset was proposed in `Towards Conversational Recommendation over Multi-Type Dialogs`_.
 
     Notes:
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
@@ -41,6 +41,9 @@ class DuRecDialDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _Towards Conversational Recommendation over Multi-Type Dialogs:
+       https://www.aclweb.org/anthology/2020.acl-main.98/
 
     """
 

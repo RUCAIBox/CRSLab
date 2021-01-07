@@ -20,12 +20,15 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class GPT2Model(BaseModel):
-    """This model was proposed in  Language models are unsupervised multitask learners
+    """This model was proposed in `Language models are unsupervised multitask learners`_.
         
     Attributes:
-        context_truncate: A integer indicating the length of dialogue context
-        response_truncate: A integer indicating the length of dialogue response
-        pad_id: A integer indicating the id of padding token
+        context_truncate: A integer indicating the length of dialogue context.
+        response_truncate: A integer indicating the length of dialogue response.
+        pad_id: A integer indicating the id of padding token.
+
+    .. _Language models are unsupervised multitask learners:
+       https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
 
     """
 
@@ -33,10 +36,10 @@ class GPT2Model(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         self.context_truncate = opt['context_truncate']

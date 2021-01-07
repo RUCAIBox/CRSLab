@@ -22,18 +22,21 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class TGRecModel(BaseModel):
-    """This model was proposed in Towards topic-guided conversational recommender system
+    """This model was proposed in `Towards topic-guided conversational recommender system`_.
         
     Attributes:
-        hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec
-        initializer_range: A float indicating the range of parameters initization in SASRec
-        hidden_size: A integer indicating the size of hidden state in SASRec
-        max_seq_length: A integer indicating the max interaction history length
-        item_size: A integer indicating the number of items
-        num_attention_heads: A integer indicating the head number in SASRec
-        attention_probs_dropout_prob: A float indicating the dropout rate in attention layers
-        hidden_act: A string indicating the activation function type in SASRec
-        num_hidden_layers: A integer indicating the number of hidden layers in SASRec
+        hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec.
+        initializer_range: A float indicating the range of parameters initization in SASRec.
+        hidden_size: A integer indicating the size of hidden state in SASRec.
+        max_seq_length: A integer indicating the max interaction history length.
+        item_size: A integer indicating the number of items.
+        num_attention_heads: A integer indicating the head number in SASRec.
+        attention_probs_dropout_prob: A float indicating the dropout rate in attention layers.
+        hidden_act: A string indicating the activation function type in SASRec.
+        num_hidden_layers: A integer indicating the number of hidden layers in SASRec.
+
+    .. _Towards topic-guided conversational recommender system:
+       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 
@@ -41,10 +44,10 @@ class TGRecModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         self.hidden_dropout_prob = opt['hidden_dropout_prob']

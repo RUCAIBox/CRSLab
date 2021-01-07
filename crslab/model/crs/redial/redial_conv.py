@@ -15,34 +15,38 @@ from .modules import HRNN, SwitchingDecoder
 
 
 class ReDialConvModel(BaseModel):
-    """This model was proposed in Towards deep conversational recommendations.
+    """This model was proposed in `Towards Deep Conversational Recommendations`_.
 
     Attributes:
-        vocab_size: A integer indicating the vocabulary size
-        pad_token_idx: A integer indicating the id of padding token
-        start_token_idx: A integer indicating the id of start token
-        end_token_idx: A integer indicating the id of end token
-        unk_token_idx: A integer indicating the id of unk token
-        pretrained_embedding: A string indicating the path of pretrained embedding
-        embedding_dim: A integer indicating the dimension of item embedding
-        utterance_encoder_hidden_size: A integer indicating the size of hidden size in utterance encoder
-        dialog_encoder_hidden_size: A integer indicating the size of hidden size in dialog encoder
-        dialog_encoder_num_layers: A integer indicating the number of layers in dialog encoder
-        use_dropout: A boolean indicating if we use the dropout
-        dropout: A float indicating the dropout rate
-        decoder_hidden_size: A integer indicating the size of hidden size in decoder
-        decoder_num_layers: A integer indicating the number of layer in decoder
-        decoder_embedding_dim: A integer indicating the demension of embedding in decoder
+        vocab_size: A integer indicating the vocabulary size.
+        pad_token_idx: A integer indicating the id of padding token.
+        start_token_idx: A integer indicating the id of start token.
+        end_token_idx: A integer indicating the id of end token.
+        unk_token_idx: A integer indicating the id of unk token.
+        pretrained_embedding: A string indicating the path of pretrained embedding.
+        embedding_dim: A integer indicating the dimension of item embedding.
+        utterance_encoder_hidden_size: A integer indicating the size of hidden size in utterance encoder.
+        dialog_encoder_hidden_size: A integer indicating the size of hidden size in dialog encoder.
+        dialog_encoder_num_layers: A integer indicating the number of layers in dialog encoder.
+        use_dropout: A boolean indicating if we use the dropout.
+        dropout: A float indicating the dropout rate.
+        decoder_hidden_size: A integer indicating the size of hidden size in decoder.
+        decoder_num_layers: A integer indicating the number of layer in decoder.
+        decoder_embedding_dim: A integer indicating the dimension of embedding in decoder.
+
+    .. _Towards Deep Conversational Recommendations:
+       https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
 
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         # dataset

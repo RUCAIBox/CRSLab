@@ -20,12 +20,15 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class TGConvModel(BaseModel):
-    """This model was proposed in Towards topic-guided conversational recommender system
+    """This model was proposed in `Towards topic-guided conversational recommender system`_.
         
     Attributes:
-        context_truncate: A integer indicating the length of dialogue context
-        response_truncate: A integer indicating the length of dialogue response
-        pad_id: A integer indicating the id of padding token
+        context_truncate: A integer indicating the length of dialogue context.
+        response_truncate: A integer indicating the length of dialogue response.
+        pad_id: A integer indicating the id of padding token.
+
+    .. _Towards topic-guided conversational recommender system:
+       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 
@@ -33,10 +36,10 @@ class TGConvModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         self.context_truncate = opt['context_truncate']

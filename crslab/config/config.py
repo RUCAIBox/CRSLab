@@ -134,5 +134,5 @@ class Config:
 
 
 if __name__ == '__main__':
-    opt_dict = Config('../../config/kbrd/redial.yaml')
+    opt_dict = Config('../../config/crs/kbrd/redial.yaml')
     pprint(opt_dict)

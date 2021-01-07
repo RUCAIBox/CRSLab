@@ -14,24 +14,29 @@ from crslab.model.base import BaseModel
 
 
 class MGCGModel(BaseModel):
-    """This model was proposed in Towards topic-guided conversational recommender system
+    """This model was proposed in `Towards Conversational Recommendation over Multi-Type Dialogs`_.
 
     Attributes:
-        topic_class_num: A integer indicating the number of topic
-        vocab_size: A integer indicating the size of vocabulary
-        embedding_dim: A integer indicating the dimension of embedding layer
-        hidden_size: A integer indicating the size of hidden state
-        num_layers: A integer indicating the number of layers in GRU
-        dropout_hidden: A float indicating the dropout rate of hidden state
+        topic_class_num: A integer indicating the number of topic.
+        vocab_size: A integer indicating the size of vocabulary.
+        embedding_dim: A integer indicating the dimension of embedding layer.
+        hidden_size: A integer indicating the size of hidden state.
+        num_layers: A integer indicating the number of layers in GRU.
+        dropout_hidden: A float indicating the dropout rate of hidden state.
+
+    .. _Towards Conversational Recommendation over Multi-Type Dialogs:
+       https://www.aclweb.org/anthology/2020.acl-main.98/
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
         
         """
         self.topic_class_num = vocab['n_topic']

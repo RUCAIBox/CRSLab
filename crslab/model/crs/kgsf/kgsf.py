@@ -26,33 +26,36 @@ from .resources import resources
 
 
 class KGSFModel(BaseModel):
-    """This model was proposed in Improving conversational recommender systems via knowledge graph based semantic fusion
+    """This model was proposed in `Improving conversational recommender systems via knowledge graph based semantic fusion`_.
 
     Attributes:
-        vocab_size: A integer indicating the vocabulary size
-        pad_token_idx: A integer indicating the id of padding token
-        start_token_idx: A integer indicating the id of start token
-        end_token_idx: A integer indicating the id of end token
-        token_emb_dim: A integer indicating the dimension of token embedding layer
-        pretrain_embedding: A string indicating the path of pretrained embedding
-        n_word: A integer indicating the number of words
-        n_entity: A integer indicating the number of entities
-        pad_word_idx: A integer indicating the id of word padding 
-        pad_entity_idx: A integer indicating the id of entity padding
-        num_bases: A integer indicating the number of bases 
-        kg_emb_dim: A integer indicating the dimension of kg embedding
-        n_heads: A integer indicating the number of heads
-        n_layers: A integer indicating the number of layer
-        ffn_size: A integer indicating the size of ffn hidden
-        dropout: A float indicating the drouput rate
-        attention_dropout: A integer indicating the drouput rate of attention layer
-        relu_dropout: A integer indicating the drouput rate of relu layer
-        learn_positional_embeddings: A boolean indicating if we learn the positional embedding
-        embeddings_scale: A boolean indicating if we use the embeddings scale
-        reduction: A boolean indicating if we use the reduction
-        n_positions: A integer indicating the number of position
-        response_truncate = A integer indicating the longest length for response generation
-        pretrained_embedding: A string indicating the path of pretrained embedding
+        vocab_size: A integer indicating the vocabulary size.
+        pad_token_idx: A integer indicating the id of padding token.
+        start_token_idx: A integer indicating the id of start token.
+        end_token_idx: A integer indicating the id of end token.
+        token_emb_dim: A integer indicating the dimension of token embedding layer.
+        pretrain_embedding: A string indicating the path of pretrained embedding.
+        n_word: A integer indicating the number of words.
+        n_entity: A integer indicating the number of entities.
+        pad_word_idx: A integer indicating the id of word padding.
+        pad_entity_idx: A integer indicating the id of entity padding.
+        num_bases: A integer indicating the number of bases.
+        kg_emb_dim: A integer indicating the dimension of kg embedding.
+        n_heads: A integer indicating the number of heads.
+        n_layers: A integer indicating the number of layer.
+        ffn_size: A integer indicating the size of ffn hidden.
+        dropout: A float indicating the dropout rate.
+        attention_dropout: A integer indicating the dropout rate of attention layer.
+        relu_dropout: A integer indicating the dropout rate of relu layer.
+        learn_positional_embeddings: A boolean indicating if we learn the positional embedding.
+        embeddings_scale: A boolean indicating if we use the embeddings scale.
+        reduction: A boolean indicating if we use the reduction.
+        n_positions: A integer indicating the number of position.
+        response_truncate = A integer indicating the longest length for response generation.
+        pretrained_embedding: A string indicating the path of pretrained embedding.
+
+    .. _Improving conversational recommender systems via knowledge graph based semantic fusion:
+       https://dl.acm.org/doi/abs/10.1145/3394486.3403143
 
     """
 
@@ -60,10 +63,10 @@ class KGSFModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
 
         """
         # vocab

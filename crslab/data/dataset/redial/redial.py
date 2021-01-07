@@ -21,7 +21,7 @@ from .resources import resources
 
 
 class ReDialDataset(BaseDataset):
-    """ReDial dataset
+    """The dataset was proposed in `Towards Deep Conversational Recommendations`_.
 
     Notes:
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``
@@ -42,6 +42,9 @@ class ReDialDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _Towards Deep Conversational Recommendations:
+       https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
 
     """
 

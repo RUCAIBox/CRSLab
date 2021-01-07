@@ -18,17 +18,20 @@ class PMIModel(BaseModel):
     """
 
     Attributes:
-        topic_class_num: A integer indicating the number of topic
-        pad_topic: A integer indicating the id of topic padding 
+        topic_class_num: A integer indicating the number of topic.
+        pad_topic: A integer indicating the id of topic padding.
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
         """
         self.topic_class_num = vocab['n_topic']
         self.pad_topic = vocab['pad_topic']

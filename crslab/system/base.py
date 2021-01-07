@@ -40,15 +40,16 @@ class BaseSystem(ABC):
         """
 
         Args:
-            opt ([dict]): Indicating the hyper parameters
-            train_dataloader ([BaseDataLoader]): Indicating the train dataloader of corresponding dataset
-            valid_dataloader ([BaseDataLoader]): Indicating the valid dataloader of corresponding dataset
-            test_dataloader ([BaseDataLoader]): Indicating the test dataloader of corresponding dataset
-            vocab ([dict]): Indicating the vocabulary
-            side_data ([dict]): Indicating the side data
+            opt (dict): Indicating the hyper parameters.
+            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
+            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
+            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
+            vocab (dict): Indicating the vocabulary.
+            side_data (dict): Indicating the side data.
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
             interact (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+
         """
         self.opt = opt
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

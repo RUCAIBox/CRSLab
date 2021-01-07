@@ -16,23 +16,29 @@ from crslab.model.base import BaseModel
 
 
 class TextCNNModel(BaseModel):
-    """This model was proposed in Selfattentive sequential recommendation.
+    """This model was proposed in `Convolutional Neural Networks for Sentence Classification`_.
         
     Attributes:
-        movie_num: A integer indicating the number of items
-        num_filters: A string indicating the number of filter in CNN
-        embed: A integer indicating the size of embedding layer
-        filter_sizes: A string indicating the size of filter in CNN
-        dropout: A float indicating the dropout rate
+        movie_num: A integer indicating the number of items.
+        num_filters: A string indicating the number of filter in CNN.
+        embed: A integer indicating the size of embedding layer.
+        filter_sizes: A string indicating the size of filter in CNN.
+        dropout: A float indicating the dropout rate.
+
+    .. _Convolutional Neural Networks for Sentence Classification:
+       https://www.aclweb.org/anthology/D14-1181/
+
     """
+
     def __init__(self, opt, device, vocab, side_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters
-            device (torch.device): A variable indicating which device to place the data and model
-            vocab (dict): A dictionary record the vocabulary information
-            side_data (dict): A dictionary record the side data
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
         """
         self.movie_num = vocab['n_entity']
         self.num_filters = opt['num_filters']

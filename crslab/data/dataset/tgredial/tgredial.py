@@ -21,7 +21,7 @@ from .resources import resources
 
 
 class TGReDialDataset(BaseDataset):
-    """TGReDial dataset
+    """The dataset was proposed in `Towards Topic-Guided Conversational Recommender System`_.
 
     Notes:
         ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
@@ -45,6 +45,9 @@ class TGReDialDataset(BaseDataset):
                 'n_entity': max(self.entity2id.values()) + 1,
                 'n_word': max(self.word2id.values()) + 1,
             }
+
+    .. _Towards Topic-Guided Conversational Recommender System:
+       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 
