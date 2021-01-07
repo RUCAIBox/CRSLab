@@ -4,26 +4,26 @@ crslab.system package
 Submodules
 ----------
 
-crslab.system.base\_system module
----------------------------------
+crslab.system.base module
+-------------------------
 
-.. automodule:: crslab.system.base_system
+.. automodule:: crslab.system.base
    :members:
    :undoc-members:
    :show-inheritance:
 
-crslab.system.kbrd\_system module
----------------------------------
+crslab.system.kbrd module
+-------------------------
 
-.. automodule:: crslab.system.kbrd_system
+.. automodule:: crslab.system.kbrd
    :members:
    :undoc-members:
    :show-inheritance:
 
-crslab.system.kgsf\_system module
----------------------------------
+crslab.system.kgsf module
+-------------------------
 
-.. automodule:: crslab.system.kgsf_system
+.. automodule:: crslab.system.kgsf
    :members:
    :undoc-members:
    :show-inheritance:
@@ -36,18 +36,18 @@ crslab.system.lr\_scheduler module
    :undoc-members:
    :show-inheritance:
 
-crslab.system.redial\_system module
------------------------------------
+crslab.system.redial module
+---------------------------
 
-.. automodule:: crslab.system.redial_system
+.. automodule:: crslab.system.redial
    :members:
    :undoc-members:
    :show-inheritance:
 
-crslab.system.tgredial\_system module
--------------------------------------
+crslab.system.tgredial module
+-----------------------------
 
-.. automodule:: crslab.system.tgredial_system
+.. automodule:: crslab.system.tgredial
    :members:
    :undoc-members:
    :show-inheritance:
