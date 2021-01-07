@@ -22,7 +22,7 @@ from crslab.model.layers.attention import SelfAttentionSeq
 from crslab.model.layers.transformer import TransformerEncoder
 from crslab.model.utils import edge_to_pyg_format
 from .modules import GateLayer, TransformerDecoderKG
-from .resource import resources
+from .resources import resources
 
 
 class KGSFModel(BaseModel):

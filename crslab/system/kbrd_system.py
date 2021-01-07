@@ -25,7 +25,7 @@ class KBRDSystem(BaseSystem):
         """
 
         Args:
-            opt ([dict]): Indicating the hyper parameters
+            opt (dict): Indicating the hyper parameters
             train_dataloader ([BaseDataLoader]): Indicating the train dataloader of corresponding dataset
             valid_dataloader ([BaseDataLoader]): Indicating the valid dataloader of corresponding dataset
             test_dataloader ([BaseDataLoader]): Indicating the test dataloader of corresponding dataset

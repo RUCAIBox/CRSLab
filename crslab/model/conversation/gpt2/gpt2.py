@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE
-# @Time   : 2020/12/29
+# @Time   : 2021/1/7
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
@@ -16,7 +16,7 @@ from transformers import GPT2LMHeadModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from ...pretrain_model import GPT2
+from crslab.model.pretrain_models import pretrain_models
 
 
 class GPT2Model(BaseModel):
@@ -44,8 +44,8 @@ class GPT2Model(BaseModel):
         self.pad_id = vocab['pad']
 
         language = dataset_language_map[opt['dataset']]
+        resource = pretrain_models['gpt2'][language]
         dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
-        resource = GPT2[language]
         super(GPT2Model, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):

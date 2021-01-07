@@ -24,7 +24,7 @@ class TGReDialDataset(BaseDataset):
     """TGReDial dataset
 
     Notes:
-        ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resource.py``.
+        ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     Attributes:
         train_data: train dataset.

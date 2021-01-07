@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2021/1/2, 2021/1/4
+# @Time   : 2021/1/7, 2021/1/4
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -18,7 +18,7 @@ from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
 from crslab.model.layers.sasrec import SASRecModel
-from ...pretrain_model import BERT
+from crslab.model.pretrain_models import pretrain_models
 
 
 class TGRecModel(BaseModel):
@@ -58,8 +58,8 @@ class TGRecModel(BaseModel):
         self.num_hidden_layers = opt['num_hidden_layers']
 
         language = dataset_language_map[opt['dataset']]
+        resource = pretrain_models['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        resource = BERT[language]
         super(TGRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):

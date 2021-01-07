@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail.com
 
 # UPDATE:
-# @Time   : 2020/12/29, 2020/12/15, 2021/1/4
+# @Time   : 2021/1/7, 2020/12/15, 2021/1/4
 # @Author : Xiaolei Wang, Yuanhang Zhou, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail, sdzyh002@gmail.com
 
@@ -16,7 +16,7 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from ...pretrain_model import BERT
+from crslab.model.pretrain_models import pretrain_models
 
 
 class TGPolicyModel(BaseModel):
@@ -34,8 +34,8 @@ class TGPolicyModel(BaseModel):
         """
         self.topic_class_num = vocab['n_topic']
         language = dataset_language_map[opt['dataset']]
+        resource = pretrain_models['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        resource = BERT[language]
         super(TGPolicyModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self, *args, **kwargs):

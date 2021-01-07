@@ -23,7 +23,7 @@ class GoRecDialDataset(BaseDataset):
     """GoRecDial dataset
 
     Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resource.py``.
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     Attributes:
         train_data: train dataset.

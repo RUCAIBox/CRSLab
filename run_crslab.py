@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2021/1/3
+# @Time   : 2020/11/24, 2021/1/7
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='crslab/properties/redial/redial.yaml', help='config file(yaml) path')
+                        default='config/tgredial/tgredial.yaml', help='config file(yaml) path')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',

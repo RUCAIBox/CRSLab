@@ -3,7 +3,7 @@
 # @Email  : sdzyh002@gmail
 
 # UPDATE
-# @Time   : 2020/12/29, 2021/1/4
+# @Time   : 2021/1/7, 2021/1/4
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
@@ -15,7 +15,7 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base_model import BaseModel
-from ...pretrain_model import BERT
+from crslab.model.pretrain_models import pretrain_models
 
 
 class TopicBERTModel(BaseModel):
@@ -39,7 +39,7 @@ class TopicBERTModel(BaseModel):
         self.topic_class_num = vocab['n_topic']
         language = dataset_language_map[opt['dataset']]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        resource = BERT[language]
+        resource = pretrain_models['bert'][language]
         super(TopicBERTModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self, *args, **kwargs):
