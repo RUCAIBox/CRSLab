@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, sdzyh002@gmail
 
+r"""
+TGReDial
+========
+References:
+    Zhou, Kun, et al. `"Towards Topic-Guided Conversational Recommender System."`_ in COLING 2020.
+
+.. _`"Towards Topic-Guided Conversational Recommender System."`:
+   https://www.aclweb.org/anthology/2020.coling-main.365/
+
+"""
+
 import json
 import os
 from collections import defaultdict
@@ -21,10 +32,7 @@ from .resources import resources
 
 
 class TGReDialDataset(BaseDataset):
-    """The dataset was proposed in `Towards Topic-Guided Conversational Recommender System`_.
-
-    Notes:
-        ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
+    """
 
     Attributes:
         train_data: train dataset.
@@ -46,8 +54,8 @@ class TGReDialDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _Towards Topic-Guided Conversational Recommender System:
-       https://www.aclweb.org/anthology/2020.coling-main.365/
+    Notes:
+        ``'unk'`` and ``'pad_topic'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 

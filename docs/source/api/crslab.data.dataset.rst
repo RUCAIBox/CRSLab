@@ -17,8 +17,6 @@ Subpackages
 Submodules
 ----------
 
-crslab.data.dataset.base\_dataset module
-----------------------------------------
 
 .. automodule:: crslab.data.dataset.base_dataset
    :members:

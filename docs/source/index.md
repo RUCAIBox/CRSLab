@@ -18,6 +18,7 @@
    :maxdepth: 1
    :caption: API REFERENCE
 
+   api/crslab.quick_start
    api/crslab.config
    api/crslab.data
    api/crslab.evaluator

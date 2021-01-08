@@ -4,8 +4,6 @@ crslab.model.recommendation.textcnn package
 Submodules
 ----------
 
-crslab.model.recommendation.textcnn.textcnn module
---------------------------------------------------
 
 .. automodule:: crslab.model.recommendation.textcnn.textcnn
    :members:

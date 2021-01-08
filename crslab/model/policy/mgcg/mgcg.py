@@ -6,6 +6,18 @@
 # @Time   : 2020/12/29, 2021/1/4
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
+
+r"""
+MGCG
+====
+References:
+    Liu, Zeming, et al. `"Towards Conversational Recommendation over Multi-Type Dialogs."`_ in ACL 2020.
+
+.. _"Towards Conversational Recommendation over Multi-Type Dialogs.":
+   https://www.aclweb.org/anthology/2020.acl-main.98/
+
+"""
+
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
@@ -14,7 +26,7 @@ from crslab.model.base import BaseModel
 
 
 class MGCGModel(BaseModel):
-    """This model was proposed in `Towards Conversational Recommendation over Multi-Type Dialogs`_.
+    """
 
     Attributes:
         topic_class_num: A integer indicating the number of topic.
@@ -23,9 +35,6 @@ class MGCGModel(BaseModel):
         hidden_size: A integer indicating the size of hidden state.
         num_layers: A integer indicating the number of layers in GRU.
         dropout_hidden: A float indicating the dropout rate of hidden state.
-
-    .. _Towards Conversational Recommendation over Multi-Type Dialogs:
-       https://www.aclweb.org/anthology/2020.acl-main.98/
 
     """
 

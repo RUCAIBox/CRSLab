@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+r"""
+DuRecDial
+=========
+References:
+    Liu, Zeming, et al. `"Towards Conversational Recommendation over Multi-Type Dialogs."`_ in ACL 2020.
+
+.. _"Towards Conversational Recommendation over Multi-Type Dialogs.":
+   https://www.aclweb.org/anthology/2020.acl-main.98/
+
+"""
+
 import json
 import os
 from copy import copy
@@ -20,10 +31,7 @@ from .resources import resources
 
 
 class DuRecDialDataset(BaseDataset):
-    """The dataset was proposed in `Towards Conversational Recommendation over Multi-Type Dialogs`_.
-
-    Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
+    """
 
     Attributes:
         train_data: train dataset.
@@ -42,13 +50,13 @@ class DuRecDialDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _Towards Conversational Recommendation over Multi-Type Dialogs:
-       https://www.aclweb.org/anthology/2020.acl-main.98/
+    Notes:
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 
     def __init__(self, opt, tokenize, restore=False, save=False):
-        """Specify tokenized resource and init base dataset.
+        """
 
         Args:
             opt (Config or dict): config for dataset or the whole system.

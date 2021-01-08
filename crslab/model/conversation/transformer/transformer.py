@@ -7,18 +7,29 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+Transformer
+===========
+References:
+    Zhou, Kun, et al. `"Towards Topic-Guided Conversational Recommender System."`_ in COLING 2020.
+
+.. _`"Towards Topic-Guided Conversational Recommender System."`:
+   https://www.aclweb.org/anthology/2020.coling-main.365/
+
+"""
+
 import torch
 import torch.nn.functional as F
 from loguru import logger
 from torch import nn
 
 from crslab.model.base import BaseModel
-from crslab.model.layers.transformer import TransformerEncoder, TransformerDecoder
-from crslab.model.utils import edge_to_pyg_format
+from crslab.model.utils.functions import edge_to_pyg_format
+from crslab.model.utils.modules.transformer import TransformerEncoder, TransformerDecoder
 
 
 class TransformerModel(BaseModel):
-    """This model was proposed in `Towards topic-guided conversational recommender system`_.
+    """
 
     Attributes:
         vocab_size: A integer indicating the vocabulary size.
@@ -44,9 +55,6 @@ class TransformerModel(BaseModel):
         reduction: A boolean indicating if we use the reduction.
         n_positions: A integer indicating the number of position.
         longest_label: A integer indicating the longest length for response generation.
-
-    .. _Towards topic-guided conversational recommender system:
-       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 

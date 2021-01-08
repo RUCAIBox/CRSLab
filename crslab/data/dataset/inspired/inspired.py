@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+r"""
+Inspired
+========
+References:
+    Hayati, Shirley Anugrah, et al. `"INSPIRED: Toward Sociable Recommendation Dialog Systems."`_ in EMNLP 2020.
+
+.. _`"INSPIRED: Toward Sociable Recommendation Dialog Systems."`:
+   https://www.aclweb.org/anthology/2020.emnlp-main.654/
+
+"""
+
 import json
 import os
 from copy import copy
@@ -20,10 +31,7 @@ from .resources import resources
 
 
 class InspiredDataset(BaseDataset):
-    """The dataset was proposed in `INSPIRED: Toward Sociable Recommendation Dialog Systems`_.
-
-    Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
+    """
 
     Attributes:
         train_data: train dataset.
@@ -42,8 +50,8 @@ class InspiredDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _`INSPIRED: Toward Sociable Recommendation Dialog Systems`:
-       https://www.aclweb.org/anthology/2020.emnlp-main.654/
+    Notes:
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 

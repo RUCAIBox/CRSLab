@@ -116,10 +116,10 @@ class MultiHeadAttention(nn.Module):
         # [B * n_heads, query_len, key_len]
         attn_mask = (
             (mask == 0)
-            .view(batch_size, 1, -1, key_len)
-            .repeat(1, n_heads, 1, 1)
-            .expand(batch_size, n_heads, query_len, key_len)
-            .view(batch_size * n_heads, query_len, key_len)
+                .view(batch_size, 1, -1, key_len)
+                .repeat(1, n_heads, 1, 1)
+                .expand(batch_size, n_heads, query_len, key_len)
+                .view(batch_size * n_heads, query_len, key_len)
         )
         assert attn_mask.shape == dot_prod.shape
         dot_prod.masked_fill_(attn_mask, neginf(dot_prod.dtype))
@@ -130,9 +130,9 @@ class MultiHeadAttention(nn.Module):
         attentioned = attn_weights.bmm(v)
         attentioned = (
             attentioned.type_as(query)
-            .view(batch_size, n_heads, query_len, dim_per_head)
-            .transpose(1, 2).contiguous()
-            .view(batch_size, query_len, dim)
+                .view(batch_size, n_heads, query_len, dim_per_head)
+                .transpose(1, 2).contiguous()
+                .view(batch_size, query_len, dim)
         )
 
         out = self.out_lin(attentioned)
@@ -159,13 +159,13 @@ class TransformerFFN(nn.Module):
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(
-        self,
-        n_heads,
-        embedding_size,
-        ffn_size,
-        attention_dropout=0.0,
-        relu_dropout=0.0,
-        dropout=0.0,
+            self,
+            n_heads,
+            embedding_size,
+            ffn_size,
+            attention_dropout=0.0,
+            relu_dropout=0.0,
+            dropout=0.0,
     ):
         super().__init__()
         self.dim = embedding_size
@@ -214,22 +214,23 @@ class TransformerEncoder(nn.Module):
         sequence.
     :param int n_positions: Size of the position embeddings matrix.
     """
+
     def __init__(
-        self,
-        n_heads,
-        n_layers,
-        embedding_size,
-        ffn_size,
-        vocabulary_size,
-        embedding=None,
-        dropout=0.0,
-        attention_dropout=0.0,
-        relu_dropout=0.0,
-        padding_idx=0,
-        learn_positional_embeddings=False,
-        embeddings_scale=False,
-        reduction=True,
-        n_positions=1024
+            self,
+            n_heads,
+            n_layers,
+            embedding_size,
+            ffn_size,
+            vocabulary_size,
+            embedding=None,
+            dropout=0.0,
+            attention_dropout=0.0,
+            relu_dropout=0.0,
+            padding_idx=0,
+            learn_positional_embeddings=False,
+            embeddings_scale=False,
+            reduction=True,
+            n_positions=1024
     ):
         super(TransformerEncoder, self).__init__()
 
@@ -250,7 +251,7 @@ class TransformerEncoder(nn.Module):
         # check input formats:
         if embedding is not None:
             assert (
-                embedding_size is None or embedding_size == embedding.weight.shape[1]
+                    embedding_size is None or embedding_size == embedding.weight.shape[1]
             ), "Embedding dim must match the embedding size."
 
         if embedding is not None:
@@ -312,13 +313,13 @@ class TransformerEncoder(nn.Module):
 
 class TransformerDecoderLayer(nn.Module):
     def __init__(
-        self,
-        n_heads,
-        embedding_size,
-        ffn_size,
-        attention_dropout=0.0,
-        relu_dropout=0.0,
-        dropout=0.0,
+            self,
+            n_heads,
+            embedding_size,
+            ffn_size,
+            attention_dropout=0.0,
+            relu_dropout=0.0,
+            dropout=0.0,
     ):
         super().__init__()
         self.dim = embedding_size
@@ -403,20 +404,20 @@ class TransformerDecoder(nn.Module):
     """
 
     def __init__(
-        self,
-        n_heads,
-        n_layers,
-        embedding_size,
-        ffn_size,
-        vocabulary_size,
-        embedding=None,
-        dropout=0.0,
-        attention_dropout=0.0,
-        relu_dropout=0.0,
-        embeddings_scale=True,
-        learn_positional_embeddings=False,
-        padding_idx=None,
-        n_positions=1024,
+            self,
+            n_heads,
+            n_layers,
+            embedding_size,
+            ffn_size,
+            vocabulary_size,
+            embedding=None,
+            dropout=0.0,
+            attention_dropout=0.0,
+            relu_dropout=0.0,
+            embeddings_scale=True,
+            learn_positional_embeddings=False,
+            padding_idx=None,
+            n_positions=1024,
     ):
         super().__init__()
         self.embedding_size = embedding_size

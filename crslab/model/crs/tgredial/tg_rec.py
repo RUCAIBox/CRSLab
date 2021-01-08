@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+TGReDial_Rec
+============
+References:
+    Zhou, Kun, et al. `"Towards Topic-Guided Conversational Recommender System."`_ in COLING 2020.
+
+.. _`"Towards Topic-Guided Conversational Recommender System."`:
+   https://www.aclweb.org/anthology/2020.coling-main.365/
+
+"""
+
 import os
 
 import torch
@@ -17,12 +28,12 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.layers.sasrec import SASRecModel
 from crslab.model.pretrain_models import pretrain_models
+from crslab.model.recommendation.sasrec.modules import SASRec
 
 
 class TGRecModel(BaseModel):
-    """This model was proposed in `Towards topic-guided conversational recommender system`_.
+    """
         
     Attributes:
         hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec.
@@ -34,9 +45,6 @@ class TGRecModel(BaseModel):
         attention_probs_dropout_prob: A float indicating the dropout rate in attention layers.
         hidden_act: A string indicating the activation function type in SASRec.
         num_hidden_layers: A integer indicating the number of hidden layers in SASRec.
-
-    .. _Towards topic-guided conversational recommender system:
-       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 
@@ -71,12 +79,12 @@ class TGRecModel(BaseModel):
         self.bert_hidden_size = self.bert.config.hidden_size
         self.concat_embed_size = self.bert_hidden_size + self.hidden_size
         self.fusion = nn.Linear(self.concat_embed_size, self.item_size)
-        self.SASREC = SASRecModel(self.hidden_dropout_prob, self.device,
-                                  self.initializer_range, self.hidden_size,
-                                  self.max_seq_length, self.item_size,
-                                  self.num_attention_heads,
-                                  self.attention_probs_dropout_prob,
-                                  self.hidden_act, self.num_hidden_layers)
+        self.SASREC = SASRec(self.hidden_dropout_prob, self.device,
+                             self.initializer_range, self.hidden_size,
+                             self.max_seq_length, self.item_size,
+                             self.num_attention_heads,
+                             self.attention_probs_dropout_prob,
+                             self.hidden_act, self.num_hidden_layers)
 
         # this loss may conduct to some weakness
         self.rec_loss = nn.CrossEntropyLoss()

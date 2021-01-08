@@ -4,8 +4,6 @@ crslab.model.crs.kbrd package
 Submodules
 ----------
 
-crslab.model.crs.kbrd.kbrd module
----------------------------------
 
 .. automodule:: crslab.model.crs.kbrd.kbrd
    :members:

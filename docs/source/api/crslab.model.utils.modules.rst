@@ -1,17 +1,17 @@
-crslab.data.dataset.redial package
+crslab.model.utils.modules package
 ==================================
 
 Submodules
 ----------
 
 
-.. automodule:: crslab.data.dataset.redial.redial
+.. automodule:: crslab.model.utils.modules.attention
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: crslab.data.dataset.redial.resources
+.. automodule:: crslab.model.utils.modules.transformer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Submodules
 Module contents
 ---------------
 
-.. automodule:: crslab.data.dataset.redial
+.. automodule:: crslab.model.utils.modules
    :members:
    :undoc-members:
    :show-inheritance:

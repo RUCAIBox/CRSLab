@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+r"""
+OpenDialKG
+==========
+References:
+    Moon, Seungwhan, et al. `"Opendialkg: Explainable conversational reasoning with attention-based walks over knowledge graphs."`_ in ACL 2019.
+
+.. _`"Opendialkg: Explainable conversational reasoning with attention-based walks over knowledge graphs."`:
+   https://www.aclweb.org/anthology/P19-1081/
+
+"""
+
 import json
 import os
 from collections import defaultdict
@@ -21,10 +32,7 @@ from .resources import resources
 
 
 class OpenDialKGDataset(BaseDataset):
-    """The dataset was proposed in `OpenDialKG: Explainable Conversational Reasoning with Attention-based Walks over Knowledge Graphs`_.
-
-    Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
+    """
 
     Attributes:
         train_data: train dataset.
@@ -43,8 +51,8 @@ class OpenDialKGDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _`OpenDialKG: Explainable Conversational Reasoning with Attention-based Walks over Knowledge Graphs`:
-       https://www.aclweb.org/anthology/P19-1081/
+    Notes:
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 

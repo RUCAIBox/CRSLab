@@ -4,8 +4,12 @@ crslab.model.recommendation.sasrec package
 Submodules
 ----------
 
-crslab.model.recommendation.sasrec.sasrec module
-------------------------------------------------
+
+.. automodule:: crslab.model.recommendation.sasrec.modules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 .. automodule:: crslab.model.recommendation.sasrec.sasrec
    :members:

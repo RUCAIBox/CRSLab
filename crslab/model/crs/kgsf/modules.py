@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from torch import nn as nn
 
-from crslab.model.layers.transformer import MultiHeadAttention, TransformerFFN, _create_selfattn_mask, _normalize, \
+from crslab.model.utils.modules.transformer import MultiHeadAttention, TransformerFFN, _create_selfattn_mask, \
+    _normalize, \
     create_position_codes
 
 

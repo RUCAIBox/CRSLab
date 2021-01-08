@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+TextCNN
+=======
+References:
+    Kim, Yoon. `"Convolutional Neural Networks for Sentence Classification."`_ in EMNLP 2014.
+
+.. _`"Convolutional Neural Networks for Sentence Classification."`:
+   https://www.aclweb.org/anthology/D14-1181/
+
+"""
+
 import torch
 import torch.nn.functional as F
 from loguru import logger
@@ -16,7 +27,7 @@ from crslab.model.base import BaseModel
 
 
 class TextCNNModel(BaseModel):
-    """This model was proposed in `Convolutional Neural Networks for Sentence Classification`_.
+    """
         
     Attributes:
         movie_num: A integer indicating the number of items.
@@ -24,9 +35,6 @@ class TextCNNModel(BaseModel):
         embed: A integer indicating the size of embedding layer.
         filter_sizes: A string indicating the size of filter in CNN.
         dropout: A float indicating the dropout rate.
-
-    .. _Convolutional Neural Networks for Sentence Classification:
-       https://www.aclweb.org/anthology/D14-1181/
 
     """
 

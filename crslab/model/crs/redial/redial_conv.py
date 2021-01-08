@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+ReDial_Conv
+===========
+References:
+    Li, Raymond, et al. `"Towards deep conversational recommendations."`_ in NeurIPS.
+
+.. _`"Towards deep conversational recommendations."`:
+   https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
+
+"""
+
 import torch
 from torch import nn
 
@@ -15,7 +26,7 @@ from .modules import HRNN, SwitchingDecoder
 
 
 class ReDialConvModel(BaseModel):
-    """This model was proposed in `Towards Deep Conversational Recommendations`_.
+    """
 
     Attributes:
         vocab_size: A integer indicating the vocabulary size.
@@ -33,9 +44,6 @@ class ReDialConvModel(BaseModel):
         decoder_hidden_size: A integer indicating the size of hidden size in decoder.
         decoder_num_layers: A integer indicating the number of layer in decoder.
         decoder_embedding_dim: A integer indicating the dimension of embedding in decoder.
-
-    .. _Towards Deep Conversational Recommendations:
-       https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
 
     """
 

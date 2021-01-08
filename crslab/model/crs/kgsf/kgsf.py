@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+KGSF
+====
+References:
+    Zhou, Kun, et al. `"Improving Conversational Recommender Systems via Knowledge Graph based Semantic Fusion."`_ in KDD 2020.
+
+.. _`"Improving Conversational Recommender Systems via Knowledge Graph based Semantic Fusion."`:
+   https://dl.acm.org/doi/abs/10.1145/3394486.3403143
+
+"""
+
 import os
 
 import numpy as np
@@ -18,15 +29,15 @@ from torch_geometric.nn import GCNConv, RGCNConv
 
 from crslab.config import MODEL_PATH
 from crslab.model.base import BaseModel
-from crslab.model.layers.attention import SelfAttentionSeq
-from crslab.model.layers.transformer import TransformerEncoder
-from crslab.model.utils import edge_to_pyg_format
+from crslab.model.utils.functions import edge_to_pyg_format
+from crslab.model.utils.modules.attention import SelfAttentionSeq
+from crslab.model.utils.modules.transformer import TransformerEncoder
 from .modules import GateLayer, TransformerDecoderKG
 from .resources import resources
 
 
 class KGSFModel(BaseModel):
-    """This model was proposed in `Improving conversational recommender systems via knowledge graph based semantic fusion`_.
+    """
 
     Attributes:
         vocab_size: A integer indicating the vocabulary size.
@@ -53,9 +64,6 @@ class KGSFModel(BaseModel):
         n_positions: A integer indicating the number of position.
         response_truncate = A integer indicating the longest length for response generation.
         pretrained_embedding: A string indicating the path of pretrained embedding.
-
-    .. _Improving conversational recommender systems via knowledge graph based semantic fusion:
-       https://dl.acm.org/doi/abs/10.1145/3394486.3403143
 
     """
 

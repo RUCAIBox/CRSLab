@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang
 # @email  : wxl1999@foxmail.com
 
+r"""
+GPT2
+====
+References:
+    Radford, Alec, et al. `"Language Models are Unsupervised Multitask Learners."`_.
+
+.. _`"Language Models are Unsupervised Multitask Learners."`:
+   https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
+
+"""
+
 import os
 
 import torch
@@ -20,15 +31,12 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class GPT2Model(BaseModel):
-    """This model was proposed in `Language models are unsupervised multitask learners`_.
+    """
         
     Attributes:
         context_truncate: A integer indicating the length of dialogue context.
         response_truncate: A integer indicating the length of dialogue response.
         pad_id: A integer indicating the id of padding token.
-
-    .. _Language models are unsupervised multitask learners:
-       https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
 
     """
 

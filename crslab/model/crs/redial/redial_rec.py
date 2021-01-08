@@ -7,21 +7,29 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+ReDial_Rec
+==========
+References:
+    Li, Raymond, et al. `"Towards deep conversational recommendations."`_ in NeurIPS.
+
+.. _`"Towards deep conversational recommendations."`:
+   https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
+
+"""
+
 import torch.nn as nn
 
 from crslab.model.base import BaseModel
 
 
 class ReDialRecModel(BaseModel):
-    """This model was proposed in `Towards Deep Conversational Recommendations`_.
+    """
 
     Attributes:
         n_entity: A integer indicating the number of entities.
         layer_sizes: A integer indicating the size of layer in autorec.
         pad_entity_idx: A integer indicating the id of entity padding.
-
-    .. _Towards Deep Conversational Recommendations:
-       https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
 
     """
 

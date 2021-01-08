@@ -1,5 +1,5 @@
-crslab package
-==============
+crslab.model.utils package
+==========================
 
 Subpackages
 -----------
@@ -7,18 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 1
 
-   crslab.config
-   crslab.data
-   crslab.evaluator
-   crslab.model
-   crslab.quick_start
-   crslab.system
+   crslab.model.utils.modules
 
 Submodules
 ----------
 
 
-.. automodule:: crslab.download
+.. automodule:: crslab.model.utils.functions
    :members:
    :undoc-members:
    :show-inheritance:
@@ -26,7 +21,7 @@ Submodules
 Module contents
 ---------------
 
-.. automodule:: crslab
+.. automodule:: crslab.model.utils
    :members:
    :undoc-members:
    :show-inheritance:

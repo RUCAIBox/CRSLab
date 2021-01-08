@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail
 
+r"""
+ReDial
+======
+References:
+    Li, Raymond, et al. `"Towards deep conversational recommendations."`_ in NeurIPS 2018.
+
+.. _`"Towards deep conversational recommendations."`:
+   https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
+
+"""
+
 import json
 import os
 from collections import defaultdict
@@ -21,10 +32,7 @@ from .resources import resources
 
 
 class ReDialDataset(BaseDataset):
-    """The dataset was proposed in `Towards Deep Conversational Recommendations`_.
-
-    Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``
+    """
 
     Attributes:
         train_data: train dataset.
@@ -43,8 +51,8 @@ class ReDialDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _Towards Deep Conversational Recommendations:
-       https://papers.nips.cc/paper/2018/hash/800de15c79c8d840f4e78d3af937d4d4-Abstract.html
+    Notes:
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 

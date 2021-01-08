@@ -4,8 +4,6 @@ crslab.model.policy.conv\_bert package
 Submodules
 ----------
 
-crslab.model.policy.conv\_bert.conv\_bert module
-------------------------------------------------
 
 .. automodule:: crslab.model.policy.conv_bert.conv_bert
    :members:

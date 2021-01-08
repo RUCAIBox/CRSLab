@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail, sdzyh002@gmail.com
 
+r"""
+TGReDial_Policy
+===============
+References:
+    Zhou, Kun, et al. `"Towards Topic-Guided Conversational Recommender System."`_ in COLING 2020.
+
+.. _`"Towards Topic-Guided Conversational Recommender System."`:
+   https://www.aclweb.org/anthology/2020.coling-main.365/
+
+"""
+
 import os
 
 import torch
@@ -20,13 +31,6 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class TGPolicyModel(BaseModel):
-    """This model was proposed in `Towards topic-guided conversational recommender system`_.
-
-    .. _Towards topic-guided conversational recommender system:
-       https://www.aclweb.org/anthology/2020.coling-main.365/
-
-    """
-
     def __init__(self, opt, device, vocab, side_data):
         """
 

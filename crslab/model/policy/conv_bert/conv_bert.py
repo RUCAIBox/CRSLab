@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+Conv_BERT
+=========
+References:
+    Zhou, Kun, et al. `"Towards Topic-Guided Conversational Recommender System."`_ in COLING 2020.
+
+.. _`"Towards Topic-Guided Conversational Recommender System."`:
+   https://www.aclweb.org/anthology/2020.coling-main.365/
+
+"""
+
 import os
 
 from torch import nn
@@ -19,13 +30,10 @@ from ...pretrain_models import pretrain_models
 
 
 class ConvBERTModel(BaseModel):
-    """This model was proposed in `Towards topic-guided conversational recommender system`_.
+    """
 
     Attributes:
         topic_class_num: the number of topic.
-
-    .. _Towards topic-guided conversational recommender system:
-       https://www.aclweb.org/anthology/2020.coling-main.365/
 
     """
 

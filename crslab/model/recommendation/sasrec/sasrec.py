@@ -7,16 +7,27 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+SASREC
+======
+References:
+    Kang, Wang-Cheng, and Julian McAuley. `"Self-attentive sequential recommendation."`_ in ICDM 2018.
+
+.. _`"Self-attentive sequential recommendation."`:
+   https://ieeexplore.ieee.org/abstract/document/8594844
+
+"""
+
 import torch
 from loguru import logger
 from torch import nn
 
 from crslab.model.base import BaseModel
-from crslab.model.layers.sasrec import SASRecModel
+from crslab.model.recommendation.sasrec.modules import SASRec
 
 
 class SASRECModel(BaseModel):
-    """This model was proposed in `Self-attentive sequential recommendation`_.
+    """
         
     Attributes:
         hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec.
@@ -28,9 +39,6 @@ class SASRECModel(BaseModel):
         attention_probs_dropout_prob: A float indicating the dropout rate in attention layers.
         hidden_act: A string indicating the activation function type in SASRec.
         num_hidden_layers: A integer indicating the number of hidden layers in SASRec.
-
-    .. _Self-attentive sequential recommendation:
-       https://ieeexplore.ieee.org/abstract/document/8594844
 
     """
 
@@ -58,12 +66,12 @@ class SASRECModel(BaseModel):
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.SASREC = SASRecModel(self.hidden_dropout_prob, self.device,
-                                  self.initializer_range, self.hidden_size,
-                                  self.max_seq_length, self.item_size,
-                                  self.num_attention_heads,
-                                  self.attention_probs_dropout_prob,
-                                  self.hidden_act, self.num_hidden_layers)
+        self.SASREC = SASRec(self.hidden_dropout_prob, self.device,
+                             self.initializer_range, self.hidden_size,
+                             self.max_seq_length, self.item_size,
+                             self.num_attention_heads,
+                             self.attention_probs_dropout_prob,
+                             self.hidden_act, self.num_hidden_layers)
 
         # this loss may conduct to some weakness
         self.rec_loss = nn.CrossEntropyLoss()

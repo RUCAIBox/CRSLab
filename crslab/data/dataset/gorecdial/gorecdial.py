@@ -7,6 +7,17 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail
 
+r"""
+GoRecDial
+=========
+References:
+    Kang, Dongyeop, et al. `"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`_ in EMNLP 2019.
+
+.. _`"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`:
+   https://www.aclweb.org/anthology/D19-1203/
+
+"""
+
 import json
 import os
 from copy import copy
@@ -20,10 +31,7 @@ from .resources import resources
 
 
 class GoRecDialDataset(BaseDataset):
-    """The dataset was proposed in `Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue`_.
-
-    Notes:
-        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
+    """
 
     Attributes:
         train_data: train dataset.
@@ -42,8 +50,8 @@ class GoRecDialDataset(BaseDataset):
                 'n_word': max(self.word2id.values()) + 1,
             }
 
-    .. _`Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue`:
-       https://www.aclweb.org/anthology/D19-1203/
+    Notes:
+        ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
 

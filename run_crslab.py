@@ -10,7 +10,7 @@
 import argparse
 import warnings
 
-from crslab import run_crslab
+from crslab.quick_start import run_crslab
 
 warnings.filterwarnings('ignore')
 

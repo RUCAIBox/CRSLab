@@ -1,11 +1,11 @@
-crslab.model.policy.pmi package
-===============================
+crslab.quick\_start package
+===========================
 
 Submodules
 ----------
 
 
-.. automodule:: crslab.model.policy.pmi.pmi
+.. automodule:: crslab.quick_start.quick_start
    :members:
    :undoc-members:
    :show-inheritance:
@@ -13,7 +13,7 @@ Submodules
 Module contents
 ---------------
 
-.. automodule:: crslab.model.policy.pmi
+.. automodule:: crslab.quick_start
    :members:
    :undoc-members:
    :show-inheritance:

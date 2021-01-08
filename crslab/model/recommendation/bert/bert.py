@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+BERT
+====
+References:
+    Devlin, Jacob, et al. `"BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding."`_ in NAACL 2019.
+
+.. _`"BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding."`:
+   https://www.aclweb.org/anthology/N19-1423/
+
+"""
+
 import os
 
 from loguru import logger
@@ -20,13 +31,10 @@ from crslab.model.pretrain_models import pretrain_models
 
 
 class BERTModel(BaseModel):
-    """The model was proposed in `BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding`_.
+    """
 
     Attributes:
         item_size: A integer indicating the number of items.
-
-    .. _`BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding`:
-       https://www.aclweb.org/anthology/N19-1423/
 
     """
 

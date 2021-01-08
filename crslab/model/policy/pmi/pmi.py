@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+PMI
+===
+"""
+
 from collections import defaultdict
 
 import torch

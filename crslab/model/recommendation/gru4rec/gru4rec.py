@@ -7,6 +7,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+GRU4REC
+=======
+References:
+    Hidasi, Balázs, et al. `"Session-Based Recommendations with Recurrent Neural Networks."`_ in ICLR 2016.
+
+.. _`"Session-Based Recommendations with Recurrent Neural Networks."`:
+   https://arxiv.org/abs/1511.06939
+
+"""
+
 import torch
 from loguru import logger
 from torch import nn
@@ -17,7 +28,7 @@ from crslab.model.base import BaseModel
 
 
 class GRU4RECModel(BaseModel):
-    """The model was proposed in `Session-based recommendations with recurrent neural networks`_.
+    """
 
     Attributes:
         item_size: A integer indicating the number of items.
@@ -27,9 +38,6 @@ class GRU4RECModel(BaseModel):
         dropout_input: A integer indicating if we dropout the input of model.
         embedding_dim: A integer indicating the dimension of item embedding.
         batch_size: A integer indicating the batch size.
-
-    .. _Session-based recommendations with recurrent neural networks:
-       https://arxiv.org/abs/1511.06939
 
     """
 

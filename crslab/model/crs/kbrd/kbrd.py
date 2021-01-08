@@ -8,6 +8,17 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+r"""
+KBRD
+====
+References:
+    Chen, Qibin, et al. `"Towards Knowledge-Based Recommender Dialog System."`_ in EMNLP 2019.
+
+.. _`"Towards Knowledge-Based Recommender Dialog System."`:
+   https://www.aclweb.org/anthology/D19-1189/
+
+"""
+
 import torch
 import torch.nn.functional as F
 from loguru import logger
@@ -15,13 +26,13 @@ from torch import nn
 from torch_geometric.nn import RGCNConv
 
 from crslab.model.base import BaseModel
-from crslab.model.layers.attention import SelfAttentionBatch
-from crslab.model.layers.transformer import TransformerDecoder, TransformerEncoder
-from crslab.model.utils import edge_to_pyg_format
+from crslab.model.utils.functions import edge_to_pyg_format
+from crslab.model.utils.modules.attention import SelfAttentionBatch
+from crslab.model.utils.modules.transformer import TransformerDecoder, TransformerEncoder
 
 
 class KBRDModel(BaseModel):
-    """This model was proposed in `Towards Knowledge-Based Recommender Dialog System`_.
+    """
 
     Attributes:
         vocab_size: A integer indicating the vocabulary size.
@@ -46,9 +57,6 @@ class KBRDModel(BaseModel):
         reduction: A boolean indicating if we use the reduction.
         n_positions: A integer indicating the number of position.
         longest_label = A integer indicating the longest length for response generation.
-
-    .. _Towards Knowledge-Based Recommender Dialog System:
-       https://www.aclweb.org/anthology/D19-1189/
 
     """
 
