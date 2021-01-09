@@ -1,13 +1,15 @@
 # CRSLab
 
 [![Pypi Latest Version](https://img.shields.io/pypi/v/crslab)](https://pypi.org/project/crslab)
-[![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/RUCAIBox/CRSlab/releases)
+[![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/rucaibox/crslab/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![arXiv](https://img.shields.io/badge/arXiv-CRSLab-%23B21B1B)](https://arxiv.org/abs/2101.00939)
+[![Documentation Status](https://readthedocs.org/projects/crslab/badge/?version=latest)](https://crslab.readthedocs.io/en/latest/?badge=latest)
 
-[论文](https://arxiv.org/pdf/2101.00939.pdf) | [English Version](./README.md)
+[论文](https://arxiv.org/pdf/2101.00939.pdf) | [文档](https://crslab.readthedocs.io/en/latest/?badge=latest)
+| [English Version](./README.md)
 
-**CRSLab** 是**第一个**用于构建对话推荐系统（CRS）的开源工具包，其基于 PyTorch 实现、主要面向研究者使用，并具有如下特色：
+**CRSLab** 是一个用于构建对话推荐系统（CRS）的开源工具包，其基于 PyTorch 实现、主要面向研究者使用，并具有如下特色：
 
 - **全面的基准模型和数据集**：我们集成了常用的 6 个数据集和 18 个模型，包括基于图神经网络和预训练模型，比如  GCN，BERT 和 GPT-2；我们还对数据集进行相关处理以支持这些模型，并提供预处理后的版本供大家下载。
 - **大规模的标准评测**：我们支持一系列被广泛认可的评估方式来测试和比较不同的 CRS。
@@ -129,7 +131,7 @@ pip install -e .
 
 ## 快速上手
 
-从 GitHub 下载 CRSLab 后，可以使用提供的脚本快速运行和测试：
+从 GitHub 下载 CRSLab 后，可以使用提供的脚本快速运行和测试，默认使用CPU：
 
 ```bash
 python run_crslab.py --config config/kgsf/redial.yaml
@@ -146,6 +148,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 总的来说，`run_crslab.py`有如下参数可供调用：
 
 - `--config` 或 `-c`：配置文件的相对路径，以指定运行的模型与数据集。
+- `--gpu` or `-g`: 指定gpu id，目前支持单GPU，默认是CPU（-1）。
 - `--save_data` 或 `-sd`：保存预处理的数据。
 - `--restore_data` 或 `-rd`：从文件读取预处理的数据。
 - `--save_system` 或 `-ss`：保存训练好的 CRS 系统。

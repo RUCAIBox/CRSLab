@@ -2,7 +2,7 @@
 
 [![Pypi Latest Version](https://img.shields.io/pypi/v/crslab)](https://pypi.org/project/crslab)
 [![Release](https://img.shields.io/github/v/release/rucaibox/crslab.svg)](https://github.com/rucaibox/crslab/releases)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://raw.githubusercontent.com/RUCAIBox/CRSLab/main/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![arXiv](https://img.shields.io/badge/arXiv-CRSLab-%23B21B1B)](https://arxiv.org/abs/2101.00939)
 [![Documentation Status](https://readthedocs.org/projects/crslab/badge/?version=latest)](https://crslab.readthedocs.io/en/latest/?badge=latest)
 
@@ -132,7 +132,7 @@ pip install -e .
 
 ## Quick-Start
 
-With the source code, you can use the provided script for initial usage of our library:
+With the source code, you can use the provided script for initial usage of our library with cpu by default:
 
 ```bash
 python run_crslab.py --config config/kgsf/redial.yaml
@@ -148,7 +148,8 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 
 In summary, there are following arguments in `run_crslab.py`:
 
-- `--config` or `-c`: relative path for configuration file.
+- `--config` or `-c`: relative path for configuration file(yaml).
+- `--gpu` or `-g`: specify gpu id(s) to use, only support using a single gpu now. Defaults to cpu(-1).
 - `--save_data` or `-sd`: save pre-processed dataset.
 - `--restore_data` or `-rd`: restore pre-processed dataset from file.
 - `--save_system` or `-ss`: save trained system.
