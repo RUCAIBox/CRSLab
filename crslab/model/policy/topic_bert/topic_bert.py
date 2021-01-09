@@ -49,6 +49,7 @@ class TopicBERTModel(BaseModel):
         
         """
         self.topic_class_num = vocab['n_topic']
+
         language = dataset_language_map[opt['dataset']]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
         resource = pretrain_models['bert'][language]
@@ -70,7 +71,7 @@ class TopicBERTModel(BaseModel):
 
         topic_rep = self.topic_bert(
             topic_path_kw,
-            tp_mask).pooler_output  # (bs, hiddensize)
+            tp_mask).pooler_output  # (bs, hidden_size)
 
         topic_scores = self.state2topic_id(topic_rep)
 

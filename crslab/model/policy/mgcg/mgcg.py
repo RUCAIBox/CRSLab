@@ -35,6 +35,7 @@ class MGCGModel(BaseModel):
         hidden_size: A integer indicating the size of hidden state.
         num_layers: A integer indicating the number of layers in GRU.
         dropout_hidden: A float indicating the dropout rate of hidden state.
+        n_sent: A integer indicating sequence length in user profile.
 
     """
 
@@ -54,6 +55,7 @@ class MGCGModel(BaseModel):
         self.hidden_size = opt['hidden_size']
         self.num_layers = opt['num_layers']
         self.dropout_hidden = opt['dropout_hidden']
+        self.n_sent = opt.get('n_sent', 10)
 
         super(MGCGModel, self).__init__(opt, device)
 
@@ -83,9 +85,7 @@ class MGCGModel(BaseModel):
         self.loss = nn.CrossEntropyLoss()
 
     def get_length(self, input):
-        ans = [torch.sum((ids != 0).long()).item() for ids in input]
-
-        return ans
+        return [torch.sum((ids != 0).long()).item() for ids in input]
 
     def guide(self, batch, mode):
         # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
@@ -95,9 +95,8 @@ class MGCGModel(BaseModel):
         len_tp = self.get_length(topic_path_kw)
         len_profile = self.get_length(user_profile)
 
-        sent_num = 10
         bs_, word_num = user_profile.shape
-        bs = bs_ // sent_num
+        bs = bs_ // self.n_sent
 
         context = self.embeddings(context)
         topic_path_kw = self.embeddings(topic_path_kw)
@@ -125,9 +124,9 @@ class MGCGModel(BaseModel):
         context_output, (context_h, _) = self.context_lstm(context, init_h0)
         topic_output, (topic_h, _) = self.topic_lstm(topic_path_kw, init_h0)
         # batch*sent_num, seq_len, num_directions * hidden_size
-        init_h0 = (torch.zeros(self.num_layers, bs * sent_num,
+        init_h0 = (torch.zeros(self.num_layers, bs * self.n_sent,
                                self.hidden_size).to(self.device),
-                   torch.zeros(self.num_layers, bs * sent_num,
+                   torch.zeros(self.num_layers, bs * self.n_sent,
                                self.hidden_size).to(self.device))
         profile_output, (profile_h,
                          _) = self.profile_lstm(user_profile, init_h0)
@@ -137,7 +136,7 @@ class MGCGModel(BaseModel):
         topic_rep = topic_h[-1]
 
         profile_rep = profile_h[-1]
-        profile_rep = profile_rep.view(bs, sent_num, -1)
+        profile_rep = profile_rep.view(bs, self.n_sent, -1)
         # batch, hidden_size
         profile_rep = torch.mean(profile_rep, dim=1)
 

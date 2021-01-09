@@ -81,7 +81,6 @@ class SASRec(nn.Module):
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
         embedding = self.embeddings(input_ids)
 
-        # extended_attention_mask 是一个上三角矩阵，上三角的元素为-10000.0， dtype与parameter相同
         encoded_layers = self.encoder(
             embedding,
             extended_attention_mask,
@@ -122,7 +121,6 @@ class SASRec(nn.Module):
         pass
 
     def cross_entropy(self, seq_out, pos_ids, neg_ids):
-
         # [batch seq_len hidden_size]
         pos_emb = self.embeddings.item_embeddings(pos_ids)
         neg_emb = self.embeddings.item_embeddings(neg_ids)
@@ -150,11 +148,13 @@ class SASRec(nn.Module):
 
 def gelu(x):
     """Implementation of the gelu activation function.
-        For information: OpenAI GPT's gelu is slightly different
-        (and gives slightly different results):
-        0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) *
-        (x + 0.044715 * torch.pow(x, 3))))
-        Also see https://arxiv.org/abs/1606.08415
+
+    For information: OpenAI GPT's gelu is slightly different
+    (and gives slightly different results):
+    0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) *
+    (x + 0.044715 * torch.pow(x, 3))))
+    Also see https://arxiv.org/abs/1606.08415
+
     """
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
@@ -168,16 +168,14 @@ ACT2FN = {"gelu": gelu, "relu": F.relu, "swish": swish}
 
 class LayerNorm(nn.Module):
     def __init__(self, hidden_size, eps=1e-12):
-        """Construct a layernorm module in the TF style (epsilon inside the square root).
-        """
+        """Construct a layernorm module in the TF style (epsilon inside the square root)."""
         super(LayerNorm, self).__init__()
-        self.weight = nn.Parameter(torch.ones(hidden_size))
-        self.bias = nn.Parameter(torch.zeros(hidden_size))
+        self.weight = nn.Parameter(torch.ones(hidden_size), requires_grad=True)
+        self.bias = nn.Parameter(torch.zeros(hidden_size), requires_grad=True)
         self.variance_epsilon = eps
 
     def forward(self, x):
         u = x.mean(-1, keepdim=True)
-        # ipdb.set_trace()
         s = (x - u).pow(2).mean(-1, keepdim=True)
         x = (x - u) / torch.sqrt(s + self.variance_epsilon)
         return self.weight * x + self.bias
@@ -195,10 +193,8 @@ class Attention(nn.Module):
         # [B L 5 H] -> [B L 5 1]
         energy = self.projection(input_tensor)
         # [B L 5]
-        weights = F.softmax(energy.squeeze(-1),
-                            dim=-2)  # 可以返回weight 看attention的情况
+        weights = F.softmax(energy.squeeze(-1), dim=-2)
         # [B L 5 H] * [B L 5 1] -> [B L 5 H]
-        # 5个向量都已经乘过了权重 直接sum
         outputs = (input_tensor * weights.unsqueeze(-1)).sum(dim=-2)
         return outputs
 
@@ -220,15 +216,13 @@ def get_item_audience():
 
 
 class Embeddings(nn.Module):
-    """Construct the embeddings from item, position, attribute.
-    """
+    """Construct the embeddings from item, position, attribute."""
 
     def __init__(self, item_size, hidden_size, max_seq_length,
                  hidden_dropout_prob):
         super(Embeddings, self).__init__()
 
-        self.item_embeddings = nn.Embedding(item_size,
-                                            hidden_size)  # 不要乱用padding_idx
+        self.item_embeddings = nn.Embedding(item_size, hidden_size)
         self.position_embeddings = nn.Embedding(max_seq_length, hidden_size)
 
         self.LayerNorm = LayerNorm(hidden_size, eps=1e-12)
@@ -241,7 +235,6 @@ class Embeddings(nn.Module):
                                     dtype=torch.long,
                                     device=input_ids.device)
         position_ids = position_ids.unsqueeze(0).expand_as(input_ids)
-        # bug原因：inputs-ids有个item-size的id
         items_embeddings = self.item_embeddings(input_ids)
         position_embeddings = self.position_embeddings(position_ids)
 
@@ -270,7 +263,6 @@ class SelfAttention(nn.Module):
 
         self.attn_dropout = nn.Dropout(attention_probs_dropout_prob)
 
-        # 做完self-attention 做一个前馈全连接 LayerNorm 输出
         self.dense = nn.Linear(hidden_size, hidden_size)
         self.LayerNorm = LayerNorm(hidden_size, eps=1e-12)
         self.out_dropout = nn.Dropout(hidden_dropout_prob)

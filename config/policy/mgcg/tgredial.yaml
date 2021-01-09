@@ -13,6 +13,7 @@ dropout_hidden: 0
 num_layers: 1
 hidden_size: 300
 embedding_dim: 300
+n_sent: 10
 # optim
 policy:
   epoch: 100

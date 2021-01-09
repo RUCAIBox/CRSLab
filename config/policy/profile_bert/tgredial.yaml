@@ -9,6 +9,7 @@ item_truncate: 100
 scale: 1
 # model
 policy_model: ProfileBERT
+n_sent: 10
 # optim
 policy:
   epoch: 50

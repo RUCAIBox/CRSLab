@@ -133,13 +133,13 @@ def truncate(vec, max_length, truncate_tail=True):
         return vec[-max_length:]
 
 
-def merge_utt(conversation, split_token_idx=None, split_in_tail=False, final_token_idx=None):
+def merge_utt(conversation, split_token_idx=None, keep_split_in_tail=False, final_token_idx=None):
     """merge utterances in one conversation.
 
     Args:
         conversation (list of list of int): conversation consist of utterances consist of tokens.
         split_token_idx (int): index of split token. Defaults to None.
-        split_in_tail (bool): split in tail or head. Defaults to False.
+        keep_split_in_tail (bool): split in tail or head. Defaults to False.
         final_token_idx (int): index of final token. Defaults to None.
 
     Returns:
@@ -152,7 +152,7 @@ def merge_utt(conversation, split_token_idx=None, split_in_tail=False, final_tok
             merged_conv.append(token)
         if split_token_idx:
             merged_conv.append(split_token_idx)
-    if split_token_idx and not split_in_tail:
+    if split_token_idx and not keep_split_in_tail:
         merged_conv = merged_conv[:-1]
     if final_token_idx:
         merged_conv.append(final_token_idx)

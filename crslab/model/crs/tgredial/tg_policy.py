@@ -42,6 +42,8 @@ class TGPolicyModel(BaseModel):
         
         """
         self.topic_class_num = vocab['n_topic']
+        self.n_sent = opt.get('n_sent', 10)
+
         language = dataset_language_map[opt['dataset']]
         resource = pretrain_models['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
@@ -71,10 +73,9 @@ class TGPolicyModel(BaseModel):
             topic_path_kw,
             tp_mask).pooler_output  # (bs, hidden_size)
 
-        sent_num = 10
-        bs = user_profile.shape[0] // sent_num
+        bs = user_profile.shape[0] // self.n_sent
         profile_rep = self.profile_bert(user_profile, profile_mask).pooler_output  # (bs, word_num, hidden)
-        profile_rep = profile_rep.view(bs, sent_num, -1)
+        profile_rep = profile_rep.view(bs, self.n_sent, -1)
         profile_rep = torch.mean(profile_rep, dim=1)  # (bs, hidden)
 
         state_rep = torch.cat((context_rep, topic_rep, profile_rep), dim=1)  # [bs, hidden_size*3]

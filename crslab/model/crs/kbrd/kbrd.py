@@ -56,7 +56,8 @@ class KBRDModel(BaseModel):
         embeddings_scale: A boolean indicating if we use the embeddings scale.
         reduction: A boolean indicating if we use the reduction.
         n_positions: A integer indicating the number of position.
-        longest_label = A integer indicating the longest length for response generation.
+        longest_label: A integer indicating the longest length for response generation.
+        user_proj_dim: A integer indicating dim to project for user embedding.
 
     """
 
@@ -99,6 +100,7 @@ class KBRDModel(BaseModel):
         self.reduction = opt.get('reduction', False)
         self.n_positions = opt.get('n_positions', 1024)
         self.longest_label = opt.get('longest_label', 1)
+        self.user_proj_dim = opt.get('user_proj_dim', 512)
 
         super(KBRDModel, self).__init__(opt, device)
 
@@ -162,8 +164,8 @@ class KBRDModel(BaseModel):
             self.pad_token_idx,
             self.n_positions
         )
-        self.user_proj_1 = nn.Linear(self.user_emb_dim, 512)
-        self.user_proj_2 = nn.Linear(512, self.vocab_size)
+        self.user_proj_1 = nn.Linear(self.user_emb_dim, self.user_proj_dim)
+        self.user_proj_2 = nn.Linear(self.user_proj_dim, self.vocab_size)
         self.conv_loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
         logger.debug('[Build conversation layer]')
 
