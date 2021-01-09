@@ -148,7 +148,7 @@ python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
 总的来说，`run_crslab.py`有如下参数可供调用：
 
 - `--config` 或 `-c`：配置文件的相对路径，以指定运行的模型与数据集。
-- `--gpu` or `-g`: 指定gpu id，目前支持单GPU，默认是CPU（-1）。
+- `--gpu` or `-g`：指定gpu id，目前仅支持单GPU，默认使用CPU（-1）。
 - `--save_data` 或 `-sd`：保存预处理的数据。
 - `--restore_data` 或 `-rd`：从文件读取预处理的数据。
 - `--save_system` 或 `-ss`：保存训练好的 CRS 系统。
