@@ -3,13 +3,14 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2021/1/7
+# @Time   : 2020/11/24, 2021/1/9
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 import argparse
 import warnings
 
+from crslab.config import Config
 from crslab.quick_start import run_crslab
 
 warnings.filterwarnings('ignore')
@@ -18,7 +19,9 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/tgredial/tgredial.yaml', help='config file(yaml) path')
+                        default='config/crs/kgsf/redial.yaml', help='config file(yaml) path')
+    parser.add_argument('-g', '--gpu', type=str, default='-1',
+                        help='specify gpu id(s) to use, only support using single gpu now. Defaults to cpu.')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',
@@ -32,5 +35,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--interact', action='store_true',
                         help='interact with your system instead of training')
     args, _ = parser.parse_known_args()
-    run_crslab(args.config, args.save_data, args.restore_data, args.save_system, args.restore_system, args.interact,
+    config = Config(args.config, args.gpu, args.debug)
+    run_crslab(config, args.save_data, args.restore_data, args.save_system, args.restore_system, args.interact,
                args.debug)

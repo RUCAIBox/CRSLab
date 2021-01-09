@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2021/1/3
+# @Time   : 2020/11/24, 2021/1/9
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -52,7 +52,12 @@ class BaseSystem(ABC):
 
         """
         self.opt = opt
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # device
+        if opt['gpu'] != '-1' and torch.cuda.is_available():
+            self.device = torch.device("cuda")
+            os.environ["CUDA_VISIBLE_DEVICES"] = opt['gpu']
+        else:
+            self.device = torch.device("cpu")
         # data
         if debug:
             self.train_dataloader = valid_dataloader

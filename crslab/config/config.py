@@ -3,7 +3,7 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/23, 2020/12/20
+# @Time   : 2020/11/23, 2021/1/9
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
@@ -20,7 +20,7 @@ from tqdm import tqdm
 class Config:
     """Configurator module that load the defined parameters."""
 
-    def __init__(self, config_file, debug=False):
+    def __init__(self, config_file, gpu='-1', debug=False):
         """Load parameters and set log level.
 
         Args:
@@ -34,10 +34,14 @@ class Config:
         """
 
         self.opt = self.load_yaml_configs(config_file)
+        # gpu
+        self.opt['gpu'] = gpu
+        # dataset
         dataset = self.opt['dataset']
         tokenize = self.opt['tokenize']
         if isinstance(tokenize, dict):
             tokenize = ', '.join(tokenize.values())
+        # model
         model = self.opt.get('model', None)
         rec_model = self.opt.get('rec_model', None)
         conv_model = self.opt.get('conv_model', None)
@@ -54,7 +58,7 @@ class Config:
                 models.append(policy_model)
             model_name = '_'.join(models)
         self.opt['model_name'] = model_name
-
+        # log
         log_name = self.opt.get("log_name", dataset + '_' + model_name + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                                              time.localtime())) + ".log"
         if not os.path.exists("log"):
