@@ -52,12 +52,7 @@ class BaseSystem(ABC):
 
         """
         self.opt = opt
-        # device
-        if opt['gpu'] != '-1' and torch.cuda.is_available():
-            self.device = torch.device("cuda")
-            os.environ["CUDA_VISIBLE_DEVICES"] = opt['gpu']
-        else:
-            self.device = torch.device("cpu")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # data
         if debug:
             self.train_dataloader = valid_dataloader
