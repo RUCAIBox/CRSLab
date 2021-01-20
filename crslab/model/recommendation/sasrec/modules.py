@@ -181,40 +181,6 @@ class LayerNorm(nn.Module):
         return self.weight * x + self.bias
 
 
-class Attention(nn.Module):
-    def __init__(self, hidden_size):
-        super().__init__()
-        self.hidden_dim = hidden_size
-        self.projection = nn.Sequential(nn.Linear(hidden_size, 64), nn.ReLU(),
-                                        nn.Linear(64, 1))
-
-    def forward(self, input_tensor):
-        batch_size = input_tensor.size(0)
-        # [B L 5 H] -> [B L 5 1]
-        energy = self.projection(input_tensor)
-        # [B L 5]
-        weights = F.softmax(energy.squeeze(-1), dim=-2)
-        # [B L 5 H] * [B L 5 1] -> [B L 5 H]
-        outputs = (input_tensor * weights.unsqueeze(-1)).sum(dim=-2)
-        return outputs
-
-
-def kmax_pooling(x, dim, k):
-    index = x.topk(k, dim=dim)[1].sort(dim=dim)[0]
-    return x.gather(dim, index).squeeze(dim)
-
-
-def avg_pooling(x, dim):
-    return x.sum(dim=dim) / x.size(1)
-
-
-def get_item_audience():
-    import pickle
-    with open('item_audience_distribute.pkl') as fin:
-        item_audience = pickle.load(fin)
-    return item_audience
-
-
 class Embeddings(nn.Module):
     """Construct the embeddings from item, position, attribute."""
 
