@@ -22,8 +22,8 @@ from crslab.config import SAVE_PATH
 from crslab.evaluator import get_evaluator
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.model import get_model
-from crslab.system import lr_scheduler
-from crslab.system.utils import compute_grad_norm
+from crslab.system.utils import lr_scheduler
+from crslab.system.utils.functions import compute_grad_norm
 
 optim_class = {}
 optim_class.update({k: v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()})

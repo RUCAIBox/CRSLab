@@ -24,7 +24,7 @@ Now we provide the following models:
     
 """
 
-pretrain_models = {
+resources = {
     'bert': {
         'zh': {
             'version': '0.1',

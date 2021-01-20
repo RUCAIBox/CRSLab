@@ -14,7 +14,7 @@ from crslab.data import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
-from crslab.system.utils import ind2txt
+from crslab.system.utils.functions import ind2txt
 
 
 class ReDialSystem(BaseSystem):

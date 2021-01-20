@@ -28,7 +28,7 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrain_models import pretrain_models
+from crslab.model.pretrained_models import resources
 from crslab.model.recommendation.sasrec.modules import SASRec
 
 
@@ -69,7 +69,7 @@ class TGRecModel(BaseModel):
         self.num_hidden_layers = opt['num_hidden_layers']
 
         language = dataset_language_map[opt['dataset']]
-        resource = pretrain_models['bert'][language]
+        resource = resources['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
         super(TGRecModel, self).__init__(opt, device, dpath, resource)
 

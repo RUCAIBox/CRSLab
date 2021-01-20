@@ -1,4 +1,4 @@
-from .base_dataset import BaseDataset
+from .base import BaseDataset
 from .durecdial import DuRecDialDataset
 from .gorecdial import GoRecDialDataset
 from .inspired import InspiredDataset

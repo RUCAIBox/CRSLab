@@ -26,7 +26,7 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from ...pretrain_models import pretrain_models
+from ...pretrained_models import resources
 
 
 class ConvBERTModel(BaseModel):
@@ -49,7 +49,7 @@ class ConvBERTModel(BaseModel):
         """
         self.topic_class_num = vocab['n_topic']
         language = dataset_language_map[opt['dataset']]
-        resource = pretrain_models['bert'][language]
+        resource = resources['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
         super(ConvBERTModel, self).__init__(opt, device, dpath, resource)
 

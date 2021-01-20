@@ -27,7 +27,7 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrain_models import pretrain_models
+from crslab.model.pretrained_models import resources
 
 
 class TGPolicyModel(BaseModel):
@@ -45,7 +45,7 @@ class TGPolicyModel(BaseModel):
         self.n_sent = opt.get('n_sent', 10)
 
         language = dataset_language_map[opt['dataset']]
-        resource = pretrain_models['bert'][language]
+        resource = resources['bert'][language]
         dpath = os.path.join(PRETRAIN_PATH, "bert", language)
         super(TGPolicyModel, self).__init__(opt, device, dpath, resource)
 
