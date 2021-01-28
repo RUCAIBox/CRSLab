@@ -135,7 +135,7 @@ pip install -e .
 With the source code, you can use the provided script for initial usage of our library with cpu by default:
 
 ```bash
-python run_crslab.py --config config/kgsf/redial.yaml
+python run_crslab.py --config config/crs/kgsf/redial.yaml
 ```
 
 The system will complete the data preprocessing, and training, validation, testing of each model in turn. Finally it will get the evaluation results of specified models.
@@ -143,7 +143,7 @@ The system will complete the data preprocessing, and training, validation, testi
 If you want to save pre-processed datasets and training results of models, you can use the following command:
 
 ```bash
-python run_crslab.py --config config/kgsf/redial.yaml --save_data --save_system
+python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_system
 ```
 
 In summary, there are following arguments in `run_crslab.py`:
