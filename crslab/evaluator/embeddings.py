@@ -24,7 +24,7 @@ resources = {
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EbPlV6DOThNArlYdpLKUnDgBQNl2SpvA2Z_lrxfiVyW-bQ?download=1',
             'cc.en.300.zip',
-            '96a06a77da70325997eaa52bfd9acb1359a7c3754cb1c1aed2fc27c04936d53e'
+            'ecf3eff4ee5b494c58953c35e598253aa2f3906c54af7b695a3fd8fa22bf2b06'
         )
     }
 }
