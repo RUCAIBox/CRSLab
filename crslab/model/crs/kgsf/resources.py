@@ -14,7 +14,7 @@ resources = {
     'ReDial': {
         'version': '0.2',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/29bf59eed27f74ba6b6d16594f1bcc02?fn=redial',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EXl2bhU82O5Itp9K4Mh41mYB69BKPEvMcKwZRstfYZUB1g?download=1',
             'kgsf_redial.zip',
             'f627841644a184079acde1b0185e3a223945061c3a591f4bc0d7f62e7263f548',
         ),
@@ -22,7 +22,7 @@ resources = {
     'TGReDial': {
         'version': '0.2',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/959f40436a07df23dd951a0c0f0d3d62?fn=tgredial',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/ETzJ0-QnguRKiKO_ktrTDZQBZHKom4-V5SJ9mhesfXzrWQ?download=1',
             'kgsf_tgredial.zip',
             'c9d054b653808795035f77cb783227e6e9a938e5bedca4d7f88c6dfb539be5d1',
         ),
@@ -30,7 +30,7 @@ resources = {
     'GoRecDial': {
         'version': '0.1',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/3e7de02a53df515e1444417da4d82e42?fn=gorecdial',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EUfPcGfLHAJPj-F3Mr79CF4Bc5sZXKk-jysutrjiRcQvCg?download=1',
             'kgsf_gorecdial.zip',
             '9794abf12b5d6773d867556685da14d951d42f64a5c4781af7d6fb720e87ec4f',
         )
@@ -38,7 +38,7 @@ resources = {
     'OpenDialKG': {
         'version': '0.1',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/f364604c91b9ed61771b1b3ee09b4cc4?fn=opendialkg',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EQgebOKypMlPr18KJ6uGeDABtqTbMQYVYNWNR_DaAZ1Wvg?download=1',
             'kgsf_opendialkg.zip',
             '89b785b23478b1d91d6ab4f34a3658e82b52dcbb73828713a9b369fa49db9e61'
         )
@@ -46,7 +46,7 @@ resources = {
     'Inspired': {
         'version': '0.1',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/7b2418b9f681bea8d6ed01bdf8ec3630?fn=inspired',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EXQGUxjGQ-ZKpzTnUYOMavABMUAxb0JwkiIMAPp5DIvsNw?download=1',
             'kgsf_inspired.zip',
             '23dfc031a3c71f2a52e29fe0183e1a501771b8d431852102ba6fd83d971f928d'
         )
@@ -54,7 +54,7 @@ resources = {
     'DuRecDial': {
         'version': '0.1',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/6127c64e70d80d8d7fd2cac7bc4b7067?fn=durecdial',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/Ed9-qLkK0bNCk5AAvJpWU3cBC-cXks-6JlclYp08AFovyw?download=1',
             'kgsf_durecdial.zip',
             'f9a39c2382efe88d80ef14d7db8b4cbaf3a6eb92a33e018dfc9afba546ba08ef'
         )

@@ -14,7 +14,7 @@ resources = {
     'nltk': {
         'version': '0.31',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/417f6ac16282e4910fc93973e954ab42?fn=nltk',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EdVnNcteOkpAkLdNL-ejvAABPieUd8jIty3r1jcdJvGLzw?download=1',
             'redial_nltk.zip',
             '01dc2ebf15a0988a92112daa7015ada3e95d855e80cc1474037a86e536de3424',
         ),
@@ -30,7 +30,7 @@ resources = {
     'bert': {
         'version': '0.31',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/34869653883b3eeb5d8d7c261207680e?fn=bert',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EXe_sjFhfqpJoTbNcoUPJf8Bl_4U-lnduct0z8Dw5HVCPw?download=1',
             'redial_bert.zip',
             'fb55516c22acfd3ba073e05101415568ed3398c86ff56792f82426b9258c92fd',
         ),
@@ -48,7 +48,7 @@ resources = {
     'gpt2': {
         'version': '0.31',
         'file': DownloadableFile(
-            'http://d0.ananas.chaoxing.com/download/bd10bcbc0f0bfe74dcc48fafaf518ae5?fn=gpt2',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EQHOlW2m6mFEqHgt94PfoLsBbmQQeKQEOMyL1lLEHz7LvA?download=1',
             'redial_gpt2.zip',
             '37b1a64032241903a37b5e014ee36e50d09f7e4a849058688e9af52027a3ac36',
         ),
