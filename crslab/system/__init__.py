@@ -12,6 +12,7 @@ from loguru import logger
 from .kbrd import KBRDSystem
 from .kgsf import KGSFSystem
 from .redial import ReDialSystem
+from .inspired import InspiredSystem
 from .tgredial import TGReDialSystem
 
 system_register_table = {
@@ -20,6 +21,7 @@ system_register_table = {
     'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,
     'TGRec_TGConv_TGPolicy': TGReDialSystem,
+    'InspiredRec_InspiredConv': InspiredSystem,
     'GPT2': TGReDialSystem,
     'Transformer': TGReDialSystem,
     'ConvBERT': TGReDialSystem,

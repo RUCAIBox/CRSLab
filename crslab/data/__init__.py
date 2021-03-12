@@ -49,6 +49,7 @@ dataloader_register_table = {
     'ReDialRec': ReDialDataLoader,
     'ReDialConv': ReDialDataLoader,
     'ReDialRec_ReDialConv': ReDialDataLoader,
+    'InspiredRec_InspiredConv': InspiredDataLoader,
     'BERT': TGReDialDataLoader,
     'SASREC': TGReDialDataLoader,
     'TextCNN': TGReDialDataLoader,
