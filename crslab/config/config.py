@@ -36,6 +36,10 @@ class Config:
         self.opt = self.load_yaml_configs(config_file)
         # gpu
         os.environ['CUDA_VISIBLE_DEVICES'] = gpu
+        gpu = gpu.split(",")
+        for i in range(len(gpu)):
+            gpu[i] = int(gpu[i])
+        self.opt["gpu"] = gpu
         # dataset
         dataset = self.opt['dataset']
         tokenize = self.opt['tokenize']

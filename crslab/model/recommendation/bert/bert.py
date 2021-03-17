@@ -67,7 +67,7 @@ class BERTModel(BaseModel):
 
         logger.debug('[Finish build rec layer]')
 
-    def recommend(self, batch, mode='train'):
+    def forward(self, batch, mode='train'):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
 
         bert_embed = self.bert(context, attention_mask=mask).pooler_output

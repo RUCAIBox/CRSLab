@@ -119,7 +119,8 @@ class TGReDialSystem(BaseSystem):
             else:
                 self.policy_model.eval()
 
-            policy_loss, policy_predict = self.policy_model.guide(batch, mode)
+            policy_loss, policy_predict = self.policy_model.forward(batch, mode)
+            policy_loss = policy_loss.sum()  # 多gpu训练会返回多个loss，需要合并为一个loss，单gpu训练时调用这个函数也不会报错
             if mode == "train" and policy_loss is not None:
                 self.backward(policy_loss)
             else:
@@ -133,8 +134,8 @@ class TGReDialSystem(BaseSystem):
                 self.rec_model.train()
             else:
                 self.rec_model.eval()
-
-            rec_loss, rec_predict = self.rec_model.recommend(batch, mode)
+            rec_loss, rec_predict = self.rec_model.forward(batch, mode)
+            rec_loss = rec_loss.sum()  # 多gpu训练会返回多个loss，需要合并为一个loss，单gpu训练时调用这个函数也不会报错
             if mode == "train":
                 self.backward(rec_loss)
             else:
@@ -145,7 +146,8 @@ class TGReDialSystem(BaseSystem):
         elif stage == "conv":
             if mode != "test":
                 # train + valid: need to compute ppl
-                gen_loss, pred = self.conv_model.converse(batch, mode)
+                gen_loss, pred = self.conv_model.forward(batch, mode)
+                gen_loss = gen_loss.sum()  # 多gpu训练会返回多个loss，需要合并为一个loss，单gpu训练时调用这个函数也不会报错
                 if mode == 'train':
                     self.backward(gen_loss)
                 else:
@@ -156,14 +158,17 @@ class TGReDialSystem(BaseSystem):
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
                 # generate response in conv_model.step
-                pred = self.conv_model.converse(batch, mode)
+                pred = self.conv_model.forward(batch, mode)
                 self.conv_evaluate(pred, batch[-1])
         else:
             raise
 
     def train_recommender(self):
         if hasattr(self.rec_model, 'bert'):
-            bert_param = list(self.rec_model.bert.named_parameters())
+            if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
+                bert_param = list(self.rec_model.bert.named_parameters())
+            else:
+                bert_param = list(self.rec_model.module.bert.named_parameters())
             bert_param_name = ['bert.' + n for n, p in bert_param]
         else:
             bert_param = []
@@ -201,6 +206,10 @@ class TGReDialSystem(BaseSystem):
                                                                   shuffle=False):
                 self.step(batch, stage='rec', mode='test')
             self.evaluator.report()
+        self.rec_model.cpu()  # 清理model占用的cuda显存
+        torch.cuda.empty_cache()  # 清理显存
+
+
 
     def train_conversation(self):
         self.init_optim(self.conv_optim_opt, self.conv_model.parameters())
@@ -230,6 +239,9 @@ class TGReDialSystem(BaseSystem):
                     batch_size=self.conv_batch_size, shuffle=False):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report()
+
+        self.conv_model.cpu()
+        torch.cuda.empty_cache()  # 清理显存
 
     def train_policy(self):
         policy_params = list(self.policy_model.named_parameters())
@@ -276,6 +288,9 @@ class TGReDialSystem(BaseSystem):
                 self.step(batch, stage='policy', mode='test')
             self.evaluator.report()
 
+        self.policy_model.cpu()  # 清理model占用的cuda显存
+        torch.cuda.empty_cache()
+
     def fit(self):
         if hasattr(self, 'rec_model'):
             self.train_recommender()
@@ -291,7 +306,7 @@ class TGReDialSystem(BaseSystem):
             # rec
             if hasattr(self, 'rec_model'):
                 rec_input = self.process_input(input_text, 'rec')
-                scores = self.rec_model.recommend(rec_input, 'infer')
+                scores = self.rec_model.forward(rec_input, 'infer')
 
                 scores = scores.cpu()[0]
                 scores = scores[self.item_ids]
@@ -309,7 +324,7 @@ class TGReDialSystem(BaseSystem):
             # conv
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
-                preds = self.conv_model.converse(conv_input, 'infer').tolist()[0]
+                preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
 
                 token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')

@@ -79,7 +79,8 @@ class ReDialSystem(BaseSystem):
                 batch[k] = v.to(self.device)
 
         if stage == 'rec':
-            rec_loss, rec_scores = self.rec_model.recommend(batch, mode=mode)
+            rec_loss, rec_scores = self.rec_model.forward(batch, mode=mode)
+            rec_loss = rec_loss.sum()
             if mode == 'train':
                 self.backward(rec_loss)
             else:
@@ -87,7 +88,8 @@ class ReDialSystem(BaseSystem):
             rec_loss = rec_loss.item()
             self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
         else:
-            gen_loss, preds = self.conv_model.converse(batch, mode=mode)
+            gen_loss, preds = self.conv_model.forward(batch, mode=mode)
+            gen_loss = gen_loss.sum()
             if mode == 'train':
                 self.backward(gen_loss)
             else:

@@ -119,7 +119,7 @@ class GRU4RECModel(BaseModel):
 
         return loss
 
-    def recommend(self, batch, mode):
+    def forward(self, batch, mode):
         """
         Args:
             input_ids: padding in left, [pad, pad, id1, id2, ..., idn]
