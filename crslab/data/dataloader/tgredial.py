@@ -174,7 +174,7 @@ class TGReDialDataLoader(BaseDataLoader):
         batch_context = padded_tensor(batch_context,
                                       self.pad_token_idx,
                                       max_len=self.context_truncate)
-        batch_mask = (batch_context != 0).long()
+        batch_mask = (batch_context != self.pad_token_idx).long()
 
         return (batch_context, batch_mask,
                 padded_tensor(batch_input_ids,
@@ -207,7 +207,7 @@ class TGReDialDataLoader(BaseDataLoader):
         context = padded_tensor(context,
                                 self.pad_token_idx,
                                 max_len=self.context_truncate)
-        mask = (context != 0).long()
+        mask = (context != self.pad_token_idx).long()
 
         return (context, mask,
                 padded_tensor(input_ids,
@@ -395,7 +395,7 @@ class TGReDialDataLoader(BaseDataLoader):
                                       pad_idx=self.pad_token_idx,
                                       pad_tail=True,
                                       max_len=self.context_truncate)
-        batch_cotnext_mask = (batch_context != 0).long()
+        batch_cotnext_mask = (batch_context != self.pad_token_idx).long()
         batch_context_policy = padded_tensor(batch_context_policy,
                                              pad_idx=self.pad_token_idx,
                                              pad_tail=True)

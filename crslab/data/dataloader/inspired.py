@@ -1,4 +1,4 @@
-# @Time   : 2020/3/11
+# @Time   : 2021/3/11
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
@@ -117,7 +117,7 @@ class InspiredDataLoader(BaseDataLoader):
         batch_context = padded_tensor(batch_context,
                                       self.pad_token_idx,
                                       max_len=self.context_truncate)
-        batch_mask = (batch_context != 0).long()
+        batch_mask = (batch_context != self.pad_token_idx).long()
 
         return (batch_context, batch_mask, torch.tensor(batch_movie_id))
 
