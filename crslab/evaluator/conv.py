@@ -8,10 +8,12 @@
 # @Email  : wxl1999@foxmail.com
 import os
 from collections import defaultdict
+import time
 
 import fasttext
 from loguru import logger
 from nltk import ngrams
+from torch.utils.tensorboard import SummaryWriter
 
 from crslab.evaluator.base import BaseEvaluator
 from crslab.evaluator.utils import nice_report
@@ -31,12 +33,16 @@ class ConvEvaluator(BaseEvaluator):
         optim_metrics: the metrics to optimize in training
 
     """
-    def __init__(self):
+    def __init__(self, tensorboard=False):
         super(ConvEvaluator, self).__init__()
         self.dist_set = defaultdict(set)
         self.dist_cnt = 0
         self.gen_metrics = Metrics()
         self.optim_metrics = Metrics()
+        self.tensorboard = tensorboard
+        if self.tensorboard:
+            self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+            self.reports_name = ['Generation Metrics', 'Optimization Metrics']
 
     def _load_embedding(self, language):
         resource = resources[language]
@@ -66,10 +72,15 @@ class ConvEvaluator(BaseEvaluator):
             self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
-    def report(self):
+    def report(self, epoch=-1, mode='test'):
         for k, v in self.dist_set.items():
             self.gen_metrics.add(k, AverageMetric(len(v) / self.dist_cnt))
         reports = [self.gen_metrics.report(), self.optim_metrics.report()]
+        if self.tensorboard and mode != 'test':
+            for idx, task_report in enumerate(reports):
+                for each_metric, value in task_report.items():
+                    self.writer.add_scalars(f'{self.reports_name[idx]}/{each_metric}', {mode: value.value()}, epoch)
+
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):

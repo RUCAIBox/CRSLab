@@ -22,6 +22,7 @@ install_requires = [
     'requests~=2.25.1',
     'scikit-learn~=0.24.0',
     'fuzzywuzzy~=0.18.0',
+    'tensorborad~=2.4.1',
 ]
 
 classifiers = [

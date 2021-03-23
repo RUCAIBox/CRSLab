@@ -23,7 +23,7 @@ class BaseEvaluator(ABC):
         pass
 
     @abstractmethod
-    def report(self):
+    def report(self, epoch, mode):
         pass
 
     @abstractmethod

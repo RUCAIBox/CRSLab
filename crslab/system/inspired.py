@@ -21,7 +21,7 @@ class InspiredSystem(BaseSystem):
     """This is the system for Inspired model"""
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False):
+                 interact=False, debug=False, tensorboard=False):
         """
 
         Args:
@@ -34,10 +34,11 @@ class InspiredSystem(BaseSystem):
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
             interact (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+            tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         super(InspiredSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore_system, interact, debug)
+                                             test_dataloader, vocab, side_data, restore_system, interact, debug, tensorboard)
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']
@@ -152,14 +153,14 @@ class InspiredSystem(BaseSystem):
             for batch in self.train_dataloader['rec'].get_rec_data(self.rec_batch_size,
                                                                    shuffle=True):
                 self.step(batch, stage='rec', mode='train')
-            self.evaluator.report()
+            self.evaluator.report(epoch=epoch, mode='train')
             # val
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader['rec'].get_rec_data(
                         self.rec_batch_size, shuffle=False):
                     self.step(batch, stage='rec', mode='val')
-                self.evaluator.report()
+                self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
                 metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
@@ -170,7 +171,7 @@ class InspiredSystem(BaseSystem):
             for batch in self.test_dataloader['rec'].get_rec_data(self.rec_batch_size,
                                                                   shuffle=False):
                 self.step(batch, stage='rec', mode='test')
-            self.evaluator.report()
+            self.evaluator.report(mode='test')
 
     def train_conversation(self):
         self.init_optim(self.conv_optim_opt, self.conv_model.parameters())
@@ -181,14 +182,14 @@ class InspiredSystem(BaseSystem):
             for batch in self.train_dataloader['conv'].get_conv_data(
                     batch_size=self.conv_batch_size, shuffle=True):
                 self.step(batch, stage='conv', mode='train')
-            self.evaluator.report()
+            self.evaluator.report(epoch=epoch, mode='train')
             # val
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader['conv'].get_conv_data(
                         batch_size=self.conv_batch_size, shuffle=False):
                     self.step((batch), stage='conv', mode='val')
-                self.evaluator.report()
+                self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
                 metric = self.evaluator.gen_metrics['ppl']
                 if self.early_stop(metric):
@@ -199,7 +200,7 @@ class InspiredSystem(BaseSystem):
             for batch in self.test_dataloader['conv'].get_conv_data(
                     batch_size=self.conv_batch_size, shuffle=False):
                 self.step((batch), stage='conv', mode='test')
-            self.evaluator.report()
+            self.evaluator.report(mode='test')
 
     def fit(self):
         if hasattr(self, 'rec_model'):

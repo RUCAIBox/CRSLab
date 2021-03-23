@@ -9,10 +9,12 @@
 
 import os
 from collections import defaultdict
+import time
 
 import fasttext
 from loguru import logger
 from nltk import ngrams
+from torch.utils.tensorboard import SummaryWriter
 
 from crslab.evaluator.base import BaseEvaluator
 from crslab.evaluator.utils import nice_report
@@ -32,7 +34,7 @@ class StandardEvaluator(BaseEvaluator):
         gen_metrics: the metrics to evaluate conversational model, including bleu, dist, embedding metrics, f1
         optim_metrics: the metrics to optimize in training
     """
-    def __init__(self, language):
+    def __init__(self, language, tensorboard=False):
         super(StandardEvaluator, self).__init__()
         # rec
         self.rec_metrics = Metrics()
@@ -43,6 +45,11 @@ class StandardEvaluator(BaseEvaluator):
         self._load_embedding(language)
         # optim
         self.optim_metrics = Metrics()
+        # tensorboard
+        self.tensorboard = tensorboard
+        if self.tensorboard:
+            self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+            self.reports_name = ['Recommendation Metrics', 'Generation Metrics', 'Optimization Metrics']
 
     def _load_embedding(self, language):
         resource = resources[language]
@@ -79,10 +86,14 @@ class StandardEvaluator(BaseEvaluator):
             self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
-    def report(self):
+    def report(self, epoch=-1, mode='test'):
         for k, v in self.dist_set.items():
             self.gen_metrics.add(k, AverageMetric(len(v) / self.dist_cnt))
         reports = [self.rec_metrics.report(), self.gen_metrics.report(), self.optim_metrics.report()]
+        if self.tensorboard and mode != 'test':
+            for idx, task_report in enumerate(reports):
+                for each_metric, value in task_report.items():
+                    self.writer.add_scalars(f'{self.reports_name[idx]}/{each_metric}', {mode: value.value()}, epoch)
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):
