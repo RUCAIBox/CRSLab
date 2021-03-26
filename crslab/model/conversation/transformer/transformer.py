@@ -197,6 +197,9 @@ class TransformerModel(BaseModel):
         sequences = [[[list(), list(), 1.0]]] * batch_size
         for i in range(self.longest_label):
             # at beginning there is 1 candidate, when i!=0 there are 4 candidates
+            if i == 1:
+                token_encoding = (token_encoding[0].repeat(beam, 1, 1),
+                                  token_encoding[1].repeat(beam, 1, 1))
             if i != 0:
                 xs = []
                 for d in range(len(sequences[0])):
@@ -205,14 +208,13 @@ class TransformerModel(BaseModel):
                         xs.append(text)
                 xs = torch.stack(xs).reshape(beam, batch_size, -1)  # (beam, batch_size, _)
 
-            logits_list = []
-            for x in xs:
-                dialog_latent, incr_state = self.conv_decoder(x, token_encoding, incr_state)
-                dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
-                gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
-                logits_list.append(gen_logits)
+            dialog_latent, incr_state = self.conv_decoder(xs.reshape(len(sequences[0]) * batch_size, -1),
+                                                          token_encoding,
+                                                          incr_state)
+            dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
+            gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
 
-            logits = torch.stack(logits_list)
+            logits = gen_logits.reshape(len(sequences[0]), batch_size, 1, -1)
             # turn into probabilities,in case of negative numbers
             probs, preds = torch.nn.functional.softmax(logits).topk(beam, dim=-1)
 

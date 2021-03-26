@@ -71,6 +71,8 @@ class KBRDModel(BaseModel):
             side_data (dict): A dictionary record the side data.
 
         """
+        self.device = device
+        self.gpu = opt.get("gpu", -1)
         # vocab
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
@@ -172,7 +174,7 @@ class KBRDModel(BaseModel):
     def encode_user(self, entity_lists, kg_embedding):
         user_repr_list = []
         for entity_list in entity_lists:
-            if not entity_list:
+            if entity_list is not None:
                 user_repr_list.append(torch.zeros(self.user_emb_dim, device=self.device))
                 continue
             user_repr = kg_embedding[entity_list]
@@ -228,7 +230,7 @@ class KBRDModel(BaseModel):
 
     def decode_beam_search(self, encoder_states, user_embedding, beam=4):
         bsz = encoder_states[0].shape[0]
-        xs = self._starts(bsz).reshape(1, bsz, -1)  # (1, batch_size, _)
+        xs = self._starts(bsz).reshape(1, bsz, -1)  # (batch_size, _)
         sequences = [[[list(), list(), 1.0]]] * bsz
         for i in range(self.longest_label):
             # at beginning there is 1 candidate, when i!=0 there are 4 candidates
@@ -241,20 +243,20 @@ class KBRDModel(BaseModel):
                 xs = torch.stack(xs).reshape(beam, bsz, -1)  # (beam, batch_size, _)
 
             with torch.no_grad():
-                logits_list = []
-                scores_list = []
-                for x in xs:
-                    scores, _ = self.decoder(x, encoder_states)
-                    scores = scores[:, -1:, :]
-                    scores_list.append(scores)
-                    token_logits = F.linear(scores, self.token_embedding.weight)
-                    user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
-                    sum_logits = token_logits + user_logits
-                    logits_list.append(sum_logits)
+                if i == 1:
+                    user_embedding = user_embedding.repeat(beam, 1)
+                    encoder_states = (encoder_states[0].repeat(beam, 1, 1),
+                                      encoder_states[1].repeat(beam, 1, 1))
 
-            logits = torch.stack(logits_list)
+                scores, _ = self.decoder(xs.reshape(len(sequences[0])*bsz, -1), encoder_states)
+                scores = scores[:, -1:, :]
+                token_logits = F.linear(scores, self.token_embedding.weight)
+                user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
+                sum_logits = token_logits + user_logits
+
+            logits = sum_logits.reshape(len(sequences[0]), bsz, 1, -1)
+            scores = scores.reshape(len(sequences[0]), bsz, 1, -1)
             logits = torch.nn.functional.softmax(logits)  # turn into probabilities,in case of negative numbers
-            scores = torch.stack(scores_list)
             probs, preds = logits.topk(beam, dim=-1)
             # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
 
@@ -299,6 +301,9 @@ class KBRDModel(BaseModel):
             return preds
 
     def forward(self, batch, mode, stage):
+        if len(self.gpu) >= 2:
+            self.edge_idx = self.edge_idx.cuda(torch.cuda.current_device())
+            self.edge_type = self.edge_type.cuda(torch.cuda.current_device())
         if stage == "conv":
             return self.converse(batch, mode)
         if stage == "rec":
