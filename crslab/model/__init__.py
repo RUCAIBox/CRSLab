@@ -22,6 +22,8 @@ Model_register_table = {
     'TGPolicy': TGPolicyModel,
     'ReDialRec': ReDialRecModel,
     'ReDialConv': ReDialConvModel,
+    'InspiredRec': InspiredRecModel,
+    'InspiredConv': InspiredConvModel,
     'GPT2': GPT2Model,
     'Transformer': TransformerModel,
     'ConvBERT': ConvBERTModel,

@@ -1,13 +1,9 @@
-# @Time   : 2020/12/9
-# @Author : Yuanhang Zhou
-# @Email  : sdzyh002@gmail.com
-
-# UPDATE:
-# @Time   : 2021/1/3
-# @Author : Xiaolei Wang
-# @Email  : wxl1999@foxmail.com
+# @Time   : 2021/3/1
+# @Author : Beichen Zhang
+# @Email  : zhangbeichen724@gmail.com
 
 import os
+import gc
 from math import floor
 
 import torch
@@ -21,8 +17,8 @@ from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
 
 
-class TGReDialSystem(BaseSystem):
-    """This is the system for TGReDial model"""
+class InspiredSystem(BaseSystem):
+    """This is the system for Inspired model"""
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
                  interact=False, debug=False, tensorboard=False):
@@ -41,7 +37,7 @@ class TGReDialSystem(BaseSystem):
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
-        super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
+        super(InspiredSystem, self).__init__(opt, train_dataloader, valid_dataloader,
                                              test_dataloader, vocab, side_data, restore_system, interact, debug, tensorboard)
 
         if hasattr(self, 'conv_model'):
@@ -68,11 +64,6 @@ class TGReDialSystem(BaseSystem):
                 conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
-        if hasattr(self, 'policy_model'):
-            self.policy_optim_opt = self.opt['policy']
-            self.policy_epoch = self.policy_optim_opt['epoch']
-            self.policy_batch_size = self.policy_optim_opt['batch_size']
-
         self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
@@ -85,19 +76,11 @@ class TGReDialSystem(BaseSystem):
             item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
 
-    def policy_evaluate(self, rec_predict, movie_label):
-        rec_predict = rec_predict.cpu()
-        _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
-        rec_ranks = rec_ranks.tolist()
-        movie_label = movie_label.tolist()
-        for rec_rank, movie in zip(rec_ranks, movie_label):
-            self.evaluator.rec_evaluate(rec_rank, movie)
-
     def conv_evaluate(self, prediction, response):
         """
         Args:
             prediction: torch.LongTensor, shape=(bs, response_truncate-1)
-            response: torch.LongTensor, shape=(bs, response_truncate)
+            response: (torch.LongTensor, torch.LongTensor), shape=((bs, response_truncate), (bs, response_truncate))
 
             the first token in response is <|endoftext|>,  it is not in prediction
         """
@@ -114,22 +97,7 @@ class TGReDialSystem(BaseSystem):
         mode: ['train', 'val', 'test]
         """
         batch = [ele.to(self.device) for ele in batch]
-        if stage == 'policy':
-            if mode == 'train':
-                self.policy_model.train()
-            else:
-                self.policy_model.eval()
-
-            policy_loss, policy_predict = self.policy_model.guide(batch, mode)
-            if mode == "train" and policy_loss is not None:
-                self.backward(policy_loss)
-            else:
-                self.policy_evaluate(policy_predict, batch[-1])
-            if isinstance(policy_loss, torch.Tensor):
-                policy_loss = policy_loss.item()
-                self.evaluator.optim_metrics.add("policy_loss",
-                                                 AverageMetric(policy_loss))
-        elif stage == 'rec':
+        if stage == 'rec':
             if mode == 'train':
                 self.rec_model.train()
             else:
@@ -148,8 +116,10 @@ class TGReDialSystem(BaseSystem):
                 # train + valid: need to compute ppl
                 gen_loss, pred = self.conv_model.converse(batch, mode)
                 if mode == 'train':
+                    self.conv_model.train()
                     self.backward(gen_loss)
                 else:
+                    self.conv_model.eval()
                     self.conv_evaluate(pred, batch[-1])
                 gen_loss = gen_loss.item()
                 self.evaluator.optim_metrics.add("gen_loss",
@@ -218,7 +188,7 @@ class TGReDialSystem(BaseSystem):
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader['conv'].get_conv_data(
                         batch_size=self.conv_batch_size, shuffle=False):
-                    self.step(batch, stage='conv', mode='val')
+                    self.step((batch), stage='conv', mode='val')
                 self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
                 metric = self.evaluator.gen_metrics['ppl']
@@ -229,136 +199,14 @@ class TGReDialSystem(BaseSystem):
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader['conv'].get_conv_data(
                     batch_size=self.conv_batch_size, shuffle=False):
-                self.step(batch, stage='conv', mode='test')
-            self.evaluator.report(mode='test')
-
-    def train_policy(self):
-        policy_params = list(self.policy_model.named_parameters())
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-        params = [{
-            'params': [
-                p for n, p in policy_params
-                if not any(nd in n for nd in no_decay)
-            ],
-            'weight_decay':
-                self.policy_optim_opt['weight_decay']
-        }, {
-            'params': [
-                p for n, p in policy_params
-                if any(nd in n for nd in no_decay)
-            ],
-        }]
-        self.init_optim(self.policy_optim_opt, params)
-
-        for epoch in range(self.policy_epoch):
-            self.evaluator.reset_metrics()
-            logger.info(f'[Policy epoch {str(epoch)}]')
-            # change the shuffle to True
-            for batch in self.train_dataloader['policy'].get_policy_data(
-                    self.policy_batch_size, shuffle=True):
-                self.step(batch, stage='policy', mode='train')
-            self.evaluator.report(epoch=epoch, mode='train')
-            # val
-            with torch.no_grad():
-                self.evaluator.reset_metrics()
-                for batch in self.valid_dataloader['policy'].get_policy_data(
-                        self.policy_batch_size, shuffle=False):
-                    self.step(batch, stage='policy', mode='val')
-                self.evaluator.report(epoch=epoch, mode='val')
-                # early stop
-                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
-                if self.early_stop(metric):
-                    break
-        # test
-        with torch.no_grad():
-            self.evaluator.reset_metrics()
-            for batch in self.test_dataloader['policy'].get_policy_data(
-                    self.policy_batch_size, shuffle=False):
-                self.step(batch, stage='policy', mode='test')
+                self.step((batch), stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
     def fit(self):
         if hasattr(self, 'rec_model'):
             self.train_recommender()
-        if hasattr(self, 'policy_model'):
-            self.train_policy()
         if hasattr(self, 'conv_model'):
             self.train_conversation()
 
     def interact(self):
-        self.init_interact()
-        input_text = self.get_input(self.language)
-        while not self.finished:
-            # rec
-            if hasattr(self, 'rec_model'):
-                rec_input = self.process_input(input_text, 'rec')
-                scores = self.rec_model.recommend(rec_input, 'infer')
-
-                scores = scores.cpu()[0]
-                scores = scores[self.item_ids]
-                _, rank = torch.topk(scores, 10, dim=-1)
-                item_ids = []
-                for r in rank.tolist():
-                    item_ids.append(self.item_ids[r])
-                first_item_id = item_ids[:1]
-                self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
-
-                print(f"[Recommend]:")
-                for item_id in item_ids:
-                    if item_id in self.id2entity:
-                        print(self.id2entity[item_id])
-            # conv
-            if hasattr(self, 'conv_model'):
-                conv_input = self.process_input(input_text, 'conv')
-                preds = self.conv_model.converse(conv_input, 'infer').tolist()[0]
-                p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
-
-                token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
-                self.update_context('conv', token_ids, entity_ids, movie_ids, word_ids)
-
-                print(f"[Response]:\n{p_str}")
-            # input
-            input_text = self.get_input(self.language)
-
-    def process_input(self, input_text, stage):
-        token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(input_text, stage)
-        self.update_context(stage, token_ids, entity_ids, movie_ids, word_ids)
-
-        data = {'role': 'Seeker', 'context_tokens': self.context[stage]['context_tokens'],
-                'context_entities': self.context[stage]['context_entities'],
-                'context_words': self.context[stage]['context_words'],
-                'context_items': self.context[stage]['context_items'],
-                'user_profile': self.context[stage]['user_profile'],
-                'interaction_history': self.context[stage]['interaction_history']}
-        dataloader = get_dataloader(self.opt, data, self.vocab[stage])
-        if stage == 'rec':
-            data = dataloader.rec_interact(data)
-        elif stage == 'conv':
-            data = dataloader.conv_interact(data)
-
-        data = [ele.to(self.device) if isinstance(ele, torch.Tensor) else ele for ele in data]
-        return data
-
-    def convert_to_id(self, text, stage):
-        if self.language == 'zh':
-            tokens = self.tokenize(text, 'pkuseg')
-        elif self.language == 'en':
-            tokens = self.tokenize(text, 'nltk')
-        else:
-            raise
-
-        entities = self.link(tokens, self.side_data[stage]['entity_kg']['entity'])
-        words = self.link(tokens, self.side_data[stage]['word_kg']['entity'])
-
-        if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
-            language = dataset_language_map[self.opt['dataset']]
-            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
-            tokens = self.tokenize(text, 'bert', path)
-
-        token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
-        entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
-                      entity in self.vocab[stage]['entity2id']]
-        movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
-        word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
-
-        return token_ids, entity_ids, movie_ids, word_ids
+        pass

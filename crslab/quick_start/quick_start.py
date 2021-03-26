@@ -14,7 +14,7 @@ from crslab.system import get_system
 
 
 def run_crslab(config, save_data=False, restore_data=False, save_system=False, restore_system=False,
-               interact=False, debug=False):
+               interact=False, debug=False, tensorboard=False):
     """A fast running api, which includes the complete process of training and testing models on specified datasets.
 
     Args:
@@ -66,7 +66,7 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
             test_dataloader[task] = get_dataloader(config, test_data, vocab[task])
     # system
     CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system,
-                     interact, debug)
+                     interact, debug, tensorboard)
     if interact:
         CRS.interact()
     else:

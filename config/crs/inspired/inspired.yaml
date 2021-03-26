@@ -1,0 +1,42 @@
+# dataset
+dataset: Inspired
+tokenize:
+  rec: bert
+  conv: gpt2
+# dataloader
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+scale: 1
+# model
+# rec
+rec_model: InspiredRec
+# conv
+conv_model: InspiredConv
+# optim
+rec:
+  epoch: 1
+  batch_size: 8
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-3
+    weight_decay: !!float 0.0000
+  early_stop: true
+  stop_mode: max
+  impatience: 3
+  lr_bert: !!float 1e-5
+conv:
+  epoch: 50
+  batch_size: 1
+  optimizer:
+    name: AdamW
+    lr: !!float 3e-5
+    eps: !!float 1e-06
+    weight_decay: !!float 0.01
+  lr_scheduler:
+    name: TransformersLinearLR
+    warmup_steps: 100
+  early_stop: true
+  impatience: 3
+  stop_mode: min
+  label_smoothing: -1

@@ -21,7 +21,7 @@ class ReDialSystem(BaseSystem):
     """This is the system for KGSF model"""
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False):
+                 interact=False, debug=False, tensorboard=False):
         """
 
         Args:
@@ -34,10 +34,11 @@ class ReDialSystem(BaseSystem):
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
             interact (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+            tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                           restore_system, interact, debug)
+                                           restore_system, interact, debug, tensorboard)
         self.ind2tok = vocab['conv']['ind2tok']
         self.end_token_idx = vocab['conv']['end']
         self.item_ids = side_data['rec']['item_entity_ids']
@@ -105,14 +106,14 @@ class ReDialSystem(BaseSystem):
             logger.info('[Train]')
             for batch in self.train_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size):
                 self.step(batch, stage='rec', mode='train')
-            self.evaluator.report()  # report train loss
+            self.evaluator.report(epoch=epoch, mode='train')  # report train loss
             # val
             logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size, shuffle=False):
                     self.step(batch, stage='rec', mode='valid')
-                self.evaluator.report()  # report valid loss
+                self.evaluator.report(epoch=epoch, mode='valid')  # report valid loss
                 # early stop
                 metric = self.evaluator.optim_metrics['rec_loss']
                 if self.early_stop(metric):
@@ -123,7 +124,7 @@ class ReDialSystem(BaseSystem):
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size, shuffle=False):
                 self.step(batch, stage='rec', mode='test')
-            self.evaluator.report()
+            self.evaluator.report(mode='test')
 
     def train_conversation(self):
         self.init_optim(self.conv_optim_opt, self.conv_model.parameters())
@@ -134,7 +135,7 @@ class ReDialSystem(BaseSystem):
             logger.info('[Train]')
             for batch in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size):
                 self.step(batch, stage='conv', mode='train')
-            self.evaluator.report()
+            self.evaluator.report(epoch=epoch, mode='train')
             # val
             logger.info('[Valid]')
             with torch.no_grad():
@@ -142,7 +143,7 @@ class ReDialSystem(BaseSystem):
                 for batch in self.valid_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size,
                                                                          shuffle=False):
                     self.step(batch, stage='conv', mode='valid')
-                self.evaluator.report()
+                self.evaluator.report(epoch=epoch, mode='valid')
                 metric = self.evaluator.optim_metrics['gen_loss']
                 if self.early_stop(metric):
                     break
@@ -152,7 +153,7 @@ class ReDialSystem(BaseSystem):
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                 self.step(batch, stage='conv', mode='test')
-            self.evaluator.report()
+            self.evaluator.report(mode='test')
 
     def fit(self):
         self.train_recommender()

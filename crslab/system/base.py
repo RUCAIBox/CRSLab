@@ -36,7 +36,7 @@ class BaseSystem(ABC):
     """Base class for all system"""
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False):
+                 interact=False, debug=False, tensorboard=False):
         """
 
         Args:
@@ -49,6 +49,7 @@ class BaseSystem(ABC):
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
             interact (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+            tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         self.opt = opt
@@ -83,7 +84,7 @@ class BaseSystem(ABC):
             self.restore_model()
 
         if not interact:
-            self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'])
+            self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'], tensorboard)
 
     def init_optim(self, opt, parameters):
         self.optim_opt = opt
