@@ -1,5 +1,5 @@
 # dataset
-dataset: Redial
+dataset: ReDial
 tokenize:
   rec: bert
   conv: gpt2
