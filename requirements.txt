@@ -11,4 +11,4 @@ nltk~=3.4.4
 requests~=2.25.1
 scikit-learn~=0.24.0
 fuzzywuzzy~=0.18.0
-tensorborad~=2.4.1
+tensorboard~=2.4.1
