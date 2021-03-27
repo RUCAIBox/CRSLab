@@ -148,31 +148,32 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_sys
 总的来说，`run_crslab.py`有如下参数可供调用：
 
 - `--config` 或 `-c`：配置文件的相对路径，以指定运行的模型与数据集。
-- `--gpu` or `-g`：指定gpu id，目前仅支持单GPU，默认使用CPU（-1）。
+- `--gpu` or `-g`：指定 gpu id，目前仅支持单 GPU，默认使用 CPU（-1）。
 - `--save_data` 或 `-sd`：保存预处理的数据。
 - `--restore_data` 或 `-rd`：从文件读取预处理的数据。
 - `--save_system` 或 `-ss`：保存训练好的 CRS 系统。
 - `--restore_system` 或 `-rs`：从文件载入提前训练好的系统。
 - `--debug` 或 `-d`：用验证集代替训练集以方便调试。
 - `--interact` 或 `-i`：与你的系统进行对话交互，而非进行训练。
+- `--tensorboard` or `-tb`：使用 tensorboardX 组件来监测训练表现。
 
 
 
 ## 模型
 
-在第一个发行版中，我们实现了 4 类共 18 个模型。这里我们将对话推荐任务主要拆分成三个任务：推荐任务（生成推荐的商品），对话任务（生成对话的回复）和策略任务（规划对话推荐的策略）。其中所有的对话推荐系统都具有对话和推荐任务，他们是对话推荐系统的核心功能。而策略任务是一个辅助任务，其致力于更好的控制对话推荐系统，在不同的模型中的实现也可能不同（如TG-ReDial采用一个主题预测模型，DuRecDial中采用一个对话规划模型等）：
+在第一个发行版中，我们实现了 4 类共 18 个模型。这里我们将对话推荐任务主要拆分成三个任务：推荐任务（生成推荐的商品），对话任务（生成对话的回复）和策略任务（规划对话推荐的策略）。其中所有的对话推荐系统都具有对话和推荐任务，他们是对话推荐系统的核心功能。而策略任务是一个辅助任务，其致力于更好的控制对话推荐系统，在不同的模型中的实现也可能不同（如 TG-ReDial 采用一个主题预测模型，DuRecDial 中采用一个对话规划模型等）：
 
 
 
 |   类别   |                             模型                             |      Graph Neural Network?      |       Pre-training Model?       |
 | :------: | :----------------------------------------------------------: | :-----------------------------: | :-----------------------------: |
-| CRS 模型 | [ReDial](https://arxiv.org/abs/1812.07617)<br/>[KBRD](https://arxiv.org/abs/1908.05391)<br/>[KGSF](https://arxiv.org/abs/2007.04032)<br/>[TG-ReDial](https://arxiv.org/abs/2010.04125) |       ×<br/>√<br/>√<br/>×       |       ×<br/>×<br/>×<br/>√       |
+| CRS 模型 | [ReDial](https://arxiv.org/abs/1812.07617)<br/>[KBRD](https://arxiv.org/abs/1908.05391)<br/>[KGSF](https://arxiv.org/abs/2007.04032)<br/>[TG-ReDial](https://arxiv.org/abs/2010.04125)<br/>[INSPIRED](https://www.aclweb.org/anthology/2020.emnlp-main.654.pdf) |    ×<br/>√<br/>√<br/>×<br/>×    |    ×<br/>×<br/>×<br/>√<br/>√    |
 | 推荐模型 | Popularity<br/>[GRU4Rec](https://arxiv.org/abs/1511.06939)<br/>[SASRec](https://arxiv.org/abs/1808.09781)<br/>[TextCNN](https://arxiv.org/abs/1408.5882)<br/>[R-GCN](https://arxiv.org/abs/1703.06103)<br/>[BERT](https://arxiv.org/abs/1810.04805) | ×<br/>×<br/>×<br/>×<br/>√<br/>× | ×<br/>×<br/>×<br/>×<br/>×<br/>√ |
 | 对话模型 | [HERD](https://arxiv.org/abs/1507.04808)<br/>[Transformer](https://arxiv.org/abs/1706.03762)<br/>[GPT-2](http://www.persagen.com/files/misc/radford2019language.pdf) |          ×<br/>×<br/>×          |          ×<br/>×<br/>√          |
 | 策略模型 | PMI<br/>[MGCG](https://arxiv.org/abs/2005.03954)<br/>[Conv-BERT](https://arxiv.org/abs/2010.04125)<br/>[Topic-BERT](https://arxiv.org/abs/2010.04125)<br/>[Profile-BERT](https://arxiv.org/abs/2010.04125) |    ×<br/>×<br/>×<br/>×<br/>×    |    ×<br/>×<br/>√<br/>√<br/>√    |
 
 
-其中，CRS模型是指直接融合推荐模型和对话模型，以相互增强彼此的效果，故其内部往往已经包含了推荐、对话和策略模型。其他如推荐模型、对话模型、策略模型往往只关注以上任务中的某一个。
+其中，CRS 模型是指直接融合推荐模型和对话模型，以相互增强彼此的效果，故其内部往往已经包含了推荐、对话和策略模型。其他如推荐模型、对话模型、策略模型往往只关注以上任务中的某一个。
 
 我们对于这几类模型，我们还分别实现了如下的自动评测指标模块：
 
@@ -203,7 +204,7 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_sys
 
 ## 评测结果
 
-我们在 TG-ReDial 数据集上对模型进行了训练和测试，这里我们将数据集按照8:1:1切分。其中对于每条数据，我们从对话的第一轮开始，一轮一轮的进行推荐、策略生成、回复生成任务。下表记录了相关的评测结果。
+我们在 TG-ReDial 数据集上对模型进行了训练和测试，这里我们将数据集按照 8:1:1 切分。其中对于每条数据，我们从对话的第一轮开始，一轮一轮的进行推荐、策略生成、回复生成任务。下表记录了相关的评测结果。
 
 ### 推荐任务
 
@@ -240,7 +241,7 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_sys
 | Topic-BERT |   0.598   |   0.828   |   0.885   |   0.598   |   0.690   |   0.693   |   0.598   |   0.724   |   0.737   |
 | TG-ReDial  | **0.600** | **0.830** | **0.893** | **0.600** | **0.693** | **0.696** | **0.600** | **0.727** | **0.741** |
 
-上述结果是我们使用CRSLab进行实验得到的。然而，这些算法是根据我们的经验和理解来实现和调参的，可能还没有达到它们的最佳性能。如果您能在某个具体算法上得到更好的结果，请告知我们。验证结果后，我们会更新该表。
+上述结果是我们使用 CRSLab 进行实验得到的。然而，这些算法是根据我们的经验和理解来实现和调参的，可能还没有达到它们的最佳性能。如果您能在某个具体算法上得到更好的结果，请告知我们。验证结果后，我们会更新该表。
 
 ## 发行版本
 
