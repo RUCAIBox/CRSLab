@@ -240,9 +240,10 @@ The above results were obtained from our CRSLab in preliminary experiments. Howe
 
 ## Releases
 
-| Releases |     Date     |   Features   |
-| :------: | :----------: | :----------: |
-|  v0.1.1  | 1 / 4 / 2021 | Basic CRSLab |
+| Releases |     Date      |   Features   |
+| :------: | :-----------: | :----------: |
+|  v0.1.1  | 1 / 4 / 2021  | Basic CRSLab |
+|  v0.1.2  | 3 / 28 / 2021 |    CRSLab    |
 
 
 

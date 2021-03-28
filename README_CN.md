@@ -245,9 +245,10 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_sys
 
 ## 发行版本
 
-| 版本号 |   发行日期   |     特性     |
-| :----: | :----------: | :----------: |
-| v0.1.1 | 1 / 4 / 2021 | Basic CRSLab |
+| 版本号 |   发行日期    |     特性     |
+| :----: | :-----------: | :----------: |
+| v0.1.1 | 1 / 4 / 2021  | Basic CRSLab |
+| v0.1.2 | 3 / 28 / 2021 |    CRSLab    |
 
 
 
