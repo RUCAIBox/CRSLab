@@ -45,7 +45,7 @@ class PopularityModel(BaseModel):
         self.item_frequency = defaultdict(int)
         logger.debug('[Finish build rec layer]')
 
-    def recommend(self, batch, mode):
+    def forward(self, batch, mode):
         context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
         if mode == 'train':
             for ids in input_ids:

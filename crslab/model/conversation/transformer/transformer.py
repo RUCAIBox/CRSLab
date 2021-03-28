@@ -190,7 +190,61 @@ class TransformerModel(BaseModel):
         logits = torch.cat(logits, dim=1)
         return logits, inputs
 
-    def converse(self, batch, mode):
+    def _decode_beam_search_with_kg(self, token_encoding, beam=4):
+        batch_size = token_encoding[0].shape[0]
+        xs = self._starts(batch_size).long().reshape(1, batch_size, -1)
+        incr_state = None
+        sequences = [[[list(), list(), 1.0]]] * batch_size
+        for i in range(self.longest_label):
+            # at beginning there is 1 candidate, when i!=0 there are 4 candidates
+            if i == 1:
+                token_encoding = (token_encoding[0].repeat(beam, 1, 1),
+                                  token_encoding[1].repeat(beam, 1, 1))
+            if i != 0:
+                xs = []
+                for d in range(len(sequences[0])):
+                    for j in range(batch_size):
+                        text = sequences[j][d][0]
+                        xs.append(text)
+                xs = torch.stack(xs).reshape(beam, batch_size, -1)  # (beam, batch_size, _)
+
+            dialog_latent, incr_state = self.conv_decoder(xs.reshape(len(sequences[0]) * batch_size, -1),
+                                                          token_encoding,
+                                                          incr_state)
+            dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
+            gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
+
+            logits = gen_logits.reshape(len(sequences[0]), batch_size, 1, -1)
+            # turn into probabilities,in case of negative numbers
+            probs, preds = torch.nn.functional.softmax(logits).topk(beam, dim=-1)
+
+            # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
+
+            for j in range(batch_size):
+                all_candidates = []
+                for n in range(len(sequences[j])):
+                    for k in range(beam):
+                        prob = sequences[j][n][2]
+                        logit = sequences[j][n][1]
+                        if logit == []:
+                            logit_tmp = logits[n][j][0].unsqueeze(0)
+                        else:
+                            logit_tmp = torch.cat((logit, logits[n][j][0].unsqueeze(0)), dim=0)
+                        seq_tmp = torch.cat((xs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
+                        candidate = [seq_tmp, logit_tmp, prob * probs[n][j][0][k]]
+                        all_candidates.append(candidate)
+                ordered = sorted(all_candidates, key=lambda tup: tup[2], reverse=True)
+                sequences[j] = ordered[:beam]
+
+            # check if everyone has generated an end token
+            all_finished = ((xs == self.end_token_idx).sum(dim=1) > 0).sum().item() == batch_size
+            if all_finished:
+                break
+        logits = torch.stack([seq[0][1] for seq in sequences])
+        xs = torch.stack([seq[0][0] for seq in sequences])
+        return logits, xs
+
+    def forward(self, batch, mode):
         context_tokens, context_entities, context_words, response = batch
 
         # encoder-decoder

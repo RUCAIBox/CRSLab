@@ -76,7 +76,7 @@ class ReDialRecModel(BaseModel):
         self.decoder = nn.Linear(self.user_repr_dim, self.n_entity)
         self.loss = nn.CrossEntropyLoss()
 
-    def recommend(self, batch, mode):
+    def forward(self, batch, mode):
         """
 
         Args:

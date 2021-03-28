@@ -108,7 +108,7 @@ class ReDialConvModel(BaseModel):
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
 
-    def converse(self, batch, mode):
+    def forward(self, batch, mode):
         """
         Args:
             batch: ::

@@ -53,7 +53,12 @@ class BaseSystem(ABC):
 
         """
         self.opt = opt
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        if opt["gpu"] == [-1]:
+            self.device = torch.device('cpu')
+        elif len(opt["gpu"]) == 1:
+            self.device = torch.device('cuda', opt["gpu"][0])
+        else:
+            self.device = torch.device('cuda')
         # data
         if debug:
             self.train_dataloader = valid_dataloader
@@ -177,7 +182,7 @@ class BaseSystem(ABC):
         if self.update_freq > 1:
             self._number_grad_accum = (self._number_grad_accum + 1) % self.update_freq
             loss /= self.update_freq
-        loss.backward()
+        loss.backward(loss.clone().detach())
 
         self._update_params()
 

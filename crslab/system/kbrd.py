@@ -8,6 +8,7 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
+import os
 import torch
 from loguru import logger
 
@@ -15,6 +16,8 @@ from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from crslab.data.dataloader.utils import padded_tensor
+
 
 
 class KBRDSystem(BaseSystem):
@@ -73,12 +76,15 @@ class KBRDSystem(BaseSystem):
         assert stage in ('rec', 'conv')
         assert mode in ('train', 'valid', 'test')
 
+        batch["context_entities"] = padded_tensor(batch["context_entities"])
+
         for k, v in batch.items():
             if isinstance(v, torch.Tensor):
                 batch[k] = v.to(self.device)
 
         if stage == 'rec':
-            rec_loss, rec_scores = self.model.recommend(batch, mode)
+            rec_loss, rec_scores = self.model.forward(batch, mode, stage)
+            rec_loss = rec_loss.sum()
             if mode == 'train':
                 self.backward(rec_loss)
             else:
@@ -87,7 +93,7 @@ class KBRDSystem(BaseSystem):
             self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
         else:
             if mode != 'test':
-                gen_loss, preds = self.model.converse(batch, mode)
+                gen_loss, preds = self.model.forward(batch, mode, stage)
                 if mode == 'train':
                     self.backward(gen_loss)
                 else:
@@ -96,7 +102,7 @@ class KBRDSystem(BaseSystem):
                 self.evaluator.optim_metrics.add('gen_loss', AverageMetric(gen_loss))
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
-                preds = self.model.converse(batch, mode)
+                preds = self.model.forward(batch, mode, stage)
                 self.conv_evaluate(preds, batch['response'])
 
     def train_recommender(self):

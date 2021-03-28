@@ -71,6 +71,8 @@ class KBRDModel(BaseModel):
             side_data (dict): A dictionary record the side data.
 
         """
+        self.device = device
+        self.gpu = opt.get("gpu", -1)
         # vocab
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
@@ -172,7 +174,7 @@ class KBRDModel(BaseModel):
     def encode_user(self, entity_lists, kg_embedding):
         user_repr_list = []
         for entity_list in entity_lists:
-            if not entity_list:
+            if entity_list is not None:
                 user_repr_list.append(torch.zeros(self.user_emb_dim, device=self.device))
                 continue
             user_repr = kg_embedding[entity_list]
@@ -205,17 +207,18 @@ class KBRDModel(BaseModel):
         return sum_logits, preds
 
     def decode_greedy(self, encoder_states, user_embedding):
+
         bsz = encoder_states[0].shape[0]
         xs = self._starts(bsz)
         incr_state = None
         logits = []
         for i in range(self.longest_label):
-            scores, incr_state = self.decoder(xs, encoder_states, incr_state)
+            scores, incr_state = self.decoder(xs, encoder_states, incr_state)  # incr_state is always None
             scores = scores[:, -1:, :]
             token_logits = F.linear(scores, self.token_embedding.weight)
             user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
             sum_logits = token_logits + user_logits
-            _, preds = sum_logits.max(dim=-1)
+            probs, preds = sum_logits.max(dim=-1)
             logits.append(scores)
             xs = torch.cat([xs, preds], dim=1)
             # check if everyone has generated an end token
@@ -223,6 +226,62 @@ class KBRDModel(BaseModel):
             if all_finished:
                 break
         logits = torch.cat(logits, 1)
+        return logits, xs
+
+    def decode_beam_search(self, encoder_states, user_embedding, beam=4):
+        bsz = encoder_states[0].shape[0]
+        xs = self._starts(bsz).reshape(1, bsz, -1)  # (batch_size, _)
+        sequences = [[[list(), list(), 1.0]]] * bsz
+        for i in range(self.longest_label):
+            # at beginning there is 1 candidate, when i!=0 there are 4 candidates
+            if i != 0:
+                xs = []
+                for d in range(len(sequences[0])):
+                    for j in range(bsz):
+                        text = sequences[j][d][0]
+                        xs.append(text)
+                xs = torch.stack(xs).reshape(beam, bsz, -1)  # (beam, batch_size, _)
+
+            with torch.no_grad():
+                if i == 1:
+                    user_embedding = user_embedding.repeat(beam, 1)
+                    encoder_states = (encoder_states[0].repeat(beam, 1, 1),
+                                      encoder_states[1].repeat(beam, 1, 1))
+
+                scores, _ = self.decoder(xs.reshape(len(sequences[0])*bsz, -1), encoder_states)
+                scores = scores[:, -1:, :]
+                token_logits = F.linear(scores, self.token_embedding.weight)
+                user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
+                sum_logits = token_logits + user_logits
+
+            logits = sum_logits.reshape(len(sequences[0]), bsz, 1, -1)
+            scores = scores.reshape(len(sequences[0]), bsz, 1, -1)
+            logits = torch.nn.functional.softmax(logits)  # turn into probabilities,in case of negative numbers
+            probs, preds = logits.topk(beam, dim=-1)
+            # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
+
+            for j in range(bsz):
+                all_candidates = []
+                for n in range(len(sequences[j])):
+                    for k in range(beam):
+                        prob = sequences[j][n][2]
+                        score = sequences[j][n][1]
+                        if score == []:
+                            score_tmp = scores[n][j][0].unsqueeze(0)
+                        else:
+                            score_tmp = torch.cat((score, scores[n][j][0].unsqueeze(0)), dim=0)
+                        seq_tmp = torch.cat((xs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
+                        candidate = [seq_tmp, score_tmp, prob * probs[n][j][0][k]]
+                        all_candidates.append(candidate)
+                ordered = sorted(all_candidates, key=lambda tup: tup[2], reverse=True)
+                sequences[j] = ordered[:beam]
+
+            # check if everyone has generated an end token
+            all_finished = ((xs == self.end_token_idx).sum(dim=1) > 0).sum().item() == bsz
+            if all_finished:
+                break
+        logits = torch.stack([seq[0][1] for seq in sequences])
+        xs = torch.stack([seq[0][0] for seq in sequences])
         return logits, xs
 
     def converse(self, batch, mode):
@@ -240,3 +299,12 @@ class KBRDModel(BaseModel):
         else:
             _, preds = self.decode_greedy(encoder_state, user_embedding)
             return preds
+
+    def forward(self, batch, mode, stage):
+        if len(self.gpu) >= 2:
+            self.edge_idx = self.edge_idx.cuda(torch.cuda.current_device())
+            self.edge_type = self.edge_type.cuda(torch.cuda.current_device())
+        if stage == "conv":
+            return self.converse(batch, mode)
+        if stage == "rec":
+            return self.recommend(batch, mode)
