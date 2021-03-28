@@ -19,7 +19,6 @@ References:
 """
 
 import os
-
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -77,6 +76,8 @@ class KGSFModel(BaseModel):
             side_data (dict): A dictionary record the side data.
 
         """
+        self.device = device
+        self.gpu = opt.get("gpu", -1)
         # vocab
         self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
@@ -96,7 +97,9 @@ class KGSFModel(BaseModel):
         self.entity_edge_idx = self.entity_edge_idx.to(device)
         self.entity_edge_type = self.entity_edge_type.to(device)
         word_edges = side_data['word_kg']['edge']
+
         self.word_edges = edge_to_pyg_format(word_edges, 'GCN').to(device)
+
         self.num_bases = opt['num_bases']
         self.kg_emb_dim = opt['kg_emb_dim']
         # transformer
@@ -194,7 +197,7 @@ class KGSFModel(BaseModel):
         self.copy_norm = nn.Linear(self.ffn_size * 3, self.token_emb_dim)
         self.copy_output = nn.Linear(self.token_emb_dim, self.vocab_size)
         self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
-                                         device=self.device)
+                                         ).to(self.device)
 
         self.conv_decoder = TransformerDecoderKG(
             self.n_heads, self.n_layers, self.token_emb_dim, self.ffn_size, self.vocab_size,
@@ -328,6 +331,78 @@ class KGSFModel(BaseModel):
         logits = torch.cat(logits, dim=1)
         return logits, inputs
 
+    def _decode_beam_search_with_kg(self, token_encoding, entity_reps, entity_emb_attn, entity_mask,
+                                    word_reps, word_emb_attn, word_mask, beam=4):
+        batch_size = token_encoding[0].shape[0]
+        inputs = self._starts(batch_size).long().reshape(1, batch_size, -1)
+        incr_state = None
+
+        sequences = [[[list(), list(), 1.0]]] * batch_size
+        for i in range(self.response_truncate):
+            if i == 1:
+                token_encoding = (token_encoding[0].repeat(beam, 1, 1),
+                                  token_encoding[1].repeat(beam, 1, 1))
+                entity_reps = entity_reps.repeat(beam, 1, 1)
+                entity_emb_attn = entity_emb_attn.repeat(beam, 1)
+                entity_mask = entity_mask.repeat(beam, 1)
+                word_reps = word_reps.repeat(beam, 1, 1)
+                word_emb_attn = word_emb_attn.repeat(beam, 1)
+                word_mask = word_mask.repeat(beam, 1)
+
+            # at beginning there is 1 candidate, when i!=0 there are 4 candidates
+            if i != 0:
+                inputs = []
+                for d in range(len(sequences[0])):
+                    for j in range(batch_size):
+                        text = sequences[j][d][0]
+                        inputs.append(text)
+                inputs = torch.stack(inputs).reshape(beam, batch_size, -1)  # (beam, batch_size, _)
+
+            with torch.no_grad():
+                dialog_latent, incr_state = self.conv_decoder(
+                    inputs.reshape(len(sequences[0]) * batch_size, -1),
+                    token_encoding, word_reps, word_mask,
+                    entity_reps, entity_mask, incr_state
+                )
+                dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
+                db_latent = entity_emb_attn.unsqueeze(1)
+                concept_latent = word_emb_attn.unsqueeze(1)
+                copy_latent = self.copy_norm(torch.cat((db_latent, concept_latent, dialog_latent), dim=-1))
+
+                copy_logits = self.copy_output(copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(0)
+                gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
+                sum_logits = copy_logits + gen_logits
+
+            logits = sum_logits.reshape(len(sequences[0]), batch_size, 1, -1)
+            # turn into probabilities,in case of negative numbers
+            probs, preds = torch.nn.functional.softmax(logits).topk(beam, dim=-1)
+
+            # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
+
+            for j in range(batch_size):
+                all_candidates = []
+                for n in range(len(sequences[j])):
+                    for k in range(beam):
+                        prob = sequences[j][n][2]
+                        logit = sequences[j][n][1]
+                        if logit == []:
+                            logit_tmp = logits[n][j][0].unsqueeze(0)
+                        else:
+                            logit_tmp = torch.cat((logit, logits[n][j][0].unsqueeze(0)), dim=0)
+                        seq_tmp = torch.cat((inputs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
+                        candidate = [seq_tmp, logit_tmp, prob * probs[n][j][0][k]]
+                        all_candidates.append(candidate)
+                ordered = sorted(all_candidates, key=lambda tup: tup[2], reverse=True)
+                sequences[j] = ordered[:beam]
+
+            # check if everyone has generated an end token
+            all_finished = ((inputs == self.end_token_idx).sum(dim=1) > 0).sum().item() == batch_size
+            if all_finished:
+                break
+        logits = torch.stack([seq[0][1] for seq in sequences])
+        inputs = torch.stack([seq[0][0] for seq in sequences])
+        return logits, inputs
+
     def converse(self, batch, mode):
         context_tokens, context_entities, context_words, response = batch
 
@@ -364,3 +439,19 @@ class KGSFModel(BaseModel):
                                                         entity_padding_mask,
                                                         conv_word_reps, conv_word_emb, word_padding_mask)
             return preds
+
+    def forward(self, batch, stage, mode):
+        if len(self.gpu) >= 2:
+                #  forward function operates on different gpus, the weight of graph network need to be copied to other gpu
+                self.entity_edge_idx = self.entity_edge_idx.cuda(torch.cuda.current_device())
+                self.entity_edge_type = self.entity_edge_type.cuda(torch.cuda.current_device())
+                self.word_edges = self.word_edges.cuda(torch.cuda.current_device())
+                self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
+                                                 ).cuda(torch.cuda.current_device())
+        if stage == "pretrain":
+            loss = self.pretrain_infomax(batch)
+        elif stage == "rec":
+            loss = self.recommend(batch, mode)
+        elif stage == "conv":
+            loss = self.converse(batch, mode)
+        return loss

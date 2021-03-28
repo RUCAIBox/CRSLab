@@ -48,7 +48,7 @@ class PMIModel(BaseModel):
         self.t2gram_to_num = defaultdict(int)
         self.last_topic_to_target_topic = defaultdict(int)
 
-    def guide(self, batch, mode):
+    def forward(self, batch, mode):
         # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
         context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, target = batch
 

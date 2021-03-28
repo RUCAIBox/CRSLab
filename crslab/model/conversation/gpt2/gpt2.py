@@ -64,9 +64,8 @@ class GPT2Model(BaseModel):
         self.model = GPT2LMHeadModel.from_pretrained(self.dpath)
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
-    def converse(self, batch, mode):
+    def forward(self, batch, mode):
         _, _, input_ids, context, _, _, y = batch
-
         if mode != 'test':
             # torch.tensor's shape = (bs, seq_len, v_s); tuple's length = 12
             lm_logits = self.model(input_ids).logits
@@ -119,3 +118,44 @@ class GPT2Model(BaseModel):
 
         loss = self.loss(logit.reshape(-1, logit.size(-1)), labels.reshape(-1))
         return loss
+
+    def generate_bs(self, context, beam=4):
+        context = context[..., -self.response_truncate + 1:]
+        context_former = context
+        batch_size = context.shape[0]
+        sequences = [[[list(), 1.0]]] * batch_size
+        for i in range(self.response_truncate - 1):
+            if sequences != [[[list(), 1.0]]] * batch_size:
+                context = []
+                for i in range(batch_size):
+                    for cand in sequences[i]:
+                        text = torch.cat((context_former[i], torch.tensor(cand[0]).to(self.device)))  # 由于取消了state，与之前的context拼接
+                        context.append(text)
+                context = torch.stack(context)
+            with torch.no_grad():
+                outputs = self.model(context)
+            last_hidden_state, state = outputs.logits, outputs.past_key_values
+            next_token_logits = last_hidden_state[:, -1, :]
+            next_token_probs = torch.nn.functional.softmax(next_token_logits)
+            topk = torch.topk(next_token_probs, beam, dim=-1)
+            probs = topk.values.reshape([batch_size, -1, beam])  # (bs, candidate, beam)
+            preds = topk.indices.reshape([batch_size, -1, beam])  # (bs, candidate, beam)
+
+            for j in range(batch_size):
+                all_candidates = []
+                for n in range(len(sequences[j])):
+                    for k in range(beam):
+                        seq = sequences[j][n][0]
+                        prob = sequences[j][n][1]
+                        seq_tmp = seq.copy()
+                        seq_tmp.append(preds[j][n][k])
+                        candidate = [seq_tmp, prob * probs[j][n][k]]
+                        all_candidates.append(candidate)
+                ordered = sorted(all_candidates, key=lambda tup: tup[1], reverse=True)
+                sequences[j] = ordered[:beam]
+
+        res = []
+        for i in range(batch_size):
+            res.append(torch.stack(sequences[i][0][0]))
+        res = torch.stack(res)
+        return res
