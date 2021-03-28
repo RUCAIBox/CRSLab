@@ -68,7 +68,6 @@ class GRU4RECModel(BaseModel):
                           self.num_layers,
                           dropout=self.dropout_hidden,
                           batch_first=True)
-        self.rec_loss = self.cross_entropy
 
         logger.debug('[Finish build rec layer]')
 
@@ -147,7 +146,7 @@ class GRU4RECModel(BaseModel):
         rec_scores = rec_scores.squeeze(1)
 
         max_out_len = max([len_ for len_ in output_len])
-        rec_loss = self.rec_loss(logit, target_pos[:, :max_out_len],
+        rec_loss = self.cross_entropy(logit, target_pos[:, :max_out_len],
                                  sample_negs[:, :max_out_len], input_mask)
 
         return rec_loss, rec_scores

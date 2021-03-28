@@ -120,8 +120,8 @@ class TGReDialSystem(BaseSystem):
                 self.policy_model.eval()
 
             policy_loss, policy_predict = self.policy_model.forward(batch, mode)
-            policy_loss = policy_loss.sum()  # 多gpu训练会返回多个loss，需要合并为一个loss，单gpu训练时调用这个函数也不会报错
             if mode == "train" and policy_loss is not None:
+                policy_loss = policy_loss.sum()  # 多gpu训练会返回多个loss，需要合并为一个loss，单gpu训练时调用这个函数也不会报错
                 self.backward(policy_loss)
             else:
                 self.policy_evaluate(policy_predict, batch[-1])
