@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config', type=str,
                         default='config/crs/tgredial/tgredial.yaml', help='config file(yaml) path')
     parser.add_argument('-g', '--gpu', type=str, default='-1',
-                        help='specify gpu id(s) to use, only support using a single gpu now. Defaults to cpu(-1).')
+                        help='specify GPU id(s) to use, we now support multiple GPUs. Defaults to CPU(-1).')
     parser.add_argument('-sd', '--save_data', action='store_true',
                         help='save processed dataset')
     parser.add_argument('-rd', '--restore_data', action='store_true',

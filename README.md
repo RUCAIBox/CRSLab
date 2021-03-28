@@ -149,7 +149,7 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_sys
 In summary, there are following arguments in `run_crslab.py`:
 
 - `--config` or `-c`: relative path for configuration file(yaml).
-- `--gpu` or `-g`: specify gpu id(s) to use, only support using a single gpu now. Defaults to cpu(-1).
+- `--gpu` or `-g`: specify GPU id(s) to use, we now support multiple GPUs. Defaults to CPU(-1).
 - `--save_data` or `-sd`: save pre-processed dataset.
 - `--restore_data` or `-rd`: restore pre-processed dataset from file.
 - `--save_system` or `-ss`: save trained system.
@@ -253,6 +253,8 @@ Please let us know if you encounter a bug or have any suggestions by [filing an 
 We welcome all contributions from bug fixes to new features and extensions.
 
 We expect all contributions discussed in the issue tracker and going through PRs.
+
+We thank the nice contributions through PRs from [@shubaoyu](https://github.com/shubaoyu), [@ToheartZhang](https://github.com/ToheartZhang).
 
 
 
