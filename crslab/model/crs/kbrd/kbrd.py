@@ -174,7 +174,7 @@ class KBRDModel(BaseModel):
     def encode_user(self, entity_lists, kg_embedding):
         user_repr_list = []
         for entity_list in entity_lists:
-            if entity_list is not None:
+            if entity_list is None:
                 user_repr_list.append(torch.zeros(self.user_emb_dim, device=self.device))
                 continue
             user_repr = kg_embedding[entity_list]
