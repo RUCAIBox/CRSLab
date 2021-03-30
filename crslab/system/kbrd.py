@@ -76,8 +76,6 @@ class KBRDSystem(BaseSystem):
         assert stage in ('rec', 'conv')
         assert mode in ('train', 'valid', 'test')
 
-        batch["context_entities"] = padded_tensor(batch["context_entities"])
-
         for k, v in batch.items():
             if isinstance(v, torch.Tensor):
                 batch[k] = v.to(self.device)

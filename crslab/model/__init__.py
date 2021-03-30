@@ -47,9 +47,10 @@ def get_model(config, model_name, device, vocab, side_data=None):
         if config.opt["gpu"] == [-1]:
             return model
         else:
-            if len(config.opt["gpu"]) > 1 and model_name == 'PMI':
-                logger.info(f'[PMI model does not support multi GPUs yet, using single GPU now]')
-                return model.to(device)
+            if len(config.opt["gpu"]) > 1 :
+                if model_name == 'PMI' or model_name == 'KBRD':
+                    logger.info(f'[PMI/KBRD model does not support multi GPUs yet, using single GPU now]')
+                    return model.to(device)
             return torch.nn.DataParallel(model, device_ids=config["gpu"])
 
     else:
