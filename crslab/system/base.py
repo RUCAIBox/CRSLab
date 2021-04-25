@@ -56,7 +56,7 @@ class BaseSystem(ABC):
         if opt["gpu"] == [-1]:
             self.device = torch.device('cpu')
         elif len(opt["gpu"]) == 1:
-            self.device = torch.device('cuda', opt["gpu"][0])
+            self.device = torch.device('cuda')
         else:
             self.device = torch.device('cuda')
         # data

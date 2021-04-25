@@ -8,12 +8,12 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
-import datetime
 import hashlib
 import os
 import shutil
 import time
 
+import datetime
 import requests
 import tqdm
 from loguru import logger

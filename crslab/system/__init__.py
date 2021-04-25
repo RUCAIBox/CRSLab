@@ -9,10 +9,10 @@
 
 from loguru import logger
 
+from .inspired import InspiredSystem
 from .kbrd import KBRDSystem
 from .kgsf import KGSFSystem
 from .redial import ReDialSystem
-from .inspired import InspiredSystem
 from .tgredial import TGReDialSystem
 
 system_register_table = {

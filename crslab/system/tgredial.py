@@ -8,10 +8,10 @@
 # @Email  : wxl1999@foxmail.com
 
 import os
-from math import floor
 
 import torch
 from loguru import logger
+from math import floor
 
 from crslab.config import PRETRAIN_PATH
 from crslab.data import get_dataloader, dataset_language_map
@@ -42,7 +42,8 @@ class TGReDialSystem(BaseSystem):
 
         """
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore_system, interact, debug, tensorboard)
+                                             test_dataloader, vocab, side_data, restore_system, interact, debug,
+                                             tensorboard)
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']

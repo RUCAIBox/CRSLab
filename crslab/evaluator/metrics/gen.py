@@ -7,15 +7,15 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
-import math
 import re
 from collections import Counter
-from typing import List, Optional
 
+import math
 import numpy as np
 from nltk import ngrams
 from nltk.translate.bleu_score import sentence_bleu
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List, Optional
 
 from crslab.evaluator.metrics.base import AverageMetric, SumMetric
 

@@ -2,7 +2,6 @@
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
-import random
 from copy import deepcopy
 
 import torch

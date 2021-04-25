@@ -9,9 +9,9 @@
 
 import functools
 from abc import ABC, abstractmethod
-from typing import Any, Union, List, Optional, Dict
 
 import torch
+from typing import Any, Union, List, Optional, Dict
 
 TScalar = Union[int, float, torch.Tensor]
 TVector = Union[List[TScalar], torch.Tensor]

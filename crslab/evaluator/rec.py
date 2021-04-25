@@ -8,8 +8,8 @@
 # @Email  : wxl1999@foxmail.com
 
 import time
-from loguru import logger
 
+from loguru import logger
 from torch.utils.tensorboard import SummaryWriter
 
 from crslab.evaluator.base import BaseEvaluator
@@ -24,6 +24,7 @@ class RecEvaluator(BaseEvaluator):
         rec_metrics: the metrics to evaluate recommender model, including hit@K, ndcg@K and mrr@K
         optim_metrics: the metrics to optimize in training
     """
+
     def __init__(self, tensorboard=False):
         super(RecEvaluator, self).__init__()
         self.rec_metrics = Metrics()

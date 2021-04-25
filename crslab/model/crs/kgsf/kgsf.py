@@ -19,6 +19,7 @@ References:
 """
 
 import os
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -77,7 +78,7 @@ class KGSFModel(BaseModel):
 
         """
         self.device = device
-        self.gpu = opt.get("gpu", -1)
+        self.gpu = opt.get("gpu", [-1])
         # vocab
         self.vocab_size = vocab['vocab_size']
         self.pad_token_idx = vocab['pad']
@@ -442,12 +443,12 @@ class KGSFModel(BaseModel):
 
     def forward(self, batch, stage, mode):
         if len(self.gpu) >= 2:
-                #  forward function operates on different gpus, the weight of graph network need to be copied to other gpu
-                self.entity_edge_idx = self.entity_edge_idx.cuda(torch.cuda.current_device())
-                self.entity_edge_type = self.entity_edge_type.cuda(torch.cuda.current_device())
-                self.word_edges = self.word_edges.cuda(torch.cuda.current_device())
-                self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
-                                                 ).cuda(torch.cuda.current_device())
+            #  forward function operates on different gpus, the weight of graph network need to be copied to other gpu
+            self.entity_edge_idx = self.entity_edge_idx.cuda(torch.cuda.current_device())
+            self.entity_edge_type = self.entity_edge_type.cuda(torch.cuda.current_device())
+            self.word_edges = self.word_edges.cuda(torch.cuda.current_device())
+            self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
+                                             ).cuda(torch.cuda.current_device())
         if stage == "pretrain":
             loss = self.pretrain_infomax(batch)
         elif stage == "rec":

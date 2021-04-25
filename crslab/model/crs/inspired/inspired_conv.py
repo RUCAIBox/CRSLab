@@ -13,6 +13,7 @@ from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 from .modules import SequenceCrossEntropyLoss
 
+
 class InspiredConvModel(BaseModel):
     """
 
@@ -83,7 +84,7 @@ class InspiredConvModel(BaseModel):
                     lm_logits, past = outputs.logits, outputs.past_key_values
                     lm_logits_all.append(lm_logits)
 
-            lm_logits_all = torch.cat(lm_logits_all, dim=0) # (b_s, seq_len, vocab_size)
+            lm_logits_all = torch.cat(lm_logits_all, dim=0)  # (b_s, seq_len, vocab_size)
 
             # index from 1 to self.reponse_truncate is valid response
             loss = self.calculate_loss(

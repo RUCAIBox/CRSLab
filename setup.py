@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+
 try:
     import torch
     import torch_geometric

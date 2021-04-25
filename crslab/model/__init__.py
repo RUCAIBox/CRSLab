@@ -7,8 +7,8 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
-from loguru import logger
 import torch
+from loguru import logger
 
 from .conversation import *
 from .crs import *
@@ -47,7 +47,7 @@ def get_model(config, model_name, device, vocab, side_data=None):
         if config.opt["gpu"] == [-1]:
             return model
         else:
-            if len(config.opt["gpu"]) > 1 :
+            if len(config.opt["gpu"]) > 1:
                 if model_name == 'PMI' or model_name == 'KBRD':
                     logger.info(f'[PMI/KBRD model does not support multi GPUs yet, using single GPU now]')
                     return model.to(device)

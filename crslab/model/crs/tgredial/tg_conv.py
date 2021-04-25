@@ -119,7 +119,8 @@ class TGConvModel(BaseModel):
                 context = []
                 for i in range(batch_size):
                     for cand in sequences[i]:
-                        text = torch.cat((context_former[i], torch.tensor(cand[0]).to(self.device)))  # 由于取消了state，与之前的context拼接
+                        text = torch.cat(
+                            (context_former[i], torch.tensor(cand[0]).to(self.device)))  # 由于取消了state，与之前的context拼接
                         context.append(text)
                 context = torch.stack(context)
             with torch.no_grad():

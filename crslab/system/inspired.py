@@ -2,15 +2,11 @@
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
-import os
-import gc
-from math import floor
-
 import torch
 from loguru import logger
+from math import floor
 
-from crslab.config import PRETRAIN_PATH
-from crslab.data import get_dataloader, dataset_language_map
+from crslab.data import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -38,7 +34,8 @@ class InspiredSystem(BaseSystem):
 
         """
         super(InspiredSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore_system, interact, debug, tensorboard)
+                                             test_dataloader, vocab, side_data, restore_system, interact, debug,
+                                             tensorboard)
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']

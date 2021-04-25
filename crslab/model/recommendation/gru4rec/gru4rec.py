@@ -147,6 +147,6 @@ class GRU4RECModel(BaseModel):
 
         max_out_len = max([len_ for len_ in output_len])
         rec_loss = self.cross_entropy(logit, target_pos[:, :max_out_len],
-                                 sample_negs[:, :max_out_len], input_mask)
+                                      sample_negs[:, :max_out_len], input_mask)
 
         return rec_loss, rec_scores

@@ -9,13 +9,13 @@
 # @email   :   wxl1999@foxmail.com
 
 import json
-import math
 import re
 import shutil
 from collections import OrderedDict
-from typing import Union, Tuple
 
+import math
 import torch
+from typing import Union, Tuple
 
 from .metrics import Metric
 

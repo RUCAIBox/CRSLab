@@ -7,8 +7,8 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 import os
-from collections import defaultdict
 import time
+from collections import defaultdict
 
 import fasttext
 from loguru import logger
@@ -33,6 +33,7 @@ class ConvEvaluator(BaseEvaluator):
         optim_metrics: the metrics to optimize in training
 
     """
+
     def __init__(self, tensorboard=False):
         super(ConvEvaluator, self).__init__()
         self.dist_set = defaultdict(set)

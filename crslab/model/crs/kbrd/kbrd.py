@@ -72,7 +72,7 @@ class KBRDModel(BaseModel):
 
         """
         self.device = device
-        self.gpu = opt.get("gpu", -1)
+        self.gpu = opt.get("gpu", [-1])
         # vocab
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
@@ -248,7 +248,7 @@ class KBRDModel(BaseModel):
                     encoder_states = (encoder_states[0].repeat(beam, 1, 1),
                                       encoder_states[1].repeat(beam, 1, 1))
 
-                scores, _ = self.decoder(xs.reshape(len(sequences[0])*bsz, -1), encoder_states)
+                scores, _ = self.decoder(xs.reshape(len(sequences[0]) * bsz, -1), encoder_states)
                 scores = scores[:, -1:, :]
                 token_logits = F.linear(scores, self.token_embedding.weight)
                 user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)

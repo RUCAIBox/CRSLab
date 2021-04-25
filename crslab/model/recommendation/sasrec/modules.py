@@ -8,8 +8,8 @@
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
 import copy
-import math
 
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -76,7 +76,7 @@ class SASRec(nn.Module):
         # positions we want to attend and -10000.0 for masked positions.
         # Since we are adding it to the raw scores before the softmax, this is
         # effectively the same as removing these entirely.
-        #extended_attention_mask = extended_attention_mask.to(
+        # extended_attention_mask = extended_attention_mask.to(
         #   dtype=next(self.parameters()).dtype)  # fp16 compatibility
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
         embedding = self.embeddings(input_ids)

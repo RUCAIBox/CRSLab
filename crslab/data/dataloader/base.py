@@ -9,9 +9,9 @@
 
 import random
 from abc import ABC
-from math import ceil
 
 from loguru import logger
+from math import ceil
 from tqdm import tqdm
 
 

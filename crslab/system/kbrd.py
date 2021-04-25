@@ -8,7 +8,6 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
-import os
 import torch
 from loguru import logger
 
@@ -16,8 +15,6 @@ from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
-from crslab.data.dataloader.utils import padded_tensor
-
 
 
 class KBRDSystem(BaseSystem):

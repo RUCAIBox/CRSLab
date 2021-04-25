@@ -44,8 +44,8 @@ def create_position_codes(n_pos, dim, out):
         for pos in range(n_pos)
     ])
 
-    out[:, 0::2] = torch.tensor(np.sin(position_enc)).type_as(out)
-    out[:, 1::2] = torch.tensor(np.cos(position_enc)).type_as(out)
+    out.data[:, 0::2] = torch.as_tensor(np.sin(position_enc))
+    out.data[:, 1::2] = torch.as_tensor(np.cos(position_enc))
     out.detach_()
     out.requires_grad = False
 

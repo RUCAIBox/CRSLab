@@ -8,8 +8,8 @@
 # @Email  : wxl1999@foxmail.com
 
 import os
-from collections import defaultdict
 import time
+from collections import defaultdict
 
 import fasttext
 from loguru import logger
@@ -34,6 +34,7 @@ class StandardEvaluator(BaseEvaluator):
         gen_metrics: the metrics to evaluate conversational model, including bleu, dist, embedding metrics, f1
         optim_metrics: the metrics to optimize in training
     """
+
     def __init__(self, language, tensorboard=False):
         super(StandardEvaluator, self).__init__()
         # rec

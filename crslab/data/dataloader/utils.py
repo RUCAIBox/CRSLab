@@ -9,9 +9,9 @@
 # @email   :   wxl1999@foxmail.com, sdzyh002@gmail
 
 from copy import copy
-from typing import List, Union, Optional
 
 import torch
+from typing import List, Union, Optional
 
 
 def padded_tensor(
