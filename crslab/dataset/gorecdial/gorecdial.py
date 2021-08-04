@@ -26,7 +26,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.config import DATASET_PATH
-from crslab.dataset import TextBaseDataset
+from crslab.dataset.base import TextBaseDataset
 from .resources import resources
 
 

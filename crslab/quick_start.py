@@ -28,6 +28,7 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
         restore_system (bool): whether to restore system. Defaults to False.
         interact (bool): whether to interact with the system. Defaults to False.
         debug (bool): whether to debug the system. Defaults to False.
+        tensorboard (bool): whether to use tensorboard. Defaults to False.
 
     .. _Github repo:
        https://github.com/RUCAIBox/CRSLab

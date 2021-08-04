@@ -4,31 +4,22 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2020/12/22
-# @Author  :   Xiaolei Wang
-# @email   :   wxl1999@foxmail.com
+# @Time    :   2020/12/22, 2021/8/4
+# @Author  :   Xiaolei Wang, Chenzhan Shang
+# @email   :   wxl1999@foxmail.com, czshang@outlook.com
 
 from loguru import logger
 
-from .conv import ConvEvaluator
-from .rec import RecEvaluator
-from .standard import StandardEvaluator
-from ..dataset import dataset_language_map
-
-Evaluator_register_table = {
-    'rec': RecEvaluator,
-    'conv': ConvEvaluator,
-    'standard': StandardEvaluator
-}
+from crslab.register import evaluator_register_table, dataset_language_map
 
 
 def get_evaluator(evaluator_name, dataset, tensorboard=False):
-    if evaluator_name in Evaluator_register_table:
+    if evaluator_name in evaluator_register_table:
         if evaluator_name in ('conv', 'standard'):
             language = dataset_language_map[dataset]
-            evaluator = Evaluator_register_table[evaluator_name](language, tensorboard=tensorboard)
+            evaluator = evaluator_register_table[evaluator_name](language, tensorboard=tensorboard)
         else:
-            evaluator = Evaluator_register_table[evaluator_name](tensorboard=tensorboard)
+            evaluator = evaluator_register_table[evaluator_name](tensorboard=tensorboard)
         logger.info(f'[Build evaluator {evaluator_name}]')
         return evaluator
     else:

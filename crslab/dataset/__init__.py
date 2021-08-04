@@ -7,33 +7,7 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou, Chenzhan Shang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com, czshang@outlook.com
 
-from .base import TextBaseDataset
-from .durecdial import DuRecDialDataset
-from .gorecdial import GoRecDialDataset
-from .inspired import InspiredDataset
-from .opendialkg import OpenDialKGDataset
-from .redial import ReDialDataset
-from .tgredial import TGReDialDataset
-from .lastfm import LastFMDataset
-
-dataset_register_table = {
-    'ReDial': ReDialDataset,
-    'TGReDial': TGReDialDataset,
-    'GoRecDial': GoRecDialDataset,
-    'OpenDialKG': OpenDialKGDataset,
-    'Inspired': InspiredDataset,
-    'DuRecDial': DuRecDialDataset,
-    'LastFM': LastFMDataset
-}
-
-dataset_language_map = {
-    'ReDial': 'en',
-    'TGReDial': 'zh',
-    'GoRecDial': 'en',
-    'OpenDialKG': 'en',
-    'Inspired': 'en',
-    'DuRecDial': 'zh'
-}
+from crslab.register import dataset_register_table
 
 
 def get_dataset(opt, tokenize, restore, save):

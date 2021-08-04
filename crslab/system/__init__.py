@@ -3,38 +3,13 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/29
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/11/24, 2020/12/29, 2021/8/4
+# @Author : Kun Zhou, Xiaolei Wang, Chenzhan Shang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, czshang@outlook.com
 
 from loguru import logger
 
-from .inspired import InspiredSystem
-from .kbrd import KBRDSystem
-from .kgsf import KGSFSystem
-from .redial import ReDialSystem
-from .tgredial import TGReDialSystem
-
-system_register_table = {
-    'ReDialRec_ReDialConv': ReDialSystem,
-    'KBRD': KBRDSystem,
-    'KGSF': KGSFSystem,
-    'TGRec_TGConv': TGReDialSystem,
-    'TGRec_TGConv_TGPolicy': TGReDialSystem,
-    'InspiredRec_InspiredConv': InspiredSystem,
-    'GPT2': TGReDialSystem,
-    'Transformer': TGReDialSystem,
-    'ConvBERT': TGReDialSystem,
-    'ProfileBERT': TGReDialSystem,
-    'TopicBERT': TGReDialSystem,
-    'PMI': TGReDialSystem,
-    'MGCG': TGReDialSystem,
-    'BERT': TGReDialSystem,
-    'SASREC': TGReDialSystem,
-    'GRU4REC': TGReDialSystem,
-    'Popularity': TGReDialSystem,
-    'TextCNN': TGReDialSystem
-}
+from crslab.register import system_register_table
 
 
 def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,

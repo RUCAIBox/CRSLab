@@ -3,14 +3,15 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2021/1/9
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/11/24, 2021/1/9, 2021/8/4
+# @Author : Kun Zhou, Xiaolei Wang, Chenzhan Shang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, czshang@outlook.com
 
 import argparse
 import warnings
 
 from crslab.config import Config
+from crslab.quick_start import run_crslab
 
 warnings.filterwarnings('ignore')
 
@@ -37,8 +38,6 @@ if __name__ == '__main__':
                         help='enable tensorboard to monitor train performance')
     args, _ = parser.parse_known_args()
     config = Config(args.config, args.gpu, args.debug)
-
-    from crslab.quick_start import run_crslab
 
     run_crslab(config, args.save_data, args.restore_data, args.save_system, args.restore_system, args.interact,
                args.debug, args.tensorboard)

@@ -14,7 +14,7 @@ References:
 import os
 
 from crslab.config import DATASET_PATH
-from crslab.dataset import AttributeBaseDataset
+from crslab.dataset.base import AttributeBaseDataset
 
 
 class LastFMDataset(AttributeBaseDataset):
