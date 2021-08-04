@@ -1,7 +1,7 @@
 # dataset
 dataset: Inspired
 tokenize: nltk
-# dataloader
+# supervised
 context_truncate: 1024
 response_truncate: 1024
 scale: 1

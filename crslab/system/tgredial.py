@@ -14,7 +14,7 @@ from loguru import logger
 from math import floor
 
 from crslab.config import PRETRAIN_PATH
-from crslab.data import get_dataloader, dataset_language_map
+from crslab.dataset import get_dataloader, dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -30,9 +30,9 @@ class TGReDialSystem(BaseSystem):
 
         Args:
             opt (dict): Indicating the hyper parameters.
-            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
-            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
-            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
+            train_dataloader (BaseDataLoader): Indicating the train supervised of corresponding dataset.
+            valid_dataloader (BaseDataLoader): Indicating the valid supervised of corresponding dataset.
+            test_dataloader (BaseDataLoader): Indicating the test supervised of corresponding dataset.
             vocab (dict): Indicating the vocabulary.
             side_data (dict): Indicating the side data.
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.

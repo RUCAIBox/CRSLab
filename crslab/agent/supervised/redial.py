@@ -13,14 +13,14 @@ from copy import copy
 import torch
 from tqdm import tqdm
 
-from crslab.data.dataloader.base import BaseDataLoader
-from crslab.data.dataloader.utils import padded_tensor, get_onehot, truncate
+from crslab.agent.supervised.base import SupervisedAgent
+from crslab.agent.supervised.utils import padded_tensor, get_onehot, truncate
 
 movie_pattern = re.compile(r'^@\d{5,6}$')
 
 
-class ReDialDataLoader(BaseDataLoader):
-    """Dataloader for model ReDial.
+class ReDialAgent(SupervisedAgent):
+    """Agent for model ReDial.
 
     Notes:
         You can set the following parameters in config:
@@ -47,7 +47,7 @@ class ReDialDataLoader(BaseDataLoader):
         """
 
         Args:
-            opt (Config or dict): config for dataloader or the whole system.
+            opt (Config or dict): config for supervised or the whole system.
             dataset: data for model.
             vocab (dict): all kinds of useful size, idx and map between token and idx.
 

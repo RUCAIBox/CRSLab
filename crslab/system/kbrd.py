@@ -26,9 +26,9 @@ class KBRDSystem(BaseSystem):
 
         Args:
             opt (dict): Indicating the hyper parameters.
-            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
-            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
-            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
+            train_dataloader (BaseDataLoader): Indicating the train supervised of corresponding dataset.
+            valid_dataloader (BaseDataLoader): Indicating the valid supervised of corresponding dataset.
+            test_dataloader (BaseDataLoader): Indicating the test supervised of corresponding dataset.
             vocab (dict): Indicating the vocabulary.
             side_data (dict): Indicating the side data.
             restore_system (bool, optional): Indicating if we store system after training. Defaults to False.

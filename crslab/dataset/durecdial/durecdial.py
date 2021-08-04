@@ -26,11 +26,11 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.config import DATASET_PATH
-from crslab.data.dataset.base import BaseDataset
+from crslab.dataset import TextBaseDataset
 from .resources import resources
 
 
-class DuRecDialDataset(BaseDataset):
+class DuRecDialDataset(TextBaseDataset):
     """
 
     Attributes:

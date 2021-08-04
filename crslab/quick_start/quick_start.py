@@ -4,12 +4,13 @@
 # @email   :   wxl1999@foxmail.com
 
 # UPDATE
-# @Time    :   2021/1/9
-# @Author  :   Xiaolei Wang
-# @email   :   wxl1999@foxmail.com
+# @Time    :   2021/1/9, 2021/8/4
+# @Author  :   Xiaolei Wang, Chenzhan Shang
+# @email   :   wxl1999@foxmail.com, czshang@outlook.com
 
 from crslab.config import Config
-from crslab.data import get_dataset, get_dataloader
+from crslab.agent import get_agent
+from crslab.dataset import get_dataset
 from crslab.system import get_system
 
 
@@ -32,15 +33,21 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
        https://github.com/RUCAIBox/CRSLab
 
     """
-    # dataset & dataloader
+    if config['dataset'] in ['LastFM', 'Yelp']:
+        CRS_dataset = get_dataset(config, config['tokenize'], restore_data, save_data)
+        side_data = CRS_dataset.side_data
+        agent = get_agent(config, CRS_dataset.train_data, None)
+        # TODO
+
+    # dataset & supervised
     if isinstance(config['tokenize'], str):
         CRS_dataset = get_dataset(config, config['tokenize'], restore_data, save_data)
         side_data = CRS_dataset.side_data
         vocab = CRS_dataset.vocab
 
-        train_dataloader = get_dataloader(config, CRS_dataset.train_data, vocab)
-        valid_dataloader = get_dataloader(config, CRS_dataset.valid_data, vocab)
-        test_dataloader = get_dataloader(config, CRS_dataset.test_data, vocab)
+        train_dataloader = get_agent(config, CRS_dataset.train_data, vocab)
+        valid_dataloader = get_agent(config, CRS_dataset.valid_data, vocab)
+        test_dataloader = get_agent(config, CRS_dataset.test_data, vocab)
     else:
         tokenized_dataset = {}
         train_dataloader = {}
@@ -61,9 +68,9 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
             side_data[task] = dataset.side_data
             vocab[task] = dataset.vocab
 
-            train_dataloader[task] = get_dataloader(config, train_data, vocab[task])
-            valid_dataloader[task] = get_dataloader(config, valid_data, vocab[task])
-            test_dataloader[task] = get_dataloader(config, test_data, vocab[task])
+            train_dataloader[task] = get_agent(config, train_data, vocab[task])
+            valid_dataloader[task] = get_agent(config, valid_data, vocab[task])
+            test_dataloader[task] = get_agent(config, test_data, vocab[task])
     # system
     CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system,
                      interact, debug, tensorboard)

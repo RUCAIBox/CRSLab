@@ -13,12 +13,12 @@ from copy import deepcopy
 import torch
 from tqdm import tqdm
 
-from crslab.data.dataloader.base import BaseDataLoader
-from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
+from crslab.agent.supervised.base import SupervisedAgent
+from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
 
 
-class TGReDialDataLoader(BaseDataLoader):
-    """Dataloader for model TGReDial.
+class TGReDialAgent(SupervisedAgent):
+    """Agent for model TGReDial.
 
     Notes:
         You can set the following parameters in config:
@@ -56,7 +56,7 @@ class TGReDialDataLoader(BaseDataLoader):
         """
 
         Args:
-            opt (Config or dict): config for dataloader or the whole system.
+            opt (Config or dict): config for supervised or the whole system.
             dataset: data for model.
             vocab (dict): all kinds of useful size, idx and map between token and idx.
 

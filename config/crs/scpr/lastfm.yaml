@@ -1,0 +1,21 @@
+# dataset
+dataset: LastFM
+tokenize: None
+# supervised
+scale: 1
+# rec model
+quadratic_only: 1
+emb_dim: 64
+fea_init_param: 0.01
+fm_dropout: 0.5
+seed: 0
+# optim
+rec:
+  epoch: 250
+  batch_size: 64
+  optimizer:
+    name: Adagrad
+    lr: !!float 2e-2
+    flr: !!float 1e-4
+  decay: 0.0
+  reg: !!float 1e-3

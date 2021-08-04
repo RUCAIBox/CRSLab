@@ -3,7 +3,7 @@ dataset: Inspired
 tokenize:
   rec: nltk
   conv: nltk
-# dataloader
+# supervised
 utterance_truncate: 80
 conversation_truncate: 40
 scale: 1

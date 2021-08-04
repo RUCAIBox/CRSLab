@@ -1,20 +1,20 @@
-# @Time   : 2020/12/19
+# @Time   : 2020/12/12
 # @Author : Kun Zhou
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/12/20, 2021/1/2
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/12/13, 2021/1/2, 2020/12/19
+# @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail
 
 r"""
-Inspired
-========
+GoRecDial
+=========
 References:
-    Hayati, Shirley Anugrah, et al. `"INSPIRED: Toward Sociable Recommendation Dialog Systems."`_ in EMNLP 2020.
+    Kang, Dongyeop, et al. `"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`_ in EMNLP 2019.
 
-.. _`"INSPIRED: Toward Sociable Recommendation Dialog Systems."`:
-   https://www.aclweb.org/anthology/2020.emnlp-main.654/
+.. _`"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`:
+   https://www.aclweb.org/anthology/D19-1203/
 
 """
 
@@ -26,11 +26,11 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.config import DATASET_PATH
-from crslab.data.dataset.base import BaseDataset
+from crslab.dataset import TextBaseDataset
 from .resources import resources
 
 
-class InspiredDataset(BaseDataset):
+class GoRecDialDataset(TextBaseDataset):
     """
 
     Attributes:
@@ -68,7 +68,7 @@ class InspiredDataset(BaseDataset):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        dpath = os.path.join(DATASET_PATH, 'inspired', tokenize)
+        dpath = os.path.join(DATASET_PATH, 'gorecdial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_data(self):
@@ -105,8 +105,7 @@ class InspiredDataset(BaseDataset):
         return train_data, valid_data, test_data
 
     def _load_vocab(self):
-        with open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8') as f:
-            self.tok2ind = json.load(f)
+        self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
 
         logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
@@ -115,8 +114,8 @@ class InspiredDataset(BaseDataset):
 
     def _load_other_data(self):
         # dbpedia
-        with open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8') as f:
-            self.entity2id = json.load(f)  # {entity: entity_id}
+        self.entity2id = json.load(
+            open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8'))  # {entity: entity_id}
         self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
@@ -126,11 +125,10 @@ class InspiredDataset(BaseDataset):
 
         # conceptnet
         # {concept: concept_id}
-        with open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8') as f:
-            self.word2id = json.load(f)
+        self.word2id = json.load(open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8'))
         self.n_word = max(self.word2id.values()) + 1
         # {concept \t relation\t concept}
-        self.word_kg = open(os.path.join(self.dpath, 'concept_subkg.txt'), encoding='utf-8')
+        self.word_kg = open(os.path.join(self.dpath, 'conceptnet_subkg.txt'), encoding='utf-8')
         logger.debug(
             f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'concept_subkg.txt')}]")
 
@@ -156,24 +154,22 @@ class InspiredDataset(BaseDataset):
         augmented_convs = []
         last_role = None
         for utt in conversation['dialog']:
+            assert utt['role'] != last_role
+
             text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
             movie_ids = [self.entity2id[movie] for movie in utt['movies'] if movie in self.entity2id]
             entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
             word_ids = [self.word2id[word] for word in utt['word'] if word in self.word2id]
+            policy = utt['decide']
 
-            if utt["role"] == last_role:
-                augmented_convs[-1]["text"] += text_token_ids
-                augmented_convs[-1]["movie"] += movie_ids
-                augmented_convs[-1]["entity"] += entity_ids
-                augmented_convs[-1]["word"] += word_ids
-            else:
-                augmented_convs.append({
-                    "role": utt["role"],
-                    "text": text_token_ids,
-                    "entity": entity_ids,
-                    "movie": movie_ids,
-                    "word": word_ids
-                })
+            augmented_convs.append({
+                "role": utt["role"],
+                "text": text_token_ids,
+                "entity": entity_ids,
+                "movie": movie_ids,
+                "word": word_ids,
+                'policy': policy
+            })
             last_role = utt["role"]
 
         return augmented_convs
@@ -183,8 +179,9 @@ class InspiredDataset(BaseDataset):
         context_tokens, context_entities, context_words, context_items = [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
-            text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
-            if len(context_tokens) > 0:
+            text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
+                                                             conv['policy']
+            if len(context_tokens) > 0 and len(text_tokens) > 0:
                 conv_dict = {
                     'role': conv['role'],
                     "context_tokens": copy(context_tokens),
@@ -193,19 +190,21 @@ class InspiredDataset(BaseDataset):
                     "context_words": copy(context_words),
                     'context_items': copy(context_items),
                     "items": movies,
+                    'policy': policies,
                 }
                 augmented_conv_dicts.append(conv_dict)
 
-            context_tokens.append(text_tokens)
-            context_items += movies
-            for entity in entities + movies:
-                if entity not in entity_set:
-                    entity_set.add(entity)
-                    context_entities.append(entity)
-            for word in words:
-                if word not in word_set:
-                    word_set.add(word)
-                    context_words.append(word)
+            if len(text_tokens) > 0:
+                context_tokens.append(text_tokens)
+                context_items += movies
+                for entity in entities + movies:
+                    if entity not in entity_set:
+                        entity_set.add(entity)
+                        context_entities.append(entity)
+                for word in words:
+                    if word not in word_set:
+                        word_set.add(word)
+                        context_words.append(word)
 
         return augmented_conv_dicts
 
@@ -214,8 +213,7 @@ class InspiredDataset(BaseDataset):
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
         logger.debug("[Finish word KG process]")
-        with open(os.path.join(self.dpath, 'movie_ids.json'), 'r', encoding='utf-8') as f:
-            movie_entity_ids = json.load(f)
+        movie_entity_ids = json.load(open(os.path.join(self.dpath, 'movie_ids.json'), 'r', encoding='utf-8'))
         logger.debug('[Load movie entity ids]')
 
         side_data = {

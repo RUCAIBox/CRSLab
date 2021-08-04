@@ -1,11 +1,6 @@
-# @Time   : 2020/11/22
-# @Author : Kun Zhou
-# @Email  : francis_kun_zhou@163.com
-
-# UPDATE:
-# @Time   : 2020/11/23, 2020/12/29
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2021/8/4
+# @Author : Chenzhan Shang
+# @Email  : czshang@outlook.com
 
 import random
 from abc import ABC
@@ -15,8 +10,8 @@ from math import ceil
 from tqdm import tqdm
 
 
-class BaseDataLoader(ABC):
-    """Abstract class of dataloader
+class InteractiveAgent(ABC):
+    """Abstract class of interactive agent
 
     Notes:
         ``'scale'`` can be set in config to limit the size of dataset.
@@ -26,7 +21,7 @@ class BaseDataLoader(ABC):
     def __init__(self, opt, dataset):
         """
         Args:
-            opt (Config or dict): config for dataloader or the whole system.
+            opt (Config or dict): config for supervised or the whole system.
             dataset: dataset
 
         """
@@ -128,7 +123,7 @@ class BaseDataLoader(ABC):
         Returns:
             batch data for the system to train conversation part.
         """
-        raise NotImplementedError('dataloader must implement conv_batchify() method')
+        raise NotImplementedError('supervised must implement conv_batchify() method')
 
     def rec_process_fn(self):
         """Process whole data for recommendation before batch_fn.
@@ -148,7 +143,7 @@ class BaseDataLoader(ABC):
         Returns:
             batch data for the system to train recommendation part.
         """
-        raise NotImplementedError('dataloader must implement rec_batchify() method')
+        raise NotImplementedError('supervised must implement rec_batchify() method')
 
     def policy_process_fn(self):
         """Process whole data for policy before batch_fn.
@@ -168,7 +163,7 @@ class BaseDataLoader(ABC):
         Returns:
             batch data for the system to train policy part.
         """
-        raise NotImplementedError('dataloader must implement policy_batchify() method')
+        raise NotImplementedError('supervised must implement policy_batchify() method')
 
     def retain_recommender_target(self):
         """keep data whose role is recommender.

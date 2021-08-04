@@ -26,7 +26,7 @@ from torch import nn
 from transformers import BertModel
 
 from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
+from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 from crslab.model.recommendation.sasrec.modules import SASRec
