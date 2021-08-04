@@ -156,7 +156,7 @@ class BaseSystem(ABC):
         logger.debug('[Reset early stop state]')
 
     @abstractmethod
-    def fit(self):
+    def run(self):
         """fit the whole system"""
         pass
 

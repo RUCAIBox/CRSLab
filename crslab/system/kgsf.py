@@ -180,10 +180,10 @@ class KGSFSystem(BaseSystem):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
-    def fit(self):
+    def run(self):
         self.pretrain()
         self.train_recommender()
         self.train_conversation()
 
     def interact(self):
-        pass
+        raise NotImplementedError('Interact function in KGSF System not implement yet.')

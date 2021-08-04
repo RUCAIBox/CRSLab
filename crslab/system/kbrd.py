@@ -158,9 +158,9 @@ class KBRDSystem(BaseSystem):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
-    def fit(self):
+    def run(self):
         self.train_recommender()
         self.train_conversation()
 
     def interact(self):
-        pass
+        raise NotImplementedError('Interact function in KBRD System not implement yet.')

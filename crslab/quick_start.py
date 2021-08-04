@@ -34,50 +34,13 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
        https://github.com/RUCAIBox/CRSLab
 
     """
-    if config['dataset'] in ['LastFM', 'Yelp']:
-        CRS_dataset = get_dataset(config, config['tokenize'], restore_data, save_data)
-        side_data = CRS_dataset.side_data
-        agent = get_agent(config, CRS_dataset.train_data, None)
-        # TODO
-
-    # dataset & supervised
-    if isinstance(config['tokenize'], str):
-        CRS_dataset = get_dataset(config, config['tokenize'], restore_data, save_data)
-        side_data = CRS_dataset.side_data
-        vocab = CRS_dataset.vocab
-
-        train_dataloader = get_agent(config, CRS_dataset.train_data, vocab)
-        valid_dataloader = get_agent(config, CRS_dataset.valid_data, vocab)
-        test_dataloader = get_agent(config, CRS_dataset.test_data, vocab)
-    else:
-        tokenized_dataset = {}
-        train_dataloader = {}
-        valid_dataloader = {}
-        test_dataloader = {}
-        vocab = {}
-        side_data = {}
-
-        for task, tokenize in config['tokenize'].items():
-            if tokenize in tokenized_dataset:
-                dataset = tokenized_dataset[tokenize]
-            else:
-                dataset = get_dataset(config, tokenize, restore_data, save_data)
-                tokenized_dataset[tokenize] = dataset
-            train_data = dataset.train_data
-            valid_data = dataset.valid_data
-            test_data = dataset.test_data
-            side_data[task] = dataset.side_data
-            vocab[task] = dataset.vocab
-
-            train_dataloader[task] = get_agent(config, train_data, vocab[task])
-            valid_dataloader[task] = get_agent(config, valid_data, vocab[task])
-            test_dataloader[task] = get_agent(config, test_data, vocab[task])
-    # system
-    CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system,
-                     interact, debug, tensorboard)
+    dataset = get_dataset(config, config['tokenize'], restore_data, save_data)
+    agent = get_agent(config, dataset)
+    system = get_system(config, agent, restore_system, interact, debug, tensorboard)
     if interact:
-        CRS.interact()
+        # interact with user
+        system.interact()
     else:
-        CRS.fit()
+        system.run()
         if save_system:
-            CRS.save_model()
+            system.save_model()

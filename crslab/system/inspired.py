@@ -6,7 +6,7 @@ import torch
 from loguru import logger
 from math import floor
 
-from crslab.dataset import dataset_language_map
+from crslab.register import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -199,11 +199,11 @@ class InspiredSystem(BaseSystem):
                 self.step((batch), stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
-    def fit(self):
+    def run(self):
         if hasattr(self, 'rec_model'):
             self.train_recommender()
         if hasattr(self, 'conv_model'):
             self.train_conversation()
 
     def interact(self):
-        pass
+        raise NotImplementedError('Interact function in INSPIRED System not implement yet.')

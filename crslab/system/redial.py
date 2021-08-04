@@ -10,7 +10,7 @@
 import torch
 from loguru import logger
 
-from crslab.dataset import dataset_language_map
+from crslab.register import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -157,9 +157,9 @@ class ReDialSystem(BaseSystem):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
-    def fit(self):
+    def run(self):
         self.train_recommender()
         self.train_conversation()
 
     def interact(self):
-        pass
+        raise NotImplementedError('Interact function in ReDial System not implement yet.')
