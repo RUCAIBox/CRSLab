@@ -43,7 +43,7 @@ class ReDialAgent(SupervisedAgent):
 
     """
 
-    def __init__(self, opt, dataset, vocab):
+    def __init__(self, opt, dataset):
         """
 
         Args:
@@ -53,19 +53,19 @@ class ReDialAgent(SupervisedAgent):
 
         """
         super().__init__(opt, dataset)
-        self.ind2tok = vocab['ind2tok']
-        self.n_entity = vocab['n_entity']
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.unk_token_idx = vocab['unk']
-        self.item_token_idx = vocab['vocab_size']
+        self.ind2tok = dataset.vocab['ind2tok']
+        self.n_entity = dataset.vocab['n_entity']
+        self.pad_token_idx = dataset.vocab['pad']
+        self.start_token_idx = dataset.vocab['start']
+        self.end_token_idx = dataset.vocab['end']
+        self.unk_token_idx = dataset.vocab['unk']
+        self.item_token_idx = dataset.vocab['vocab_size']
         self.conversation_truncate = self.opt.get('conversation_truncate', None)
         self.utterance_truncate = self.opt.get('utterance_truncate', None)
 
-    def rec_process_fn(self, *args, **kwargs):
+    def rec_process_fn(self, mode):
         dataset = []
-        for conversation in self.dataset:
+        for conversation in self.data[mode]:
             if conversation['role'] == 'Recommender':
                 for item in conversation['items']:
                     context_entities = conversation['context_entities']
@@ -81,9 +81,9 @@ class ReDialAgent(SupervisedAgent):
         context_entities = get_onehot(batch_context_entities, self.n_entity)
         return {'context_entities': context_entities, 'item': torch.tensor(batch_item, dtype=torch.long)}
 
-    def conv_process_fn(self):
+    def conv_process_fn(self, mode):
         dataset = []
-        for conversation in tqdm(self.dataset):
+        for conversation in tqdm(self.data[mode]):
             if conversation['role'] != 'Recommender':
                 continue
             context_tokens = [truncate(utterance, self.utterance_truncate, truncate_tail=True) for utterance in
@@ -141,6 +141,3 @@ class ReDialAgent(SupervisedAgent):
         return {'context': context, 'context_lengths': torch.tensor(batch_context_length),
                 'utterance_lengths': torch.tensor(batch_utterance_lengths), 'request': request,
                 'request_lengths': torch.tensor(batch_request_length), 'response': response}
-
-    def policy_batchify(self, batch):
-        pass

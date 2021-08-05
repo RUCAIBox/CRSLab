@@ -22,10 +22,10 @@ import torch
 from torch import nn
 
 from crslab.model.base import BaseModel
-from .modules import HRNN, SwitchingDecoder
+from .modules import HRNN, SwitchingDecoder, AutoRec
 
 
-class ReDialConvModel(BaseModel):
+class ReDialModel(BaseModel):
     """
 
     Attributes:
@@ -47,26 +47,29 @@ class ReDialConvModel(BaseModel):
 
     """
 
-    def __init__(self, opt, device, vocab, side_data):
+    def __init__(self, opt, device, other_data):
         """
 
         Args:
             opt (dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
-            vocab (dict): A dictionary record the vocabulary information.
-            side_data (dict): A dictionary record the side data.
+            other_data (dict): A dictionary record the other data.
 
         """
         # dataset
-        self.vocab_size = vocab['vocab_size']
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.unk_token_idx = vocab['unk']
-        self.pretrained_embedding = side_data.get('embedding', None)
+        self.vocab_size = other_data['vocab']['vocab_size']
+        self.pad_token_idx = other_data['vocab']['pad']
+        self.start_token_idx = other_data['vocab']['start']
+        self.end_token_idx = other_data['vocab']['end']
+        self.unk_token_idx = other_data['vocab']['unk']
+        self.pretrained_embedding = other_data.get('embedding', None)
         self.embedding_dim = opt.get('embedding_dim', None)
         if opt.get('embedding', None) and self.embedding_dim is None:
             raise
+        # AutoRec
+        self.n_entity = other_data['vocab']['n_entity']
+        self.layer_sizes = opt['autorec_layer_sizes']
+        self.pad_entity_idx = other_data['vocab']['pad_entity']
         # HRNN
         self.utterance_encoder_hidden_size = opt['utterance_encoder_hidden_size']
         self.dialog_encoder_hidden_size = opt['dialog_encoder_hidden_size']
@@ -78,9 +81,11 @@ class ReDialConvModel(BaseModel):
         self.decoder_num_layers = opt['decoder_num_layers']
         self.decoder_embedding_dim = opt['decoder_embedding_dim']
 
-        super(ReDialConvModel, self).__init__(opt, device)
+        super(ReDialModel, self).__init__(opt, device)
 
     def build_model(self):
+        self.autorec = AutoRec(self.opt, self.n_entity, self.layer_sizes, self.pad_entity_idx)
+
         if self.opt.get('embedding', None) and self.pretrained_embedding is not None:
             embedding = nn.Embedding.from_pretrained(
                 torch.as_tensor(self.pretrained_embedding, dtype=torch.float), freeze=False,
@@ -108,7 +113,15 @@ class ReDialConvModel(BaseModel):
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=self.pad_token_idx)
 
-    def forward(self, batch, mode):
+    def recommend(self, batch, mode):
+        assert mode in ('train', 'valid', 'test')
+        if mode == 'train':
+            self.train()
+        else:
+            self.eval()
+        return self.autorec(batch)
+
+    def converse(self, batch, mode):
         """
         Args:
             batch: ::
@@ -121,6 +134,7 @@ class ReDialConvModel(BaseModel):
                     'request_lengths': (batch_size),
                     'response': (batch_size, max_utterance_length)
                 }
+            mode: str
 
         """
         assert mode in ('train', 'valid', 'test')

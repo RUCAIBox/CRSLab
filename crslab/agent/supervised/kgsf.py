@@ -41,7 +41,7 @@ class KGSFAgent(SupervisedAgent):
 
     """
 
-    def __init__(self, opt, dataset, vocab):
+    def __init__(self, opt, dataset):
         """
 
         Args:
@@ -51,19 +51,19 @@ class KGSFAgent(SupervisedAgent):
 
         """
         super().__init__(opt, dataset)
-        self.n_entity = vocab['n_entity']
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.pad_entity_idx = vocab['pad_entity']
-        self.pad_word_idx = vocab['pad_word']
+        self.n_entity = dataset.vocab['n_entity']
+        self.pad_token_idx = dataset.vocab['pad']
+        self.start_token_idx = dataset.vocab['start']
+        self.end_token_idx = dataset.vocab['end']
+        self.pad_entity_idx = dataset.vocab['pad_entity']
+        self.pad_word_idx = dataset.vocab['pad_word']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
         self.word_truncate = opt.get('word_truncate', None)
 
-    def get_pretrain_data(self, batch_size, shuffle=True):
-        return self.get_data(self.pretrain_batchify, batch_size, shuffle, self.retain_recommender_target)
+    def get_pretrain_data(self, mode, batch_size, shuffle=True):
+        return self.get_data(mode, self.pretrain_batchify, batch_size, shuffle, self.retain_recommender_target)
 
     def pretrain_batchify(self, batch):
         batch_context_entities = []
@@ -76,9 +76,9 @@ class KGSFAgent(SupervisedAgent):
         return (padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 get_onehot(batch_context_entities, self.n_entity))
 
-    def rec_process_fn(self):
+    def rec_process_fn(self, mode):
         augment_dataset = []
-        for conv_dict in tqdm(self.dataset):
+        for conv_dict in tqdm(self.data[mode]):
             if conv_dict['role'] == 'Recommender':
                 for movie in conv_dict['items']:
                     augment_conv_dict = deepcopy(conv_dict)
@@ -101,8 +101,8 @@ class KGSFAgent(SupervisedAgent):
                 get_onehot(batch_context_entities, self.n_entity),
                 torch.tensor(batch_item, dtype=torch.long))
 
-    def conv_process_fn(self, *args, **kwargs):
-        return self.retain_recommender_target()
+    def conv_process_fn(self, mode):
+        return self.retain_recommender_target(mode)
 
     def conv_batchify(self, batch):
         batch_context_tokens = []
@@ -124,6 +124,3 @@ class KGSFAgent(SupervisedAgent):
                 padded_tensor(batch_context_entities, self.pad_entity_idx, pad_tail=False),
                 padded_tensor(batch_context_words, self.pad_word_idx, pad_tail=False),
                 padded_tensor(batch_response, self.pad_token_idx))
-
-    def policy_batchify(self, *args, **kwargs):
-        pass

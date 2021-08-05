@@ -32,8 +32,8 @@ class TextBaseDataset(ABC):
             opt (Config or dict): config for dataset or the whole system.
             dpath (str): where to store dataset.
             resource (dict): version, download file and special token idx of tokenized dataset.
-            restore (bool): whether to restore saved dataset which has been processed. Defaults to False.
-            save (bool): whether to save dataset after processing. Defaults to False.
+            restore (bool, optional): whether to restore saved dataset which has been processed. Defaults to False.
+            save (bool, optional): whether to save dataset after processing. Defaults to False.
 
         """
         self.opt = opt
@@ -45,22 +45,24 @@ class TextBaseDataset(ABC):
 
         if not restore:
             # load and process
-            train_data, valid_data, test_data, self.vocab = self._load_data()
+            train_data, valid_data, test_data, vocab = self._load_data()
             logger.info('[Finish data load]')
-            self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
-                                                                                                     valid_data,
-                                                                                                     test_data)
+            self.train_data, self.valid_data, self.test_data, self.other_data = self._data_preprocess(train_data,
+                                                                                                      valid_data,
+                                                                                                      test_data)
             embedding = opt.get('embedding', None)
             if embedding:
-                self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
+                self.other_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
                 logger.debug(f'[Load pretrained embedding {embedding}]')
+
+            self.other_data['vocab'] = vocab
             logger.info('[Finish data preprocess]')
         else:
-            self.train_data, self.valid_data, self.test_data, self.side_data, self.vocab = self._load_from_restore()
+            self.train_data, self.valid_data, self.test_data, self.other_data = self._restore_data()
 
         if save:
-            data = (self.train_data, self.valid_data, self.test_data, self.side_data, self.vocab)
-            self._save_to_one(data)
+            data = (self.train_data, self.valid_data, self.test_data, self.other_data)
+            self._save_data(data)
 
     @abstractmethod
     def _load_data(self):
@@ -117,7 +119,7 @@ class TextBaseDataset(ABC):
                     'final' (list): final goal for current turn
                 }
 
-            side_data, which is in the following format::
+            other_data, which is in the following format::
 
                 {
                     'entity_kg': {
@@ -135,7 +137,7 @@ class TextBaseDataset(ABC):
         """
         pass
 
-    def _load_from_restore(self, file_name="all_data.pkl"):
+    def _restore_data(self, file_name="all_data.pkl"):
         """Restore saved dataset.
 
         Args:
@@ -149,7 +151,7 @@ class TextBaseDataset(ABC):
         logger.info(f'Restore dataset from [{file_name}]')
         return dataset
 
-    def _save_to_one(self, data, file_name="all_data.pkl"):
+    def _save_data(self, data, file_name="all_data.pkl"):
         """Save all processed dataset and vocab into one file.
 
         Args:
@@ -187,21 +189,6 @@ class AttributeBaseDataset(ABC):
         # download - TODO
         # dfile = resource['file']
         # build(dpath, dfile, version=resource['version'])
-
-        if not restore:
-            # load and process
-            train_data, valid_data, test_data = self._load_data()
-            logger.info('[Finish data load]')
-            self.train_data, self.valid_data, self.test_data, self.side_data = self._data_preprocess(train_data,
-                                                                                                     valid_data,
-                                                                                                     test_data)
-            logger.info('[Finish data preprocess]')
-        else:
-            self.train_data, self.valid_data, self.test_data, self.side_data = self._load_from_restore()
-
-        if save:
-            data = (self.train_data, self.valid_data, self.test_data, self.side_data)
-            self._save_to_one(data)
 
     @abstractmethod
     def _load_data(self):
@@ -247,7 +234,7 @@ class AttributeBaseDataset(ABC):
         """
         pass
 
-    def _load_from_restore(self, file_name="all_data.pkl"):
+    def _restore_data(self, file_name="all_data.pkl"):
         """Restore saved dataset.
 
         Args:
@@ -261,7 +248,7 @@ class AttributeBaseDataset(ABC):
         logger.info(f'Restore dataset from [{file_name}]')
         return dataset
 
-    def _save_to_one(self, data, file_name="all_data.pkl"):
+    def _save_data(self, data, file_name="all_data.pkl"):
         """Save all processed dataset and vocab into one file.
 
         Args:

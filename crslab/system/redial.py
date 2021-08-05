@@ -20,29 +20,22 @@ from crslab.system.utils.functions import ind2txt
 class ReDialSystem(BaseSystem):
     """This is the system for KGSF model"""
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False, tensorboard=False):
+    def __init__(self, opt, agent, restore=False, save=False, interaction=False, tensorboard=False):
         """
 
         Args:
             opt (dict): Indicating the hyper parameters.
-            train_dataloader (BaseDataLoader): Indicating the train supervised of corresponding dataset.
-            valid_dataloader (BaseDataLoader): Indicating the valid supervised of corresponding dataset.
-            test_dataloader (BaseDataLoader): Indicating the test supervised of corresponding dataset.
-            vocab (dict): Indicating the vocabulary.
-            side_data (dict): Indicating the side data.
-            restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
-            interact (bool, optional): Indicating if we interact with system. Defaults to False.
-            debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
-            tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
+            agent (SupervisedAgent or Interactive Agent): Indicating the system agent.
+            restore (bool, optional): Indicating if we store system after training. Defaults to False.
+            interaction (bool, optional): Indicating if we interact with system. Defaults to False.
+            tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False.
 
         """
-        super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
-                                           restore_system, interact, debug, tensorboard)
-        self.ind2tok = vocab['conv']['ind2tok']
-        self.end_token_idx = vocab['conv']['end']
-        self.item_ids = side_data['rec']['item_entity_ids']
-        self.id2entity = vocab['rec']['id2entity']
+        super(ReDialSystem, self).__init__(opt, agent, restore, save, interaction, tensorboard)
+        self.ind2tok = self.agent.other_data['vocab']['ind2tok']
+        self.end_token_idx = self.agent.other_data['vocab']['end']
+        self.item_ids = self.agent.other_data['item_entity_ids']
+        self.id2entity = self.agent.other_data['vocab']['id2entity']
 
         self.rec_optim_opt = opt['rec']
         self.conv_optim_opt = opt['conv']
@@ -106,14 +99,14 @@ class ReDialSystem(BaseSystem):
             self.evaluator.reset_metrics()
             logger.info(f'[Recommendation epoch {str(epoch)}]')
             logger.info('[Train]')
-            for batch in self.train_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size):
+            for batch in self.agent.get_rec_data('train', self.rec_batch_size):
                 self.step(batch, stage='rec', mode='train')
             self.evaluator.report(epoch=epoch, mode='train')  # report train loss
             # val
             logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
-                for batch in self.valid_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size, shuffle=False):
+                for batch in self.agent.get_rec_data('valid', self.rec_batch_size, shuffle=False):
                     self.step(batch, stage='rec', mode='valid')
                 self.evaluator.report(epoch=epoch, mode='valid')  # report valid loss
                 # early stop
@@ -124,7 +117,7 @@ class ReDialSystem(BaseSystem):
         logger.info('[Test]')
         with torch.no_grad():
             self.evaluator.reset_metrics()
-            for batch in self.test_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size, shuffle=False):
+            for batch in self.agent.get_rec_data('test', self.rec_batch_size, shuffle=False):
                 self.step(batch, stage='rec', mode='test')
             self.evaluator.report(mode='test')
 
@@ -135,15 +128,14 @@ class ReDialSystem(BaseSystem):
             self.evaluator.reset_metrics()
             logger.info(f'[Conversation epoch {str(epoch)}]')
             logger.info('[Train]')
-            for batch in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size):
+            for batch in self.agent.get_conv_data('train', self.conv_batch_size):
                 self.step(batch, stage='conv', mode='train')
             self.evaluator.report(epoch=epoch, mode='train')
             # val
             logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
-                for batch in self.valid_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size,
-                                                                         shuffle=False):
+                for batch in self.agent.get_conv_data('valid', self.conv_batch_size, shuffle=False):
                     self.step(batch, stage='conv', mode='valid')
                 self.evaluator.report(epoch=epoch, mode='valid')
                 metric = self.evaluator.optim_metrics['gen_loss']
@@ -153,11 +145,11 @@ class ReDialSystem(BaseSystem):
         logger.info('[Test]')
         with torch.no_grad():
             self.evaluator.reset_metrics()
-            for batch in self.test_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+            for batch in self.agent.get_conv_data('test', self.conv_batch_size, shuffle=False):
                 self.step(batch, stage='conv', mode='test')
             self.evaluator.report(mode='test')
 
-    def run(self):
+    def fit(self):
         self.train_recommender()
         self.train_conversation()
 

@@ -3,9 +3,9 @@
 # @Email  : wxl1999@foxmail.com
 
 # UPDATE:
-# @Time   : 2020/12/2
-# @Author : Xiaolei Wang
-# @Email  : wxl1999@foxmail.com
+# @Time   : 2020/12/2, 2021/8/5
+# @Author : Xiaolei Wang, Chenzhan Shang
+# @Email  : wxl1999@foxmail.com, czshang@outlook.com
 
 import torch
 from tqdm import tqdm
@@ -35,27 +35,26 @@ class KBRDAgent(SupervisedAgent):
 
     """
 
-    def __init__(self, opt, dataset, vocab):
+    def __init__(self, opt, dataset):
         """
 
         Args:
             opt (Config or dict): config for supervised or the whole system.
             dataset: data for model.
-            vocab (dict): all kinds of useful size, idx and map between token and idx.
 
         """
         super().__init__(opt, dataset)
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.pad_entity_idx = vocab['pad_entity']
+        self.pad_token_idx = dataset.vocab['pad']
+        self.start_token_idx = dataset.vocab['start']
+        self.end_token_idx = dataset.vocab['end']
+        self.pad_entity_idx = dataset.vocab['pad_entity']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
 
-    def rec_process_fn(self):
+    def rec_process_fn(self, mode):
         augment_dataset = []
-        for conv_dict in tqdm(self.dataset):
+        for conv_dict in tqdm(self.data[mode]):
             if conv_dict['role'] == 'Recommender':
                 for movie in conv_dict['items']:
                     augment_conv_dict = {'context_entities': conv_dict['context_entities'], 'item': movie}
@@ -74,8 +73,8 @@ class KBRDAgent(SupervisedAgent):
             "item": torch.tensor(batch_movies, dtype=torch.long)
         }
 
-    def conv_process_fn(self, *args, **kwargs):
-        return self.retain_recommender_target()
+    def conv_process_fn(self, mode):
+        return self.retain_recommender_target(mode)
 
     def conv_batchify(self, batch):
         batch_context_tokens = []
@@ -95,6 +94,3 @@ class KBRDAgent(SupervisedAgent):
             "context_entities": batch_context_entities,
             "response": padded_tensor(batch_response, self.pad_token_idx)
         }
-
-    def policy_batchify(self, *args, **kwargs):
-        pass

@@ -10,21 +10,19 @@
 from crslab.register import agent_register_table
 
 
-def get_agent(opt, dataset, vocab):
+def get_agent(opt, dataset):
     """get supervised to batchify dataset
 
     Args:
         opt (Config or dict): config for supervised or the whole system.
-        dataset: processed raw data, no side data.
-        vocab (dict): all kinds of useful size, idx and map between token and idx.
+        dataset: instance of TextBaseDataset or AttributeBaseDataset.
 
     Returns:
-        supervised
+        instance of SupervisedAgent or InteractiveAgent.
 
     """
     model_name = opt['model_name']
     if model_name in agent_register_table:
-        return agent_register_table[model_name](opt, dataset, vocab)
+        return agent_register_table[model_name](opt, dataset)
     else:
         raise NotImplementedError(f'The supervised [{model_name}] has not been implemented')
-

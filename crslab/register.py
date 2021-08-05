@@ -58,9 +58,7 @@ agent_register_table = {
     'TGPolicy': TGReDialAgent,
     'TGRec_TGConv': TGReDialAgent,
     'TGRec_TGConv_TGPolicy': TGReDialAgent,
-    'ReDialRec': ReDialAgent,
-    'ReDialConv': ReDialAgent,
-    'ReDialRec_ReDialConv': ReDialAgent,
+    'ReDial': ReDialAgent,
     'InspiredRec_InspiredConv': InspiredAgent,
     'BERT': TGReDialAgent,
     'SASREC': TGReDialAgent,
@@ -90,8 +88,7 @@ model_register_table = {
     'TGRec': TGRecModel,
     'TGConv': TGConvModel,
     'TGPolicy': TGPolicyModel,
-    'ReDialRec': ReDialRecModel,
-    'ReDialConv': ReDialConvModel,
+    'ReDialRec': ReDialModel,
     'InspiredRec': InspiredRecModel,
     'InspiredConv': InspiredConvModel,
     'GPT2': GPT2Model,
@@ -109,7 +106,7 @@ model_register_table = {
 }
 
 system_register_table = {
-    'ReDialRec_ReDialConv': ReDialSystem,
+    'ReDial': ReDialSystem,
     'KBRD': KBRDSystem,
     'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,

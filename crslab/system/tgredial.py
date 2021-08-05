@@ -25,8 +25,8 @@ from crslab.system.utils.functions import ind2txt
 class TGReDialSystem(BaseSystem):
     """This is the system for TGReDial model"""
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False, tensorboard=False):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
+                 interaction=False, debug=False, tensorboard=False):
         """
 
         Args:
@@ -36,14 +36,14 @@ class TGReDialSystem(BaseSystem):
             test_dataloader (BaseDataLoader): Indicating the test supervised of corresponding dataset.
             vocab (dict): Indicating the vocabulary.
             side_data (dict): Indicating the side data.
-            restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
-            interact (bool, optional): Indicating if we interact with system. Defaults to False.
+            restore (bool, optional): Indicating if we store system after training. Defaults to False.
+            interaction (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore_system, interact, debug,
+                                             test_dataloader, vocab, side_data, restore, interaction, debug,
                                              tensorboard)
 
         if hasattr(self, 'conv_model'):
@@ -284,7 +284,7 @@ class TGReDialSystem(BaseSystem):
                 self.step(batch, stage='policy', mode='test')
             self.evaluator.report(mode='test')
 
-    def run(self):
+    def fit(self):
         if hasattr(self, 'rec_model'):
             self.train_recommender()
         if hasattr(self, 'policy_model'):

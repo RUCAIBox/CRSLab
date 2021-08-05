@@ -100,7 +100,7 @@ class TGReDialAgent(SupervisedAgent):
 
     def rec_process_fn(self, *args, **kwargs):
         augment_dataset = []
-        for conv_dict in tqdm(self.dataset):
+        for conv_dict in tqdm(self.data):
             for movie in conv_dict['items']:
                 augment_conv_dict = deepcopy(conv_dict)
                 augment_conv_dict['item'] = movie
@@ -335,7 +335,7 @@ class TGReDialAgent(SupervisedAgent):
 
     def policy_process_fn(self, *args, **kwargs):
         augment_dataset = []
-        for conv_dict in tqdm(self.dataset):
+        for conv_dict in tqdm(self.data):
             for target_policy in conv_dict['target']:
                 topic_variable = target_policy[1]
                 for topic in topic_variable:

@@ -80,7 +80,7 @@ class InspiredAgent(SupervisedAgent):
 
     def rec_process_fn(self, *args, **kwargs):
         augment_dataset = []
-        for conv_dict in tqdm(self.dataset):
+        for conv_dict in tqdm(self.data):
             if conv_dict['role'] == 'Recommender':
                 for movie in conv_dict['items']:
                     augment_conv_dict = deepcopy(conv_dict)
