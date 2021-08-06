@@ -160,3 +160,9 @@ class ReDialModel(BaseModel):
         loss = self.loss(log_probs, response)
 
         return loss, preds
+
+    def forward(self, batch, stage, mode):
+        if stage == "rec":
+            return self.recommend(batch, mode)
+        elif stage == "conv":
+            return self.converse(batch, mode)

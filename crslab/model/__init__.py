@@ -21,7 +21,7 @@ model_register_table = {
     'TGRec': TGRecModel,
     'TGConv': TGConvModel,
     'TGPolicy': TGPolicyModel,
-    'ReDialRec': ReDialModel,
+    'ReDial': ReDialModel,
     'InspiredRec': InspiredRecModel,
     'InspiredConv': InspiredConvModel,
     'GPT2': GPT2Model,
@@ -47,8 +47,8 @@ def get_model(config, model_name, device, other_data):
             return model
         else:
             if len(config.opt["gpu"]) > 1:
-                if model_name == 'PMI' or model_name == 'KBRD':
-                    logger.info(f'[PMI/KBRD model does not support multi GPUs yet, using single GPU now]')
+                if model_name in ['PMI', 'KBRD', 'ReDial']:
+                    logger.info(f'[PMI/KBRD/ReDial model does not support multi GPUs yet, using single GPU now]')
                     return model.to(device)
             return torch.nn.DataParallel(model, device_ids=config["gpu"])
 

@@ -73,7 +73,7 @@ class ReDialSystem(BaseSystem):
                 batch[k] = v.to(self.device)
 
         if stage == 'rec':
-            rec_loss, rec_scores = self.rec_model.forward(batch, mode=mode)
+            rec_loss, rec_scores = self.model.forward(batch, stage=stage, mode=mode)
             rec_loss = rec_loss.sum()
             if mode == 'train':
                 self.backward(rec_loss)
@@ -82,7 +82,7 @@ class ReDialSystem(BaseSystem):
             rec_loss = rec_loss.item()
             self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
         else:
-            gen_loss, preds = self.conv_model.forward(batch, mode=mode)
+            gen_loss, preds = self.model.forward(batch, stage=stage, mode=mode)
             gen_loss = gen_loss.sum()
             if mode == 'train':
                 self.backward(gen_loss)
@@ -93,7 +93,7 @@ class ReDialSystem(BaseSystem):
             self.evaluator.gen_metrics.add('ppl', PPLMetric(gen_loss))
 
     def train_recommender(self):
-        self.init_optim(self.rec_optim_opt, self.rec_model.parameters())
+        self.init_optim(self.rec_optim_opt, self.model.parameters())
 
         for epoch in range(self.rec_epoch):
             self.evaluator.reset_metrics()
@@ -122,7 +122,7 @@ class ReDialSystem(BaseSystem):
             self.evaluator.report(mode='test')
 
     def train_conversation(self):
-        self.init_optim(self.conv_optim_opt, self.conv_model.parameters())
+        self.init_optim(self.conv_optim_opt, self.model.parameters())
 
         for epoch in range(self.conv_epoch):
             self.evaluator.reset_metrics()
