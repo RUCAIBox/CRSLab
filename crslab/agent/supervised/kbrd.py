@@ -44,10 +44,10 @@ class KBRDAgent(SupervisedAgent):
 
         """
         super().__init__(opt, dataset)
-        self.pad_token_idx = dataset.vocab['pad']
-        self.start_token_idx = dataset.vocab['start']
-        self.end_token_idx = dataset.vocab['end']
-        self.pad_entity_idx = dataset.vocab['pad_entity']
+        self.pad_token_idx = dataset.other_data['vocab']['pad']
+        self.start_token_idx = dataset.other_data['vocab']['start']
+        self.end_token_idx = dataset.other_data['vocab']['end']
+        self.pad_entity_idx = dataset.other_data['vocab']['pad_entity']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)

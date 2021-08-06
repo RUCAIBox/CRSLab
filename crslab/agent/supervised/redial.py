@@ -53,13 +53,13 @@ class ReDialAgent(SupervisedAgent):
 
         """
         super().__init__(opt, dataset)
-        self.ind2tok = dataset.vocab['ind2tok']
-        self.n_entity = dataset.vocab['n_entity']
-        self.pad_token_idx = dataset.vocab['pad']
-        self.start_token_idx = dataset.vocab['start']
-        self.end_token_idx = dataset.vocab['end']
-        self.unk_token_idx = dataset.vocab['unk']
-        self.item_token_idx = dataset.vocab['vocab_size']
+        self.ind2tok = dataset.other_data['vocab']['ind2tok']
+        self.n_entity = dataset.other_data['vocab']['n_entity']
+        self.pad_token_idx = dataset.other_data['vocab']['pad']
+        self.start_token_idx = dataset.other_data['vocab']['start']
+        self.end_token_idx = dataset.other_data['vocab']['end']
+        self.unk_token_idx = dataset.other_data['vocab']['unk']
+        self.item_token_idx = dataset.other_data['vocab']['vocab_size']
         self.conversation_truncate = self.opt.get('conversation_truncate', None)
         self.utterance_truncate = self.opt.get('utterance_truncate', None)
 

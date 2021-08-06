@@ -7,7 +7,32 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou, Chenzhan Shang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com, czshang@outlook.com
 
-from crslab.register import dataset_register_table
+from crslab.dataset.durecdial import DuRecDialDataset
+from crslab.dataset.gorecdial import GoRecDialDataset
+from crslab.dataset.inspired import InspiredDataset
+from crslab.dataset.opendialkg import OpenDialKGDataset
+from crslab.dataset.redial import ReDialDataset
+from crslab.dataset.tgredial import TGReDialDataset
+from crslab.dataset.lastfm import LastFMDataset
+
+dataset_register_table = {
+    'ReDial': ReDialDataset,
+    'TGReDial': TGReDialDataset,
+    'GoRecDial': GoRecDialDataset,
+    'OpenDialKG': OpenDialKGDataset,
+    'Inspired': InspiredDataset,
+    'DuRecDial': DuRecDialDataset,
+    'LastFM': LastFMDataset
+}
+
+dataset_language_map = {
+    'ReDial': 'en',
+    'TGReDial': 'zh',
+    'GoRecDial': 'en',
+    'OpenDialKG': 'en',
+    'Inspired': 'en',
+    'DuRecDial': 'zh'
+}
 
 
 def get_dataset(opt, tokenize, restore, save):

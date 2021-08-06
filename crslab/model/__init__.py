@@ -10,12 +10,38 @@
 import torch
 from loguru import logger
 
-from crslab.register import model_register_table
+from crslab.model.conversation import *
+from crslab.model.crs import *
+from crslab.model.policy import *
+from crslab.model.recommendation import *
+
+model_register_table = {
+    'KGSF': KGSFModel,
+    'KBRD': KBRDModel,
+    'TGRec': TGRecModel,
+    'TGConv': TGConvModel,
+    'TGPolicy': TGPolicyModel,
+    'ReDialRec': ReDialModel,
+    'InspiredRec': InspiredRecModel,
+    'InspiredConv': InspiredConvModel,
+    'GPT2': GPT2Model,
+    'Transformer': TransformerModel,
+    'ConvBERT': ConvBERTModel,
+    'ProfileBERT': ProfileBERTModel,
+    'TopicBERT': TopicBERTModel,
+    'PMI': PMIModel,
+    'MGCG': MGCGModel,
+    'BERT': BERTModel,
+    'SASREC': SASRECModel,
+    'GRU4REC': GRU4RECModel,
+    'Popularity': PopularityModel,
+    'TextCNN': TextCNNModel
+}
 
 
-def get_model(config, model_name, device, vocab, side_data=None):
+def get_model(config, model_name, device, other_data):
     if model_name in model_register_table:
-        model = model_register_table[model_name](config, device, vocab, side_data)
+        model = model_register_table[model_name](config, device, other_data)
         logger.info(f'[Build model {model_name}]')
         if config.opt["gpu"] == [-1]:
             return model

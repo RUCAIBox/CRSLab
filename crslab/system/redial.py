@@ -10,7 +10,7 @@
 import torch
 from loguru import logger
 
-from crslab.register import dataset_language_map
+from crslab.dataset import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem

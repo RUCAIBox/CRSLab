@@ -10,7 +10,16 @@
 
 from loguru import logger
 
-from crslab.register import evaluator_register_table, dataset_language_map
+from crslab.evaluator.conv import ConvEvaluator
+from crslab.evaluator.rec import RecEvaluator
+from crslab.evaluator.standard import StandardEvaluator
+from crslab.dataset import dataset_language_map
+
+evaluator_register_table = {
+    'rec': RecEvaluator,
+    'conv': ConvEvaluator,
+    'standard': StandardEvaluator
+}
 
 
 def get_evaluator(evaluator_name, dataset, tensorboard=False):
