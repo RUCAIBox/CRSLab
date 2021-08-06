@@ -32,6 +32,7 @@ if __name__ == '__main__':
                         help='restore trained model')
     parser.add_argument('-sm', '--save_model', action='store_true',
                         help='save trained model')
+    parser.add_argument('-s', '--seed', type=int, default=2021, help='specify the random seed')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='use valid dataset to debug your system')
     parser.add_argument('-i', '--interaction', action='store_true',
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('-tb', '--tensorboard', action='store_true',
                         help='enable tensorboard to monitor train performance')
     args, _ = parser.parse_known_args()
-    config = Config(args.config, args.gpu, args.debug)
+    config = Config(args.config, args.gpu, args.seed, args.debug)
 
     dataset = get_dataset(config, config['tokenize'], args.restore_data, args.save_data)
     agent = get_agent(config, dataset)

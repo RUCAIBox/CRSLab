@@ -12,6 +12,9 @@ import os
 import time
 from pprint import pprint
 
+import torch
+import numpy as np
+import random
 import yaml
 from loguru import logger
 from tqdm import tqdm
@@ -20,7 +23,7 @@ from tqdm import tqdm
 class Config:
     """Configurator module that load the defined parameters."""
 
-    def __init__(self, config_file, gpu='-1', debug=False):
+    def __init__(self, config_file, gpu='-1', seed=2021, debug=False):
         """Load parameters and set log level.
 
         Args:
@@ -37,6 +40,12 @@ class Config:
         # gpu
         os.environ['CUDA_VISIBLE_DEVICES'] = gpu
         self.opt['gpu'] = [i for i in range(len(gpu.split(',')))]
+        # random seed
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
         # dataset
         dataset = self.opt['dataset']
         tokenize = self.opt['tokenize']
