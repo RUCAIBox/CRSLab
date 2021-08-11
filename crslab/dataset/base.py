@@ -126,7 +126,7 @@ class TextBaseDataset(ABC):
                         'edge' (list of tuple): (head_entity_id, tail_entity_id, relation_id),
                         'n_relation' (int): number of distinct relations,
                         'entity' (list of str): str of entities, used for entity linking
-                    }
+                    },
                     'word_kg': {
                         'edge' (list of tuple): (head_entity_id, tail_entity_id),
                         'entity' (list of str): str of entities, used for entity linking
@@ -190,49 +190,88 @@ class AttributeBaseDataset(ABC):
         # dfile = resource['file']
         # build(dpath, dfile, version=resource['version'])
 
+        if not restore:
+            # load and process
+            self.kg, self.interactions = self._load_and_preprocess()
+            logger.info('[Finish data preprocess]')
+        else:
+            self.kg, self.interactions = self._restore_data()
+
+        if save:
+            data = (self.kg, self.interactions)
+            self._save_data(data)
+
     @abstractmethod
-    def _load_data(self):
-        """Load dataset.
+    def _load_and_preprocess(self):
+        """Load and preprocess dataset.
 
         Returns:
-            (any, any, any):
+            (dict, dict):
 
-            raw train, valid and test data.
+            knowledge graph, which is in the following format::
 
-        """
-        pass
-
-    @abstractmethod
-    def _data_preprocess(self, train_data, valid_data, test_data):
-        """Process raw train, valid, test data.
-
-        Args:
-            train_data: train dataset.
-            valid_data: valid dataset.
-            test_data: test dataset.
-
-        Returns:
-            (list of dict, dict):
-
-            train/valid/test_data, each dict is in the following format::
-
-                 {
-                    'role' (str):
-                        'Seeker' or 'Recommender'
-                }
-
-            side_data, which is in the following format::
-
-                {
-                    'entity_kg': {
-                        'edge' (list of tuple): (head_entity_id, tail_entity_id, relation_id),
-                        'n_relation' (int): number of distinct relations,
-                        'entity' (list of str): str of entities, used for entity linking
+            {
+                'user': {
+                    user_id: {
+                        'interact' (list of int): ids of items which the user interacts with.
+                        'friend' (list of int): ids of users which are friends of the user.
+                        'like' (list of int): ids of attributes which the user likes.
+                    }
+                },
+                'item': {
+                    item_id: {
+                        'belong_to' (list of int): ids of attributes which belong to the item.
+                        'interact' (list of int): ids of users which the item interacts with.
+                    }
+                },
+                'attribute': {
+                    attribute_id: {
+                        'like' (list of int): ids of users which like the attribute.
+                        'belong_to' (list of int): ids of items which the attribute belongs to.
                     }
                 }
+            }
+
+            interaction records, which is in the following format::
+
+            {
+                'train': {
+                    user_id (list of int): ids of items which the user interacts with.
+                },
+                'valid': {
+                    user_id (list of int): ids of items which the user interacts with.
+                },
+                'test': {
+                    user_id (list of int): ids of items which the user interacts with.
+                }
+            }
 
         """
         pass
+
+    def _get_template(self, users, items, attributes):
+        template = {
+            'user': dict(),
+            'item': dict(),
+            'attribute': dict()
+        }
+        for user_id in users:
+            template['user'][user_id] = {
+                'interact': [],
+                'friend': [],
+                'like': []
+            }
+        for item_id in items:
+            template['item'][item_id] = {
+                'belong_to': [],
+                'interact': []
+            }
+        for attribute_id in attributes:
+            template['attribute'][attribute_id] = {
+                'like': [],
+                'belong_to': []
+            }
+        return template
 
     def _restore_data(self, file_name="all_data.pkl"):
         """Restore saved dataset.

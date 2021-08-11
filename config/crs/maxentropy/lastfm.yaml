@@ -8,8 +8,12 @@ quadratic_only: 1
 emb_dim: 64
 fea_init_param: 0.01
 fm_dropout: 0.5
+# conv model
+max_turn: 15
+gamma: 0.0
+max_epi: 20000
 # optim
-rec:
+rec_offline:
   epoch: 250
   batch_size: 64
   optimizer:
@@ -18,3 +22,8 @@ rec:
     flr: !!float 1e-4
   decay: 0.0
   reg: !!float 1e-3
+rec_online:
+  optimizer:
+    name: SGD
+    lr: !!float 1e-3
+  decay: 0.0
