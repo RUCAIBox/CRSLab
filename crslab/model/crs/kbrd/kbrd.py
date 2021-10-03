@@ -61,28 +61,27 @@ class KBRDModel(BaseModel):
 
     """
 
-    def __init__(self, opt, device, vocab, side_data):
+    def __init__(self, opt, device, other_data):
         """
 
         Args:
             opt (dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
-            vocab (dict): A dictionary record the vocabulary information.
-            side_data (dict): A dictionary record the side data.
+            other_data (dict): A dictionary record the other data.
 
         """
         self.device = device
         self.gpu = opt.get("gpu", [-1])
         # vocab
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.vocab_size = vocab['vocab_size']
+        self.pad_token_idx = other_data['vocab']['pad']
+        self.start_token_idx = other_data['vocab']['start']
+        self.end_token_idx = other_data['vocab']['end']
+        self.vocab_size = other_data['vocab']['vocab_size']
         self.token_emb_dim = opt.get('token_emb_dim', 300)
-        self.pretrain_embedding = side_data.get('embedding', None)
+        self.pretrain_embedding = other_data.get('embedding', None)
         # kg
-        self.n_entity = vocab['n_entity']
-        entity_kg = side_data['entity_kg']
+        self.n_entity = other_data['vocab']['n_entity']
+        entity_kg = other_data['entity_kg']
         self.n_relation = entity_kg['n_relation']
         self.edge_idx, self.edge_type = edge_to_pyg_format(entity_kg['edge'], 'RGCN')
         self.edge_idx = self.edge_idx.to(device)

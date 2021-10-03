@@ -4,7 +4,7 @@ tokenize:
   rec: bert
   conv: gpt2
   policy: bert
-# dataloader
+# supervised
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100

@@ -1,21 +1,17 @@
 # dataset
 dataset: DuRecDial
-tokenize:
-  rec: jieba
-  conv: jieba
-# dataloader
+tokenize: nltk
+# supervised
 utterance_truncate: 80
 conversation_truncate: 40
 scale: 1
 # model
+model: ReDial
 # rec
-rec_model: ReDialRec
 autorec_layer_sizes: [ 1000 ]
 autorec_f: sigmoid
 autorec_g: sigmoid
 # conv
-conv_model: ReDialConv
-# embedding: word2vec
 embedding_dim: 300
 utterance_encoder_hidden_size: 256
 dialog_encoder_hidden_size: 256

@@ -3,9 +3,9 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2021/1/9
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/11/24, 2021/1/9, 2021/8/5
+# @Author : Kun Zhou, Xiaolei Wang, Chenzhan Shang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, czshang@outlook.com
 
 import os
 from abc import ABC, abstractmethod
@@ -35,60 +35,45 @@ transformers_tokenizer = ('bert', 'gpt2')
 class BaseSystem(ABC):
     """Base class for all system"""
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False, tensorboard=False):
+    def __init__(self, opt, agent, restore=False, save=False, interaction=False, tensorboard=False):
         """
 
         Args:
             opt (dict): Indicating the hyper parameters.
-            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
-            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
-            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
-            vocab (dict): Indicating the vocabulary.
-            side_data (dict): Indicating the side data.
-            restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
-            interact (bool, optional): Indicating if we interact with system. Defaults to False.
-            debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
+            agent (SupervisedAgent or Interactive Agent): Indicating the system agent.
+            restore (bool, optional): Indicating if we restore saved model. Defaults to False.
+            save (bool, optional): Indicating if we store model after training. Defaults to False.
+            interaction (bool, optional): Indicating if we interact with system. Defaults to False.
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         self.opt = opt
         if opt["gpu"] == [-1]:
             self.device = torch.device('cpu')
-        elif len(opt["gpu"]) == 1:
-            self.device = torch.device('cuda')
         else:
             self.device = torch.device('cuda')
-        # data
-        if debug:
-            self.train_dataloader = valid_dataloader
-            self.valid_dataloader = valid_dataloader
-            self.test_dataloader = test_dataloader
-        else:
-            self.train_dataloader = train_dataloader
-            self.valid_dataloader = valid_dataloader
-            self.test_dataloader = test_dataloader
-        self.vocab = vocab
-        self.side_data = side_data
+
         # model
+        self.agent = agent
         if 'model' in opt:
-            self.model = get_model(opt, opt['model'], self.device, vocab, side_data).to(self.device)
+            self.model = get_model(opt, opt['model'], self.device, agent.other_data).to(self.device)
         else:
             if 'rec_model' in opt:
-                self.rec_model = get_model(opt, opt['rec_model'], self.device, vocab['rec'], side_data['rec']).to(
-                    self.device)
+                self.rec_model = get_model(opt, opt['rec_model'], self.device, agent.other_data['rec']).to(self.device)
             if 'conv_model' in opt:
-                self.conv_model = get_model(opt, opt['conv_model'], self.device, vocab['conv'], side_data['conv']).to(
-                    self.device)
+                self.conv_model = get_model(opt, opt['conv_model'], self.device, agent.other_data['conv']).to(
+                                            self.device)
             if 'policy_model' in opt:
-                self.policy_model = get_model(opt, opt['policy_model'], self.device, vocab['policy'],
-                                              side_data['policy']).to(self.device)
+                self.policy_model = get_model(opt, opt['policy_model'], self.device, agent.other_data['policy']).to(
+                                            self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
         self.model_file = os.path.join(SAVE_PATH, model_file_name)
-        if restore_system:
-            self.restore_model()
+        if restore:
+            self._restore_model()
 
-        if not interact:
+        self.save = save
+        self.interaction = interaction
+        if not interaction:
             self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'], tensorboard)
 
     def init_optim(self, opt, parameters):
@@ -154,11 +139,6 @@ class BaseSystem(ABC):
         else:
             raise
         logger.debug('[Reset early stop state]')
-
-    @abstractmethod
-    def fit(self):
-        """fit the whole system"""
-        pass
 
     @abstractmethod
     def step(self, batch, stage, mode):
@@ -243,7 +223,7 @@ class BaseSystem(ABC):
                 logger.info('[Early stop]')
                 return True
 
-    def save_model(self):
+    def _save_model(self):
         r"""Store the model parameters."""
         state = {}
         if hasattr(self, 'model'):
@@ -259,7 +239,7 @@ class BaseSystem(ABC):
         torch.save(state, self.model_file)
         logger.info(f'[Save model into {self.model_file}]')
 
-    def restore_model(self):
+    def _restore_model(self):
         r"""Store the model parameters."""
         if not os.path.exists(self.model_file):
             raise ValueError(f'Saved model [{self.model_file}] does not exist')
@@ -274,8 +254,22 @@ class BaseSystem(ABC):
             self.policy_model.load_state_dict(checkpoint['policy_state_dict'])
         logger.info(f'[Restore model from {self.model_file}]')
 
+    def run(self):
+        if self.interaction:
+            self.interact()
+        else:
+            self.fit()
+            if self.save:
+                self._save_model()
+
+    @abstractmethod
+    def fit(self):
+        """fit the whole system"""
+        pass
+
     @abstractmethod
     def interact(self):
+        """interact with user"""
         pass
 
     def init_interact(self):

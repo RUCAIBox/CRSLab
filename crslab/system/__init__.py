@@ -3,20 +3,20 @@
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/11/24, 2020/12/29
-# @Author : Kun Zhou, Xiaolei Wang
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
+# @Time   : 2020/11/24, 2020/12/29, 2021/8/4
+# @Author : Kun Zhou, Xiaolei Wang, Chenzhan Shang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, czshang@outlook.com
 
 from loguru import logger
 
-from .inspired import InspiredSystem
-from .kbrd import KBRDSystem
-from .kgsf import KGSFSystem
-from .redial import ReDialSystem
-from .tgredial import TGReDialSystem
+from crslab.system.inspired import InspiredSystem
+from crslab.system.kbrd import KBRDSystem
+from crslab.system.kgsf import KGSFSystem
+from crslab.system.redial import ReDialSystem
+from crslab.system.tgredial import TGReDialSystem
 
 system_register_table = {
-    'ReDialRec_ReDialConv': ReDialSystem,
+    'ReDial': ReDialSystem,
     'KBRD': KBRDSystem,
     'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,
@@ -37,15 +37,13 @@ system_register_table = {
 }
 
 
-def get_system(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-               interact=False, debug=False, tensorboard=False):
+def get_system(opt, agent, restore_model=False, save_model=False, interaction=False, tensorboard=False):
     """
     return the system class
     """
     model_name = opt['model_name']
     if model_name in system_register_table:
-        system = system_register_table[model_name](opt, train_dataloader, valid_dataloader, test_dataloader, vocab,
-                                                   side_data, restore_system, interact, debug, tensorboard)
+        system = system_register_table[model_name](opt, agent, restore_model, save_model, interaction, tensorboard)
         logger.info(f'[Build system {model_name}]')
         return system
     else:

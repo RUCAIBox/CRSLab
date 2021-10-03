@@ -1,7 +1,7 @@
 # dataset
 dataset: DuRecDial
 tokenize: jieba
-# dataloader
+# supervised
 context_truncate: 1024
 response_truncate: 1024
 scale: 0.1

@@ -14,7 +14,7 @@ from loguru import logger
 from math import floor
 
 from crslab.config import PRETRAIN_PATH
-from crslab.data import get_dataloader, dataset_language_map
+from crslab.dataset import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -24,25 +24,25 @@ from crslab.system.utils.functions import ind2txt
 class TGReDialSystem(BaseSystem):
     """This is the system for TGReDial model"""
 
-    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system=False,
-                 interact=False, debug=False, tensorboard=False):
+    def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
+                 interaction=False, debug=False, tensorboard=False):
         """
 
         Args:
             opt (dict): Indicating the hyper parameters.
-            train_dataloader (BaseDataLoader): Indicating the train dataloader of corresponding dataset.
-            valid_dataloader (BaseDataLoader): Indicating the valid dataloader of corresponding dataset.
-            test_dataloader (BaseDataLoader): Indicating the test dataloader of corresponding dataset.
+            train_dataloader (BaseDataLoader): Indicating the train supervised of corresponding dataset.
+            valid_dataloader (BaseDataLoader): Indicating the valid supervised of corresponding dataset.
+            test_dataloader (BaseDataLoader): Indicating the test supervised of corresponding dataset.
             vocab (dict): Indicating the vocabulary.
             side_data (dict): Indicating the side data.
-            restore_system (bool, optional): Indicating if we store system after training. Defaults to False.
-            interact (bool, optional): Indicating if we interact with system. Defaults to False.
+            restore (bool, optional): Indicating if we store system after training. Defaults to False.
+            interaction (bool, optional): Indicating if we interact with system. Defaults to False.
             debug (bool, optional): Indicating if we train in debug mode. Defaults to False.
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
         super(TGReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader,
-                                             test_dataloader, vocab, side_data, restore_system, interact, debug,
+                                             test_dataloader, vocab, side_data, restore, interaction, debug,
                                              tensorboard)
 
         if hasattr(self, 'conv_model'):

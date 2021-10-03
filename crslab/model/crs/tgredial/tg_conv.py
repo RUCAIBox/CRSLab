@@ -25,7 +25,7 @@ from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
 from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
+from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 
