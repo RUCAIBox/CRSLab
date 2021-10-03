@@ -128,3 +128,26 @@ class LastFMDataset(AttributeBaseDataset):
             'valid': valid,
             'test': test
         }
+
+    def generate_data(self, mode):
+        """Generate train and valid data for Bayesian Personalized Ranking objective.
+
+        train data (list of tuple): [(
+            user (int): user of the session.
+            positive item (int): the ground-truth item of the session.
+            negative item (int): the non-interacted item of the user.
+            attribute-aware negative item (int): the non-interacted item of the user in the candidate item set.
+            preference (list of int): partially known preferred attributes of the user.
+        )]
+
+        valid data (list of tuple): [(
+            user (int): user of the session.
+            positive item (int): the ground-truth item of the session.
+            candidate item set (int): the candidate items satisfy the partially known preferred attributes.
+            preference (list of int): partially known preferred attributes of the user.
+        )]
+
+        """
+        assert mode in ('train', 'valid')
+        # TODO - design train - merge valid
+        pass
