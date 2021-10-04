@@ -148,13 +148,11 @@ class SASRec(nn.Module):
 
 def gelu(x):
     """Implementation of the gelu activation function.
-
     For information: OpenAI GPT's gelu is slightly different
     (and gives slightly different results):
     0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) *
     (x + 0.044715 * torch.pow(x, 3))))
     Also see https://arxiv.org/abs/1606.08415
-
     """
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
@@ -237,10 +235,8 @@ class SelfAttention(nn.Module):
         """
         Args:
             x: (bs, seq_len, all_head_size)
-
         Returns:
             x.permute(0, 2, 1, 3), (bs, num_heads, seq_len, head_size)
-
         """
         new_x_shape = x.size()[:-1] + (self.num_attention_heads,
                                        self.attention_head_size)

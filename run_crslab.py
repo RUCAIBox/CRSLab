@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str,
-                        default='config/crs/maxentropy/lastfm.yaml', help='config file(yaml) path')
+                        default='config/generation/kbrd/redial.yaml', help='config file(yaml) path')
     parser.add_argument('-g', '--gpu', type=str, default='-1',
                         help='specify GPU id(s) to use, we now support multiple GPUs. Defaults to CPU(-1).')
     parser.add_argument('-rd', '--restore_data', action='store_true',
