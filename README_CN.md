@@ -134,7 +134,7 @@ pip install -e .
 从 GitHub 下载 CRSLab 后，可以使用提供的脚本快速运行和测试，默认使用CPU：
 
 ```bash
-python run_crslab.py --config config/crs/kgsf/redial.yaml
+python run_crslab.py --config config/generation/kgsf/redial.yaml
 ```
 
 系统将依次完成数据的预处理，以及各模块的训练、验证和测试，并得到指定的模型评测结果。
@@ -142,7 +142,7 @@ python run_crslab.py --config config/crs/kgsf/redial.yaml
 如果你希望保存数据预处理结果与模型训练结果，可以使用如下命令：
 
 ```bash
-python run_crslab.py --config config/crs/kgsf/redial.yaml --save_data --save_system
+python run_crslab.py --config config/generation/kgsf/redial.yaml --save_data --save_system
 ```
 
 总的来说，`run_crslab.py`有如下参数可供调用：

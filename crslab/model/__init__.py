@@ -10,10 +10,7 @@
 import torch
 from loguru import logger
 
-from crslab.model.conversation import *
-from crslab.model.crs import *
-from crslab.model.policy import *
-from crslab.model.recommendation import *
+from crslab.model.generation import *
 
 model_register_table = {
     'KGSF': KGSFModel,
@@ -23,19 +20,7 @@ model_register_table = {
     'TGPolicy': TGPolicyModel,
     'ReDial': ReDialModel,
     'InspiredRec': InspiredRecModel,
-    'InspiredConv': InspiredConvModel,
-    'GPT2': GPT2Model,
-    'Transformer': TransformerModel,
-    'ConvBERT': ConvBERTModel,
-    'ProfileBERT': ProfileBERTModel,
-    'TopicBERT': TopicBERTModel,
-    'PMI': PMIModel,
-    'MGCG': MGCGModel,
-    'BERT': BERTModel,
-    'SASREC': SASRECModel,
-    'GRU4REC': GRU4RECModel,
-    'Popularity': PopularityModel,
-    'TextCNN': TextCNNModel
+    'InspiredConv': InspiredConvModel
 }
 
 

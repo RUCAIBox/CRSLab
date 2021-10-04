@@ -1,1 +1,0 @@
-from .mgcg import MGCGModel

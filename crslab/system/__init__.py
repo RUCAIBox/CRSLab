@@ -21,19 +21,7 @@ system_register_table = {
     'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,
     'TGRec_TGConv_TGPolicy': TGReDialSystem,
-    'InspiredRec_InspiredConv': InspiredSystem,
-    'GPT2': TGReDialSystem,
-    'Transformer': TGReDialSystem,
-    'ConvBERT': TGReDialSystem,
-    'ProfileBERT': TGReDialSystem,
-    'TopicBERT': TGReDialSystem,
-    'PMI': TGReDialSystem,
-    'MGCG': TGReDialSystem,
-    'BERT': TGReDialSystem,
-    'SASREC': TGReDialSystem,
-    'GRU4REC': TGReDialSystem,
-    'Popularity': TGReDialSystem,
-    'TextCNN': TGReDialSystem
+    'InspiredRec_InspiredConv': InspiredSystem
 }
 
 
