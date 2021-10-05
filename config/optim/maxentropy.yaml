@@ -1,18 +1,3 @@
-# dataset
-dataset: LastFM
-tokenize: None
-# supervised
-scale: 1
-# rec model
-quadratic_only: 1
-emb_dim: 64
-fea_init_param: 0.01
-fm_dropout: 0.5
-# conv model
-max_turn: 15
-gamma: 0.0
-max_epi: 20000
-# optim
 rec_offline:
   epoch: 250
   batch_size: 64

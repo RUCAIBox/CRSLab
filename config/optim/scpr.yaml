@@ -1,0 +1,9 @@
+rec:
+  epoch: 250
+  batch_size: 64
+  optimizer:
+    name: Adagrad
+    lr: !!float 2e-2
+    flr: !!float 1e-4
+  decay: 0.0
+  reg: !!float 1e-3

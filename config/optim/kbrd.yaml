@@ -1,0 +1,20 @@
+rec:
+  epoch: 10
+  batch_size: 2048
+  early_stop: True
+  stop_mode: min
+  optimizer:
+    name: Adam
+    lr: !!float 3e-3
+conv:
+  epoch: 10
+  batch_size: 32
+  early_stop: True
+  stop_mode: min
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5

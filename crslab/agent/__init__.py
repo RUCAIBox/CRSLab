@@ -21,18 +21,6 @@ agent_register_table = {
     'TGRec_TGConv_TGPolicy': TGReDialAgent,
     'ReDial': ReDialAgent,
     'InspiredRec_InspiredConv': InspiredAgent,
-    'BERT': TGReDialAgent,
-    'SASREC': TGReDialAgent,
-    'TextCNN': TGReDialAgent,
-    'GRU4REC': TGReDialAgent,
-    'Popularity': TGReDialAgent,
-    'Transformer': KGSFAgent,
-    'GPT2': TGReDialAgent,
-    'ConvBERT': TGReDialAgent,
-    'TopicBERT': TGReDialAgent,
-    'ProfileBERT': TGReDialAgent,
-    'MGCG': TGReDialAgent,
-    'PMI': TGReDialAgent,
     'SCPR': SCPRAgent,
     'EAR': EARAgent
 }

@@ -1,0 +1,10 @@
+rec_model: InspiredRec
+conv_model: InspiredConv
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+embedding_dim: 300
+use_dropout: False
+dropout: 0.3
+decoder_hidden_size: 256
+decoder_num_layers: 1

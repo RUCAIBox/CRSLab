@@ -1,0 +1,23 @@
+pretrain:
+  epoch: 3
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+rec:
+  epoch: 9
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+conv:
+  epoch: 90
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5
+  gradient_clip: 0.1

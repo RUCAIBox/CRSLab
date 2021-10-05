@@ -1,0 +1,14 @@
+rec_model: TGRec
+conv_model: TGConv
+policy_model: TGPolicy
+context_truncate: 256
+response_truncate: 30
+item_truncate: 100
+hidden_dropout_prob: 0.2
+initializer_range: 0.02
+hidden_size: 50
+max_history_items: 100
+num_attention_heads: 1
+attention_probs_dropout_prob: 0.2
+hidden_act: gelu
+num_hidden_layers: 2
