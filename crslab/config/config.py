@@ -171,6 +171,7 @@ class Config:
         torch.cuda.manual_seed_all(seed)
 
     def _init_paths(self):
+        # cache paths which are transparent to users
         self.cache_home = os.path.expanduser(os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), 'crslab'))
         self.data_path = os.path.join(self.cache_home, 'data')
         self.dataset_path = os.path.join(self.data_path, 'dataset')
@@ -178,10 +179,13 @@ class Config:
         self.pretrain_path = os.path.join(self.model_path, 'pretrain')
         self.embedding_path = os.path.join(self.data_path, 'embedding')
 
+        # user-defined paths
         stack = traceback.extract_stack()
         self.root_path = os.path.expanduser(os.path.dirname(os.path.realpath(stack[-3].filename)))
-        self.save_path = os.path.join(self.root_path, 'save')
-        self.log_path = os.path.join(self.root_path, 'log')
+        self.log_path = os.path.join(self.root_path, self.final_config_dict.get('log_path', 'log'))
+        self.checkpoint_path = os.path.join(self.root_path, self.final_config_dict.get('checkpoint_path', 'checkpoint'))
+        self.intermediate_path = os.path.join(self.root_path, self.final_config_dict.get('intermediate_path', 'data'))
+        self.customized_path = os.path.join(self.root_path, self.final_config_dict.get('customized_path', 'custom'))
 
     def _init_logger(self):
         log_name = self.model + '_' + self.dataset + '_' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.log'

@@ -15,7 +15,6 @@ import os
 import json
 from loguru import logger
 
-from crslab.config import DATASET_PATH
 from crslab.dataset.base import AttributeBaseDataset
 
 
@@ -30,7 +29,7 @@ class LastFMDataset(AttributeBaseDataset):
     """
     def __init__(self, opt, tokenize, restore=False, save=False):
         resource = None
-        dpath = os.path.join(DATASET_PATH, "lastfm")
+        dpath = os.path.join(opt.dataset_path, "lastfm")
         super(LastFMDataset, self).__init__(opt, dpath, resource, restore, save)
 
     def _load_and_preprocess(self):

@@ -9,7 +9,7 @@
 
 from crslab.dataset.durecdial import DuRecDialDataset
 from crslab.dataset.gorecdial import GoRecDialDataset
-from crslab.dataset.inspired import InspiredDataset
+from crslab.dataset.inspired import INSPIREDDataset
 from crslab.dataset.opendialkg import OpenDialKGDataset
 from crslab.dataset.redial import ReDialDataset
 from crslab.dataset.tgredial import TGReDialDataset
@@ -20,7 +20,7 @@ dataset_register_table = {
     'TGReDial': TGReDialDataset,
     'GoRecDial': GoRecDialDataset,
     'OpenDialKG': OpenDialKGDataset,
-    'Inspired': InspiredDataset,
+    'Inspired': INSPIREDDataset,
     'DuRecDial': DuRecDialDataset,
     'LastFM': LastFMDataset
 }

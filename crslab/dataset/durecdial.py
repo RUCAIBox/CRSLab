@@ -1,20 +1,20 @@
-# @Time   : 2020/12/12
+# @Time   : 2020/12/21
 # @Author : Kun Zhou
 # @Email  : francis_kun_zhou@163.com
 
 # UPDATE:
-# @Time   : 2020/12/13, 2021/1/2, 2020/12/19
-# @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
-# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail
+# @Time   : 2020/12/21, 2021/1/2
+# @Author : Kun Zhou, Xiaolei Wang
+# @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
 r"""
-GoRecDial
+DuRecDial
 =========
 References:
-    Kang, Dongyeop, et al. `"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`_ in EMNLP 2019.
+    Liu, Zeming, et al. `"Towards Conversational Recommendation over Multi-Type Dialogs."`_ in ACL 2020.
 
-.. _`"Recommendation as a Communication Game: Self-Supervised Bot-Play for Goal-oriented Dialogue."`:
-   https://www.aclweb.org/anthology/D19-1203/
+.. _"Towards Conversational Recommendation over Multi-Type Dialogs.":
+   https://www.aclweb.org/anthology/2020.acl-main.98/
 
 """
 
@@ -25,12 +25,70 @@ from copy import copy
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config import DATASET_PATH
 from crslab.dataset.base import TextBaseDataset
-from .resources import resources
+from crslab.download import DownloadableFile
+
+resources = {
+    'jieba': {
+        'version': '0.3',
+        'file': DownloadableFile(
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EQ5u_Mos1JBFo4MAN8DinUQB7dPWuTsIHGjjvMougLfYaQ?download=1',
+            'durecdial_jieba.zip',
+            'c2d24f7d262e24e45a9105161b5eb15057c96c291edb3a2a7b23c9c637fd3813',
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 1,
+            'end': 2,
+            'unk': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+        },
+    },
+    'bert': {
+        'version': '0.3',
+        'file': DownloadableFile(
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/ETGpJYjEM9tFhze2VfD33cQBDwa7zq07EUr94zoPZvMPtA?download=1',
+            'durecdial_bert.zip',
+            '0126803aee62a5a4d624d8401814c67bee724ad0af5226d421318ac4eec496f5'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 101,
+            'end': 102,
+            'unk': 100,
+            'sent_split': 2,
+            'word_split': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+            'pad_topic': 0
+        },
+    },
+    'gpt2': {
+        'version': '0.3',
+        'file': DownloadableFile(
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/ETxJk-3Kd6tDgFvPhLo9bLUBfVsVZlF80QCnGFcVgusdJg?download=1',
+            'durecdial_gpt2.zip',
+            'a7a93292b4e4b8a5e5a2c644f85740e625e04fbd3da76c655150c00f97d405e4'
+        ),
+        'special_token_idx': {
+            'pad': 0,
+            'start': 101,
+            'end': 102,
+            'unk': 100,
+            'cls': 101,
+            'sep': 102,
+            'sent_split': 2,
+            'word_split': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+            'pad_topic': 0,
+        },
+    }
+}
 
 
-class GoRecDialDataset(TextBaseDataset):
+class DuRecDialDataset(TextBaseDataset):
     """
 
     Attributes:
@@ -56,7 +114,7 @@ class GoRecDialDataset(TextBaseDataset):
     """
 
     def __init__(self, opt, tokenize, restore=False, save=False):
-        """Specify tokenized resource and init base dataset.
+        """
 
         Args:
             opt (Config or dict): config for dataset or the whole system.
@@ -68,7 +126,7 @@ class GoRecDialDataset(TextBaseDataset):
         resource = resources[tokenize]
         self.special_token_idx = resource['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
-        dpath = os.path.join(DATASET_PATH, 'gorecdial', tokenize)
+        dpath = os.path.join(opt.dataset_path, 'durecdial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_data(self):
@@ -91,7 +149,6 @@ class GoRecDialDataset(TextBaseDataset):
         return train_data, valid_data, test_data, vocab
 
     def _load_raw_data(self):
-        # load train/valid/test data
         with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
             logger.debug(f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
@@ -113,24 +170,25 @@ class GoRecDialDataset(TextBaseDataset):
         logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
 
     def _load_other_data(self):
-        # dbpedia
-        self.entity2id = json.load(
-            open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8'))  # {entity: entity_id}
+        # entity kg
+        with open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8') as f:
+            self.entity2id = json.load(f)  # {entity: entity_id}
         self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = open(os.path.join(self.dpath, 'dbpedia_subkg.txt'), encoding='utf-8')
+        self.entity_kg = open(os.path.join(self.dpath, 'entity_subkg.txt'), encoding='utf-8')
         logger.debug(
             f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'entity2id.json')} and {os.path.join(self.dpath, 'entity_subkg.txt')}]")
 
-        # conceptnet
+        # hownet
         # {concept: concept_id}
-        self.word2id = json.load(open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8'))
+        with open(os.path.join(self.dpath, 'word2id.json'), 'r', encoding='utf-8') as f:
+            self.word2id = json.load(f)
         self.n_word = max(self.word2id.values()) + 1
         # {concept \t relation\t concept}
-        self.word_kg = open(os.path.join(self.dpath, 'conceptnet_subkg.txt'), encoding='utf-8')
+        self.word_kg = open(os.path.join(self.dpath, 'hownet_subkg.txt'), encoding='utf-8')
         logger.debug(
-            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'concept_subkg.txt')}]")
+            f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'hownet_subkg.txt')}]")
 
     def _data_preprocess(self, train_data, valid_data, test_data):
         processed_train_data = self._raw_data_process(train_data)
@@ -154,21 +212,19 @@ class GoRecDialDataset(TextBaseDataset):
         augmented_convs = []
         last_role = None
         for utt in conversation['dialog']:
-            assert utt['role'] != last_role
+            assert utt['role'] != last_role, print(utt)
 
             text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
-            movie_ids = [self.entity2id[movie] for movie in utt['movies'] if movie in self.entity2id]
+            item_ids = [self.entity2id[movie] for movie in utt['item'] if movie in self.entity2id]
             entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
             word_ids = [self.word2id[word] for word in utt['word'] if word in self.word2id]
-            policy = utt['decide']
 
             augmented_convs.append({
                 "role": utt["role"],
                 "text": text_token_ids,
                 "entity": entity_ids,
-                "movie": movie_ids,
-                "word": word_ids,
-                'policy': policy
+                "movie": item_ids,
+                "word": word_ids
             })
             last_role = utt["role"]
 
@@ -179,9 +235,8 @@ class GoRecDialDataset(TextBaseDataset):
         context_tokens, context_entities, context_words, context_items = [], [], [], []
         entity_set, word_set = set(), set()
         for i, conv in enumerate(raw_conv_dict):
-            text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
-                                                             conv['policy']
-            if len(context_tokens) > 0 and len(text_tokens) > 0:
+            text_tokens, entities, movies, words = conv["text"], conv["entity"], conv["movie"], conv["word"]
+            if len(context_tokens) > 0:
                 conv_dict = {
                     'role': conv['role'],
                     "context_tokens": copy(context_tokens),
@@ -189,22 +244,20 @@ class GoRecDialDataset(TextBaseDataset):
                     "context_entities": copy(context_entities),
                     "context_words": copy(context_words),
                     'context_items': copy(context_items),
-                    "items": movies,
-                    'policy': policies,
+                    "items": movies
                 }
                 augmented_conv_dicts.append(conv_dict)
 
-            if len(text_tokens) > 0:
-                context_tokens.append(text_tokens)
-                context_items += movies
-                for entity in entities + movies:
-                    if entity not in entity_set:
-                        entity_set.add(entity)
-                        context_entities.append(entity)
-                for word in words:
-                    if word not in word_set:
-                        word_set.add(word)
-                        context_words.append(word)
+            context_tokens.append(text_tokens)
+            context_items += movies
+            for entity in entities + movies:
+                if entity not in entity_set:
+                    entity_set.add(entity)
+                    context_entities.append(entity)
+            for word in words:
+                if word not in word_set:
+                    word_set.add(word)
+                    context_words.append(word)
 
         return augmented_conv_dicts
 
@@ -213,13 +266,14 @@ class GoRecDialDataset(TextBaseDataset):
         logger.debug("[Finish entity KG process]")
         processed_word_kg = self._word_kg_process()
         logger.debug("[Finish word KG process]")
-        movie_entity_ids = json.load(open(os.path.join(self.dpath, 'movie_ids.json'), 'r', encoding='utf-8'))
+        with open(os.path.join(self.dpath, 'item_ids.json'), 'r', encoding='utf-8') as f:
+            item_entity_ids = json.load(f)
         logger.debug('[Load movie entity ids]')
 
         side_data = {
             "entity_kg": processed_entity_kg,
             "word_kg": processed_word_kg,
-            "item_entity_ids": movie_entity_ids,
+            "item_entity_ids": item_entity_ids,
         }
         return side_data
 
