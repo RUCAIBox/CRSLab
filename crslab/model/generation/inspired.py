@@ -10,7 +10,6 @@ import torch.nn.functional as F
 from loguru import logger
 from transformers import GPT2LMHeadModel, BertModel
 
-from crslab.config import PRETRAIN_PATH
 from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
@@ -80,7 +79,7 @@ class INSPIREDRecModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters.
+            opt (Config or dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
             vocab (dict): A dictionary record the vocabulary information.
             side_data (dict): A dictionary record the side data.
@@ -90,7 +89,7 @@ class INSPIREDRecModel(BaseModel):
 
         language = dataset_language_map[opt['dataset']]
         resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        dpath = os.path.join(opt.pretrain_path, "bert", language)
         super(INSPIREDRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
@@ -131,7 +130,7 @@ class INSPIREDConvModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters.
+            opt (Config or dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
             vocab (dict): A dictionary record the vocabulary information.
             side_data (dict): A dictionary record the side data.
@@ -144,7 +143,7 @@ class INSPIREDConvModel(BaseModel):
 
         language = dataset_language_map[opt['dataset']]
         resource = resources['gpt2'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
+        dpath = os.path.join(opt.pretrain_path, "gpt2", language)
         super(INSPIREDConvModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):

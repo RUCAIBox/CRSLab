@@ -11,10 +11,12 @@ from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from crslab.utils import ModelType
 
 
 class INSPIREDSystem(BaseSystem):
     """This is the system for INSPIRED model"""
+    model_type = ModelType.GENERATION
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  interaction=False, debug=False, tensorboard=False):

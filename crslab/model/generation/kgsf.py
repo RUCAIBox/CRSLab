@@ -27,15 +27,15 @@ from loguru import logger
 from torch import nn
 from torch_geometric.nn import GCNConv, RGCNConv
 
-from crslab.config import MODEL_PATH
 from crslab.model.base import BaseModel
 from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionSeq
 from crslab.model.utils.modules.transformer import TransformerEncoder
-from crslab.download import DownloadableFile
+from crslab.utils.download import DownloadableFile
 from crslab.model.utils.modules.transformer import MultiHeadAttention, TransformerFFN, _create_selfattn_mask, \
     _normalize, \
     create_position_codes
+from crslab.utils import ModelType
 
 resources = {
     'ReDial': {
@@ -119,12 +119,13 @@ class KGSFModel(BaseModel):
         pretrained_embedding: A string indicating the path of pretrained embedding.
 
     """
+    model_type = ModelType.GENERATION
 
     def __init__(self, opt, device, other_data):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters.
+            opt (Config or dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
             other_data (dict): A dictionary record the other data.
 
@@ -169,7 +170,7 @@ class KGSFModel(BaseModel):
         self.response_truncate = opt.get('response_truncate', 20)
         # copy mask
         dataset = opt['dataset']
-        dpath = os.path.join(MODEL_PATH, "kgsf", dataset)
+        dpath = os.path.join(opt.model_path, "kgsf", dataset)
         resource = resources[dataset]
         super(KGSFModel, self).__init__(opt, device, dpath, resource)
 

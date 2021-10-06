@@ -25,6 +25,7 @@ from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
 from crslab.model.base import BaseModel
 from crslab.model.utils.functions import sort_for_packed_sequence
+from crslab.utils import ModelType
 
 
 class ReDialModel(BaseModel):
@@ -48,6 +49,7 @@ class ReDialModel(BaseModel):
         decoder_embedding_dim: A integer indicating the dimension of embedding in decoder.
 
     """
+    model_type = ModelType.GENERATION
 
     def __init__(self, opt, device, other_data):
         """

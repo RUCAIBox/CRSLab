@@ -27,11 +27,11 @@ from transformers import GPT2LMHeadModel
 from transformers import BertModel
 from loguru import logger
 
-from crslab.config import PRETRAIN_PATH
 from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 from crslab.model.utils.modules.sasrec import SASRec
+from crslab.utils import ModelType
 
 
 class TGConvModel(BaseModel):
@@ -48,7 +48,7 @@ class TGConvModel(BaseModel):
         """
 
         Args:
-            opt (dict): A dictionary record the hyper parameters.
+            opt (Config or dict): A dictionary record the hyper parameters.
             device (torch.device): A variable indicating which device to place the data and model.
             vocab (dict): A dictionary record the vocabulary information.
             side_data (dict): A dictionary record the side data.
@@ -60,7 +60,7 @@ class TGConvModel(BaseModel):
 
         language = dataset_language_map[opt['dataset']]
         resource = resources['gpt2'][language]
-        dpath = os.path.join(PRETRAIN_PATH, 'gpt2', language)
+        dpath = os.path.join(opt.pretrain_path, 'gpt2', language)
         super(TGConvModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):

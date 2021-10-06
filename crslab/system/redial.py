@@ -15,10 +15,12 @@ from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from crslab.utils import ModelType
 
 
 class ReDialSystem(BaseSystem):
     """This is the system for KGSF model"""
+    model_type = ModelType.GENERATION
 
     def __init__(self, opt, agent, restore=False, save=False, interaction=False, tensorboard=False):
         """

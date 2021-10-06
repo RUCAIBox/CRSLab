@@ -29,6 +29,7 @@ from crslab.model.base import BaseModel
 from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionBatch
 from crslab.model.utils.modules.transformer import TransformerDecoder, TransformerEncoder
+from crslab.utils import ModelType
 
 
 class KBRDModel(BaseModel):
@@ -60,6 +61,7 @@ class KBRDModel(BaseModel):
         user_proj_dim: A integer indicating dim to project for user embedding.
 
     """
+    model_type = ModelType.GENERATION
 
     def __init__(self, opt, device, other_data):
         """
