@@ -11,6 +11,7 @@ import json
 import os
 import time
 import sys
+import traceback
 from pprint import pprint
 
 import torch
@@ -45,68 +46,13 @@ class Config:
         self._init_paths()
         self._init_logger()
 
-        # self.opt = self.load_yaml_configs(config_file)
-        # # gpu
-        # os.environ['CUDA_VISIBLE_DEVICES'] = gpu
-        # self.opt['gpu'] = [i for i in range(len(gpu.split(',')))]
-        # # random seed
-        # random.seed(seed)
-        # np.random.seed(seed)
-        # torch.manual_seed(seed)
-        # torch.cuda.manual_seed(seed)
-        # torch.cuda.manual_seed_all(seed)
-        # # dataset
-        # dataset = self.opt['dataset']
-        # tokenize = self.opt['tokenize']
-        # if isinstance(tokenize, dict):
-        #     tokenize = ', '.join(tokenize.values())
-        # # model
-        # model = self.opt.get('model', None)
-        # rec_model = self.opt.get('rec_model', None)
-        # conv_model = self.opt.get('conv_model', None)
-        # policy_model = self.opt.get('policy_model', None)
-        # if model:
-        #     model_name = model
-        # else:
-        #     models = []
-        #     if rec_model:
-        #         models.append(rec_model)
-        #     if conv_model:
-        #         models.append(conv_model)
-        #     if policy_model:
-        #         models.append(policy_model)
-        #     model_name = '_'.join(models)
-        # self.opt['model_name'] = model_name
-        # # log
-        # log_name = self.opt.get("log_name", dataset + '_' + model_name + '_' + time.strftime("%Y-%m-%d-%H-%M-%S",
-        #                                                                                      time.localtime())) + ".log"
-        # if not os.path.exists("log"):
-        #     os.makedirs("log")
-        # logger.remove()
-        # if debug:
-        #     level = 'DEBUG'
-        # else:
-        #     level = 'INFO'
-        # logger.add(os.path.join("log", log_name), level=level)
-        # logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True, level=level)
-        #
-        # logger.info(f"[Dataset: {dataset} tokenized in {tokenize}]")
-        # if model:
-        #     logger.info(f'[Model: {model}]')
-        # if rec_model:
-        #     logger.info(f'[Recommendation Model: {rec_model}]')
-        # if conv_model:
-        #     logger.info(f'[Conversation Model: {conv_model}]')
-        # if policy_model:
-        #     logger.info(f'[Policy Model: {policy_model}]')
-        # logger.info("[Config]" + '\n' + json.dumps(self.opt, indent=4))
-
     @staticmethod
     def _load_config_files(config_files):
         config_dict = dict()
-        for file in config_files:
-            with open(file, 'r', encoding='utf-8') as f:
-                config_dict.update(yaml.safe_load(f.read()))
+        if config_files:
+            for file in config_files:
+                with open(file, 'r', encoding='utf-8') as f:
+                    config_dict.update(yaml.safe_load(f.read()))
         return config_dict
 
     def _deep_update(self, target_dict, source_dict):
@@ -193,9 +139,9 @@ class Config:
         self.internal_config_dict = dict()
         current_path = os.path.dirname(os.path.realpath(__file__))
         overall_config_file = os.path.join(current_path, '../../config/overall.yaml')
-        model_config_file = os.path.join(current_path, '../../config/model' + model + '.yaml')
-        optim_config_file = os.path.join(current_path, '../../config/optim' + model + '.yaml')
-        dataset_config_file = os.path.join(current_path, '../../config/dataset' + dataset + '.yaml')
+        model_config_file = os.path.join(current_path, '../../config/model/' + model.lower() + '.yaml')
+        optim_config_file = os.path.join(current_path, '../../config/optim/' + model.lower() + '.yaml')
+        dataset_config_file = os.path.join(current_path, '../../config/dataset/' + dataset.lower() + '.yaml')
 
         for file in [overall_config_file, model_config_file, optim_config_file, dataset_config_file]:
             if os.path.isfile(file):
@@ -211,16 +157,44 @@ class Config:
         return final_config_dict
 
     def _init_device(self):
-        pass
+        use_gpu = self.final_config_dict['use_gpu']
+        if use_gpu:
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(self.final_config_dict['gpu_id'])
+        self.device = torch.device("cuda" if torch.cuda.is_available() and use_gpu else "cpu")
 
     def _init_random_seed(self):
-        pass
+        seed = self.final_config_dict.get('seed', 2021)
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
 
     def _init_paths(self):
-        pass
+        self.cache_home = os.path.expanduser(os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), 'crslab'))
+        self.data_path = os.path.join(self.cache_home, 'data')
+        self.dataset_path = os.path.join(self.data_path, 'dataset')
+        self.model_path = os.path.join(self.data_path, 'model')
+        self.pretrain_path = os.path.join(self.model_path, 'pretrain')
+        self.embedding_path = os.path.join(self.data_path, 'embedding')
+
+        stack = traceback.extract_stack()
+        self.root_path = os.path.expanduser(os.path.dirname(os.path.realpath(stack[-3].filename)))
+        self.save_path = os.path.join(self.root_path, 'save')
+        self.log_path = os.path.join(self.root_path, 'log')
 
     def _init_logger(self):
-        pass
+        log_name = self.model + '_' + self.dataset + '_' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.log'
+        log_name = self.final_config_dict.get('log_name', log_name)
+        if not os.path.exists(self.log_path):
+            os.makedirs(self.log_path)
+        logger.remove()
+        level = 'DEBUG' if self.final_config_dict.get('debug', False) else 'INFO'
+        logger.add(os.path.join(self.log_path, log_name), level=level)
+        logger.add(lambda msg: tqdm.write(msg, end=''), colorize=True, level=level)
+        logger.info(f"[Dataset: {self.dataset} tokenized in {self.final_config_dict['tokenize']}]")
+        logger.info(f"[Model: {self.model}]")
+        logger.info("[Config]\n" + json.dumps(self.final_config_dict, indent=4))
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):

@@ -20,8 +20,8 @@ warnings.filterwarnings('ignore')
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dataset', type=str, default='redial', help='name of dataset')
-    parser.add_argument('-m', '--model', type=str, default='kbrd', help='name of model')
+    parser.add_argument('-d', '--dataset', type=str, default='ReDial', help='name of dataset')
+    parser.add_argument('-m', '--model', type=str, default='KBRD', help='name of model')
     parser.add_argument('-c', '--config', type=str, default=None, help='external config files')
     parser.add_argument('-rd', '--restore_data', action='store_true', help='restore processed dataset')
     parser.add_argument('-rm', '--restore_model', action='store_true', help='restore trained model')
