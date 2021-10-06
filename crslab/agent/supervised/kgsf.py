@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, get_onehot, truncate, merge_utt
+from crslab.utils import AgentType
 
 
 class KGSFAgent(SupervisedAgent):
@@ -40,6 +41,7 @@ class KGSFAgent(SupervisedAgent):
         - ``'n_entity'``: the number of entities in the entity KG of dataset.
 
     """
+    agent_type = AgentType.SUPERVISED
 
     def __init__(self, opt, dataset):
         """

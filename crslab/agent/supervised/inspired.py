@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
+from crslab.utils import AgentType
 
 
 class INSPIREDAgent(SupervisedAgent):
@@ -43,6 +44,7 @@ class INSPIREDAgent(SupervisedAgent):
         - ``'word_split'`` (optional): token used to split word. Defaults to ``'end'``.
 
     """
+    agent_type = AgentType.SUPERVISED
 
     def __init__(self, opt, dataset, vocab):
         """

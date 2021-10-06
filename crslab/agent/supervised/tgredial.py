@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
+from crslab.utils import AgentType
 
 
 class TGReDialAgent(SupervisedAgent):
@@ -51,6 +52,7 @@ class TGReDialAgent(SupervisedAgent):
         - ``'ind2topic'`` (optional): map from index to topic.
 
     """
+    agent_type = AgentType.SUPERVISED
 
     def __init__(self, opt, dataset, vocab):
         """
