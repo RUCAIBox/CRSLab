@@ -27,7 +27,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from crslab.dataset.base import TextBaseDataset
-from crslab.download import DownloadableFile
+from crslab.utils.download import DownloadableFile
 
 resources = {
     'nltk': {
