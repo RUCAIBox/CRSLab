@@ -19,8 +19,8 @@ model_register_table = {
     'TGConv': TGConvModel,
     'TGPolicy': TGPolicyModel,
     'ReDial': ReDialModel,
-    'InspiredRec': InspiredRecModel,
-    'InspiredConv': InspiredConvModel
+    'InspiredRec': INSPIREDRecModel,
+    'InspiredConv': INSPIREDConvModel
 }
 
 

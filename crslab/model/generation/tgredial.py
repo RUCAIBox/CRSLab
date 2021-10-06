@@ -21,18 +21,22 @@ References:
 import os
 
 import torch
+from torch import nn
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
+from transformers import BertModel
+from loguru import logger
 
 from crslab.config import PRETRAIN_PATH
 from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
+from crslab.model.utils.modules.sasrec import SASRec
 
 
 class TGConvModel(BaseModel):
     """
-        
+
     Attributes:
         context_truncate: A integer indicating the length of dialogue context.
         response_truncate: A integer indicating the length of dialogue response.
@@ -161,3 +165,135 @@ class TGConvModel(BaseModel):
 
         loss = self.loss(logit.reshape(-1, logit.size(-1)), labels.reshape(-1))
         return loss
+
+
+class TGPolicyModel(BaseModel):
+    def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
+        """
+        self.topic_class_num = vocab['n_topic']
+        self.n_sent = opt.get('n_sent', 10)
+
+        language = dataset_language_map[opt['dataset']]
+        resource = resources['bert'][language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        super(TGPolicyModel, self).__init__(opt, device, dpath, resource)
+
+    def build_model(self, *args, **kwargs):
+        """build model"""
+        self.context_bert = BertModel.from_pretrained(self.dpath)
+        self.topic_bert = BertModel.from_pretrained(self.dpath)
+        self.profile_bert = BertModel.from_pretrained(self.dpath)
+
+        self.bert_hidden_size = self.context_bert.config.hidden_size
+        self.state2topic_id = nn.Linear(self.bert_hidden_size * 3,
+                                        self.topic_class_num)
+
+        self.loss = nn.CrossEntropyLoss()
+
+    def forward(self, batch, mode):
+        # conv_id, message_id, context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
+        context, context_mask, topic_path_kw, tp_mask, user_profile, profile_mask, y = batch
+
+        context_rep = self.context_bert(
+            context,
+            context_mask).pooler_output  # (bs, hidden_size)
+
+        topic_rep = self.topic_bert(
+            topic_path_kw,
+            tp_mask).pooler_output  # (bs, hidden_size)
+
+        bs = user_profile.shape[0] // self.n_sent
+        profile_rep = self.profile_bert(user_profile, profile_mask).pooler_output  # (bs, word_num, hidden)
+        profile_rep = profile_rep.view(bs, self.n_sent, -1)
+        profile_rep = torch.mean(profile_rep, dim=1)  # (bs, hidden)
+
+        state_rep = torch.cat((context_rep, topic_rep, profile_rep), dim=1)  # [bs, hidden_size*3]
+        topic_scores = self.state2topic_id(state_rep)
+        topic_loss = self.loss(topic_scores, y)
+
+        return topic_loss, topic_scores
+
+
+class TGRecModel(BaseModel):
+    """
+
+    Attributes:
+        hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec.
+        initializer_range: A float indicating the range of parameters initization in SASRec.
+        hidden_size: A integer indicating the size of hidden state in SASRec.
+        max_seq_length: A integer indicating the max interaction history length.
+        item_size: A integer indicating the number of items.
+        num_attention_heads: A integer indicating the head number in SASRec.
+        attention_probs_dropout_prob: A float indicating the dropout rate in attention layers.
+        hidden_act: A string indicating the activation function type in SASRec.
+        num_hidden_layers: A integer indicating the number of hidden layers in SASRec.
+
+    """
+
+    def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
+        """
+        self.hidden_dropout_prob = opt['hidden_dropout_prob']
+        self.initializer_range = opt['initializer_range']
+        self.hidden_size = opt['hidden_size']
+        self.max_seq_length = opt['max_history_items']
+        self.item_size = vocab['n_entity'] + 1
+        self.num_attention_heads = opt['num_attention_heads']
+        self.attention_probs_dropout_prob = opt['attention_probs_dropout_prob']
+        self.hidden_act = opt['hidden_act']
+        self.num_hidden_layers = opt['num_hidden_layers']
+
+        language = dataset_language_map[opt['dataset']]
+        resource = resources['bert'][language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        super(TGRecModel, self).__init__(opt, device, dpath, resource)
+
+    def build_model(self):
+        # build BERT layer, give the architecture, load pretrained parameters
+        self.bert = BertModel.from_pretrained(self.dpath)
+        self.bert_hidden_size = self.bert.config.hidden_size
+        self.concat_embed_size = self.bert_hidden_size + self.hidden_size
+        self.fusion = nn.Linear(self.concat_embed_size, self.item_size)
+        self.SASREC = SASRec(self.hidden_dropout_prob, self.device,
+                             self.initializer_range, self.hidden_size,
+                             self.max_seq_length, self.item_size,
+                             self.num_attention_heads,
+                             self.attention_probs_dropout_prob,
+                             self.hidden_act, self.num_hidden_layers)
+
+        # this loss may conduct to some weakness
+        self.rec_loss = nn.CrossEntropyLoss()
+
+        logger.debug('[Finish build rec layer]')
+
+    def forward(self, batch, mode):
+        context, mask, input_ids, target_pos, input_mask, sample_negs, y = batch
+
+        bert_embed = self.bert(context, attention_mask=mask).pooler_output
+
+        sequence_output = self.SASREC(input_ids, input_mask)  # bs, max_len, hidden_size2
+        sas_embed = sequence_output[:, -1, :]  # bs, hidden_size2
+
+        embed = torch.cat((sas_embed, bert_embed), dim=1)
+        rec_scores = self.fusion(embed)  # bs, item_size
+
+        if mode == 'infer':
+            return rec_scores
+        else:
+            rec_loss = self.rec_loss(rec_scores, y)
+            return rec_loss, rec_scores

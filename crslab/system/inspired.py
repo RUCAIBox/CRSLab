@@ -13,8 +13,8 @@ from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
 
 
-class InspiredSystem(BaseSystem):
-    """This is the system for Inspired model"""
+class INSPIREDSystem(BaseSystem):
+    """This is the system for INSPIRED model"""
 
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  interaction=False, debug=False, tensorboard=False):
@@ -33,7 +33,7 @@ class InspiredSystem(BaseSystem):
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
-        super(InspiredSystem, self).__init__(opt, train_dataloader, valid_dataloader,
+        super(INSPIREDSystem, self).__init__(opt, train_dataloader, valid_dataloader,
                                              test_dataloader, vocab, side_data, restore, interaction, debug,
                                              tensorboard)
 

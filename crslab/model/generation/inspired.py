@@ -5,16 +5,119 @@
 import os
 
 import torch
-from transformers import GPT2LMHeadModel
+import torch.nn as nn
+import torch.nn.functional as F
+from loguru import logger
+from transformers import GPT2LMHeadModel, BertModel
 
 from crslab.config import PRETRAIN_PATH
 from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
-from .modules import SequenceCrossEntropyLoss
 
 
-class InspiredConvModel(BaseModel):
+class SequenceCrossEntropyLoss(nn.Module):
+    """
+
+    Attributes:
+        ignore_index: indices corresponding tokens which should be ignored in calculating loss.
+        label_smoothing: determine smoothing value in cross entropy loss. should be less than 1.0.
+
+    """
+
+    def __init__(self, ignore_index=None, label_smoothing=-1):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.label_smoothing = label_smoothing
+
+    def forward(self, logits, labels):
+        """
+
+        Args:
+            logits: (batch_size, max_seq_len, vocal_size)
+            labels: (batch_size, max_seq_len)
+
+        """
+        if self.label_smoothing > 1.0:
+            raise ValueError('The param label_smoothing should be in the range of 0.0 to 1.0.')
+        if self.ignore_index == None:
+            mask = torch.ones_like(labels, dtype=torch.float)
+        else:
+            mask = (labels != self.ignore_index).float()
+        logits_flat = logits.reshape(-1, logits.size(-1))  # (b_s * s_l, num_classes)
+        log_probs_flat = F.log_softmax(logits_flat, dim=-1)
+        labels_flat = labels.reshape(-1, 1).long()  # (b_s * s_l, 1)
+
+        if self.label_smoothing > 0.0:
+            num_classes = logits.size(-1)
+            smoothing_value = self.label_smoothing / float(num_classes)
+            one_hot_labels = torch.zeros_like(log_probs_flat).scatter_(-1, labels_flat,
+                                                                       1.0 - self.label_smoothing)  # fill all the correct indices with 1 - smoothing value.
+            smoothed_labels = one_hot_labels + smoothing_value
+            negative_log_likelihood_flat = -log_probs_flat * smoothed_labels
+            negative_log_likelihood_flat = negative_log_likelihood_flat.sum(-1, keepdim=True)
+        else:
+            negative_log_likelihood_flat = -torch.gather(log_probs_flat, dim=1, index=labels_flat)  # (b_s * s_l, 1)
+
+        negative_log_likelihood = negative_log_likelihood_flat.view(-1, logits.shape[1])  # (b_s, s_l)
+        loss = negative_log_likelihood * mask
+
+        loss = loss.sum(1) / (mask.sum(1) + 1e-13)
+        loss = loss.mean()
+
+        return loss
+
+
+class INSPIREDRecModel(BaseModel):
+    """
+
+    Attributes:
+        item_size: A integer indicating the number of items.
+
+    """
+
+    def __init__(self, opt, device, vocab, side_data):
+        """
+
+        Args:
+            opt (dict): A dictionary record the hyper parameters.
+            device (torch.device): A variable indicating which device to place the data and model.
+            vocab (dict): A dictionary record the vocabulary information.
+            side_data (dict): A dictionary record the side data.
+
+        """
+        self.item_size = vocab['n_entity']
+
+        language = dataset_language_map[opt['dataset']]
+        resource = resources['bert'][language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        super(INSPIREDRecModel, self).__init__(opt, device, dpath, resource)
+
+    def build_model(self):
+        # build BERT layer, give the architecture, load pretrained parameters
+        self.bert = BertModel.from_pretrained(self.dpath)
+        # print(self.item_size)
+        self.bert_hidden_size = self.bert.config.hidden_size
+        self.mlp = nn.Linear(self.bert_hidden_size, self.item_size)
+
+        # this loss may conduct to some weakness
+        self.rec_loss = nn.CrossEntropyLoss()
+
+        logger.debug('[Finish build rec layer]')
+
+    def recommend(self, batch, mode='train'):
+        context, mask, y = batch
+
+        bert_embed = self.bert(context, attention_mask=mask).pooler_output
+
+        rec_scores = self.mlp(bert_embed)  # bs, item_size
+
+        rec_loss = self.rec_loss(rec_scores, y)
+
+        return rec_loss, rec_scores
+
+
+class INSPIREDConvModel(BaseModel):
     """
 
     Attributes:
@@ -42,7 +145,7 @@ class InspiredConvModel(BaseModel):
         language = dataset_language_map[opt['dataset']]
         resource = resources['gpt2'][language]
         dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
-        super(InspiredConvModel, self).__init__(opt, device, dpath, resource)
+        super(INSPIREDConvModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         """build model for seeker and recommender separately"""

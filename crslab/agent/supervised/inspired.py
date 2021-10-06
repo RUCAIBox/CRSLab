@@ -11,7 +11,7 @@ from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
 
 
-class InspiredAgent(SupervisedAgent):
+class INSPIREDAgent(SupervisedAgent):
     """Agent for model Inspired.
 
     Notes:

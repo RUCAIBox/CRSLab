@@ -20,7 +20,7 @@ agent_register_table = {
     'TGRec_TGConv': TGReDialAgent,
     'TGRec_TGConv_TGPolicy': TGReDialAgent,
     'ReDial': ReDialAgent,
-    'InspiredRec_InspiredConv': InspiredAgent,
+    'InspiredRec_InspiredConv': INSPIREDAgent,
     'SCPR': SCPRAgent,
     'EAR': EARAgent
 }

@@ -9,7 +9,7 @@
 
 from loguru import logger
 
-from crslab.system.inspired import InspiredSystem
+from crslab.system.inspired import INSPIREDSystem
 from crslab.system.kbrd import KBRDSystem
 from crslab.system.kgsf import KGSFSystem
 from crslab.system.redial import ReDialSystem
@@ -21,7 +21,7 @@ system_register_table = {
     'KGSF': KGSFSystem,
     'TGRec_TGConv': TGReDialSystem,
     'TGRec_TGConv_TGPolicy': TGReDialSystem,
-    'InspiredRec_InspiredConv': InspiredSystem
+    'InspiredRec_InspiredConv': INSPIREDSystem
 }
 
 
