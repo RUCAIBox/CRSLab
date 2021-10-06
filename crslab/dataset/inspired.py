@@ -27,6 +27,7 @@ from tqdm import tqdm
 
 from crslab.dataset.base import TextBaseDataset
 from crslab.utils.download import DownloadableFile
+from crslab.utils import DatasetType
 
 resources = {
     'nltk': {
@@ -108,6 +109,7 @@ class INSPIREDDataset(TextBaseDataset):
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
+    dataset_type = DatasetType.TEXT
 
     def __init__(self, opt, tokenize, restore=False, save=False):
         """Specify tokenized resource and init base dataset.

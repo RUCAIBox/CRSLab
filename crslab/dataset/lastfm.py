@@ -16,6 +16,7 @@ import json
 from loguru import logger
 
 from crslab.dataset.base import AttributeBaseDataset
+from crslab.utils import DatasetType
 
 
 class LastFMDataset(AttributeBaseDataset):
@@ -27,6 +28,8 @@ class LastFMDataset(AttributeBaseDataset):
         test_data: test dataset.
 
     """
+    dataset_type = DatasetType.ATTRIBUTE
+
     def __init__(self, opt, tokenize, restore=False, save=False):
         resource = None
         dpath = os.path.join(opt.dataset_path, "lastfm")
