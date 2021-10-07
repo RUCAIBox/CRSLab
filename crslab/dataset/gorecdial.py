@@ -27,7 +27,7 @@ from tqdm import tqdm
 
 from crslab.dataset.base import TextBaseDataset
 from crslab.utils.download import DownloadableFile
-from crslab.utils import DatasetType
+from crslab.utils import DatasetType, LanguageType
 
 resources = {
     'nltk': {
@@ -111,8 +111,6 @@ class GoRecDialDataset(TextBaseDataset):
         ``'unk'`` must be specified in ``'special_token_idx'`` in ``resources.py``.
 
     """
-    dataset_type = DatasetType.TEXT
-
     def __init__(self, opt, tokenize, restore=False, save=False):
         """Specify tokenized resource and init base dataset.
 
@@ -128,6 +126,12 @@ class GoRecDialDataset(TextBaseDataset):
         self.unk_token_idx = self.special_token_idx['unk']
         dpath = os.path.join(opt.dataset_path, 'gorecdial', tokenize)
         super().__init__(opt, dpath, resource, restore, save)
+
+    def _set_dataset_type(self) -> DatasetType:
+        return DatasetType.TEXT
+
+    def _set_language_type(self) -> LanguageType:
+        return LanguageType.ENGLISH
 
     def _load_data(self):
         train_data, valid_data, test_data = self._load_raw_data()

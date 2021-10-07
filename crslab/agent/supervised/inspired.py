@@ -44,8 +44,6 @@ class INSPIREDAgent(SupervisedAgent):
         - ``'word_split'`` (optional): token used to split word. Defaults to ``'end'``.
 
     """
-    agent_type = AgentType.SUPERVISED
-
     def __init__(self, opt, dataset, vocab):
         """
 
@@ -79,6 +77,9 @@ class INSPIREDAgent(SupervisedAgent):
 
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def rec_process_fn(self, *args, **kwargs):
         augment_dataset = []

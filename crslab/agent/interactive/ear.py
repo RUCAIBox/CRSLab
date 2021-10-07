@@ -10,7 +10,8 @@ from crslab.utils import AgentType
 
 
 class EARAgent(InteractiveAgent):
-    agent_type = AgentType.INTERACTIVE
-
     def __init__(self):
         pass
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.INTERACTIVE

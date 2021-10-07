@@ -35,8 +35,6 @@ class KBRDAgent(SupervisedAgent):
         the above values specify the id of needed special token.
 
     """
-    agent_type = AgentType.SUPERVISED
-
     def __init__(self, opt, dataset):
         """
 
@@ -53,6 +51,9 @@ class KBRDAgent(SupervisedAgent):
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def rec_process_fn(self, mode):
         augment_dataset = []

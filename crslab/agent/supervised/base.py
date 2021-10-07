@@ -8,11 +8,12 @@
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, czshang@outlook.com
 
 import random
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from loguru import logger
 from math import ceil
 from tqdm import tqdm
+from crslab.utils import AgentType
 
 
 class SupervisedAgent(ABC):
@@ -39,6 +40,16 @@ class SupervisedAgent(ABC):
         self.other_data = dataset.other_data
         self.scale = opt.get('scale', 1)
         assert 0 < self.scale <= 1
+        self._agent_type = self._set_agent_type()
+        assert isinstance(self._agent_type, AgentType)
+
+    @property
+    def agent_type(self):
+        return self._agent_type
+
+    @abstractmethod
+    def _set_agent_type(self) -> AgentType:
+        pass
 
     def get_data(self, mode, batch_fn, batch_size, shuffle=True, process_fn=None):
         """Collate batch data for system to fit

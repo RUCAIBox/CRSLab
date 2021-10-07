@@ -36,3 +36,14 @@ class DatasetType(Enum):
 
     TEXT = 1
     ATTRIBUTE = 2
+
+
+class LanguageType(Enum):
+    """Language type of datasets
+
+    - ``ENGLISH``: English
+    - ``CHINESE``: Chinese
+    """
+
+    ENGLISH = 'en'
+    CHINESE = 'zh'

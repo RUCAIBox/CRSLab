@@ -16,7 +16,7 @@ import json
 from loguru import logger
 
 from crslab.dataset.base import AttributeBaseDataset
-from crslab.utils import DatasetType
+from crslab.utils import DatasetType, LanguageType
 
 
 class LastFMDataset(AttributeBaseDataset):
@@ -28,12 +28,16 @@ class LastFMDataset(AttributeBaseDataset):
         test_data: test dataset.
 
     """
-    dataset_type = DatasetType.ATTRIBUTE
-
     def __init__(self, opt, tokenize, restore=False, save=False):
         resource = None
         dpath = os.path.join(opt.dataset_path, "lastfm")
         super(LastFMDataset, self).__init__(opt, dpath, resource, restore, save)
+
+    def _set_dataset_type(self) -> DatasetType:
+        return DatasetType.ATTRIBUTE
+
+    def _set_language_type(self) -> LanguageType:
+        return LanguageType.ENGLISH
 
     def _load_and_preprocess(self):
         entities, relations = self._load_kg_data()

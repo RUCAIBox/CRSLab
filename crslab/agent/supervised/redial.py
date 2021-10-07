@@ -43,8 +43,6 @@ class ReDialAgent(SupervisedAgent):
         - ``'vocab_size'``: size of vocab.
 
     """
-    agent_type = AgentType.SUPERVISED
-
     def __init__(self, opt, dataset):
         """
 
@@ -64,6 +62,9 @@ class ReDialAgent(SupervisedAgent):
         self.item_token_idx = dataset.other_data['vocab']['vocab_size']
         self.conversation_truncate = self.opt.get('conversation_truncate', None)
         self.utterance_truncate = self.opt.get('utterance_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def rec_process_fn(self, mode):
         dataset = []
