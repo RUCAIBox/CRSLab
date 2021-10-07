@@ -32,6 +32,9 @@ class InteractiveAgent(ABC):
         assert 0 < self.scale <= 1
         self._agent_type = self._set_agent_type()
         assert isinstance(self._agent_type, AgentType)
+        if self._agent_type.value != self.dataset.dataset_type:
+            raise TypeError(f"Dataset type '{self.dataset.dataset_type.name}' does not correspond to Agent type" +
+                            f"'{self._agent_type.name}'.")
 
     @property
     def agent_type(self):

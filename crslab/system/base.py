@@ -18,12 +18,12 @@ from nltk import word_tokenize
 from torch import optim
 from transformers import AdamW, Adafactor
 
-from crslab.config import SAVE_PATH
 from crslab.evaluator import get_evaluator
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.model import get_model
 from crslab.system.utils import lr_scheduler
 from crslab.system.utils.functions import compute_grad_norm
+from crslab.utils import ModelType
 
 optim_class = {}
 optim_class.update({k: v for k, v in optim.__dict__.items() if not k.startswith('__') and k[0].isupper()})
@@ -39,7 +39,7 @@ class BaseSystem(ABC):
         """
 
         Args:
-            opt (dict): Indicating the hyper parameters.
+            opt (Config or dict): Indicating the hyper parameters.
             agent (SupervisedAgent or Interactive Agent): Indicating the system agent.
             restore (bool, optional): Indicating if we restore saved model. Defaults to False.
             save (bool, optional): Indicating if we store model after training. Defaults to False.
@@ -67,7 +67,7 @@ class BaseSystem(ABC):
                 self.policy_model = get_model(opt, opt['policy_model'], self.device, agent.other_data['policy']).to(
                                             self.device)
         model_file_name = opt.get('model_file', f'{opt["model_name"]}.pth')
-        self.model_file = os.path.join(SAVE_PATH, model_file_name)
+        self.model_file = os.path.join(opt.save_path, model_file_name)
         if restore:
             self._restore_model()
 
@@ -75,6 +75,17 @@ class BaseSystem(ABC):
         self.interaction = interaction
         if not interaction:
             self.evaluator = get_evaluator(opt.get('evaluator', 'standard'), opt['dataset'], tensorboard)
+
+        self._model_type = self._set_model_type()
+        assert isinstance(self._model_type, ModelType)
+
+    @property
+    def model_type(self):
+        return self._model_type
+
+    @abstractmethod
+    def _set_model_type(self) -> ModelType:
+        pass
 
     def init_optim(self, opt, parameters):
         self.optim_opt = opt

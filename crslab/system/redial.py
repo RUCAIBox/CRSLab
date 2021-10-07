@@ -20,8 +20,6 @@ from crslab.utils import ModelType
 
 class ReDialSystem(BaseSystem):
     """This is the system for KGSF model"""
-    model_type = ModelType.GENERATION
-
     def __init__(self, opt, agent, restore=False, save=False, interaction=False, tensorboard=False):
         """
 
@@ -47,6 +45,9 @@ class ReDialSystem(BaseSystem):
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
         self.language = dataset_language_map[self.opt['dataset']]
+
+    def _set_model_type(self) -> ModelType:
+        return ModelType.GENERATION
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

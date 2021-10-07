@@ -23,7 +23,6 @@ from crslab.utils import ModelType
 
 class TGReDialSystem(BaseSystem):
     """This is the system for TGReDial model"""
-
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  interaction=False, debug=False, tensorboard=False):
         """
@@ -75,6 +74,9 @@ class TGReDialSystem(BaseSystem):
             self.policy_batch_size = self.policy_optim_opt['batch_size']
 
         self.language = dataset_language_map[self.opt['dataset']]
+
+    def _set_model_type(self) -> ModelType:
+        return ModelType.GENERATION
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

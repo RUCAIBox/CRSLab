@@ -16,8 +16,6 @@ from crslab.utils import ModelType
 
 class INSPIREDSystem(BaseSystem):
     """This is the system for INSPIRED model"""
-    model_type = ModelType.GENERATION
-
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  interaction=False, debug=False, tensorboard=False):
         """
@@ -64,6 +62,9 @@ class INSPIREDSystem(BaseSystem):
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
         self.language = dataset_language_map[self.opt['dataset']]
+
+    def _set_model_type(self) -> ModelType:
+        return ModelType.GENERATION
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
