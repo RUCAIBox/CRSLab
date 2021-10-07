@@ -20,29 +20,16 @@ warnings.filterwarnings('ignore')
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=str,
-                        default='config/generation/kbrd/redial.yaml', help='config file(yaml) path')
-    parser.add_argument('-g', '--gpu', type=str, default='-1',
-                        help='specify GPU id(s) to use, we now support multiple GPUs. Defaults to CPU(-1).')
-    parser.add_argument('-rd', '--restore_data', action='store_true',
-                        help='restore processed dataset')
-    parser.add_argument('-sd', '--save_data', action='store_true',
-                        help='save processed dataset')
-    parser.add_argument('-rm', '--restore_model', action='store_true',
-                        help='restore trained model')
-    parser.add_argument('-sm', '--save_model', action='store_true',
-                        help='save trained model')
-    parser.add_argument('-s', '--seed', type=int, default=2021, help='specify the random seed')
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='use valid dataset to debug your system')
-    parser.add_argument('-i', '--interaction', action='store_true',
-                        help='interact with your system instead of training')
-    parser.add_argument('-tb', '--tensorboard', action='store_true',
-                        help='enable tensorboard to monitor train performance')
+    parser.add_argument('-d', '--dataset', type=str, default='ReDial', help='name of dataset')
+    parser.add_argument('-m', '--model', type=str, default='KBRD', help='name of model')
+    parser.add_argument('-c', '--config', type=str, default=None, help='external config files')
+    parser.add_argument('-rd', '--restore_data', action='store_true', help='restore processed dataset')
+    parser.add_argument('-rm', '--restore_model', action='store_true', help='restore trained model')
+    parser.add_argument('-i', '--interaction', action='store_true', help='interact with your system')
     args, _ = parser.parse_known_args()
-    config = Config(args.config, args.gpu, args.seed, args.debug)
+    config = Config(args)
 
-    dataset = get_dataset(config, config['tokenize'], args.restore_data, args.save_data)
+    dataset = get_dataset(config, config['tokenize'])
     agent = get_agent(config, dataset)
-    system = get_system(config, agent, args.restore_model, args.save_model, args.interaction, args.tensorboard)
+    system = get_system(config, agent)
     system.run()

@@ -14,7 +14,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from loguru import logger
 
-from crslab.download import build
+from crslab.utils.download import build
+from crslab.utils import DatasetType, LanguageType
 
 
 class TextBaseDataset(ABC):
@@ -63,6 +64,27 @@ class TextBaseDataset(ABC):
         if save:
             data = (self.train_data, self.valid_data, self.test_data, self.other_data)
             self._save_data(data)
+
+        self._dataset_type = self._set_dataset_type()
+        assert isinstance(self._dataset_type, DatasetType)
+        self._language_type = self._set_language_type()
+        assert isinstance(self._language_type, LanguageType)
+
+    @property
+    def dataset_type(self):
+        return self._dataset_type
+
+    @abstractmethod
+    def _set_dataset_type(self) -> DatasetType:
+        pass
+
+    @property
+    def language_type(self):
+        return self._language_type
+
+    @abstractmethod
+    def _set_language_type(self) -> LanguageType:
+        pass
 
     @abstractmethod
     def _load_data(self):
@@ -200,6 +222,33 @@ class AttributeBaseDataset(ABC):
         if save:
             data = (self.kg, self.interactions)
             self._save_data(data)
+        self._dataset_type = self._set_dataset_type()
+        assert isinstance(self._dataset_type, DatasetType)
+        self._language_type = self._set_language_type()
+        assert isinstance(self._language_type, LanguageType)
+
+    @property
+    def properties(self):
+        return {
+            'dataset_type': self._dataset_type.name,
+            'language_type': self._language_type.value
+        }
+
+    @property
+    def dataset_type(self):
+        return self._dataset_type
+
+    @abstractmethod
+    def _set_dataset_type(self) -> DatasetType:
+        pass
+
+    @property
+    def language_type(self):
+        return self._language_type
+
+    @abstractmethod
+    def _set_language_type(self) -> LanguageType:
+        pass
 
     @abstractmethod
     def _load_and_preprocess(self):

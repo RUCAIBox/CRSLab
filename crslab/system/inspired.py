@@ -11,11 +11,11 @@ from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from crslab.utils import ModelType
 
 
-class InspiredSystem(BaseSystem):
-    """This is the system for Inspired model"""
-
+class INSPIREDSystem(BaseSystem):
+    """This is the system for INSPIRED model"""
     def __init__(self, opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore=False,
                  interaction=False, debug=False, tensorboard=False):
         """
@@ -33,7 +33,7 @@ class InspiredSystem(BaseSystem):
             tensorboard (bool, optional) Indicating if we monitor the training performance in tensorboard. Defaults to False. 
 
         """
-        super(InspiredSystem, self).__init__(opt, train_dataloader, valid_dataloader,
+        super(INSPIREDSystem, self).__init__(opt, train_dataloader, valid_dataloader,
                                              test_dataloader, vocab, side_data, restore, interaction, debug,
                                              tensorboard)
 
@@ -62,6 +62,9 @@ class InspiredSystem(BaseSystem):
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
         self.language = dataset_language_map[self.opt['dataset']]
+
+    def _set_model_type(self) -> ModelType:
+        return ModelType.GENERATION
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

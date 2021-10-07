@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, get_onehot, truncate, merge_utt
+from crslab.utils import AgentType
 
 
 class KGSFAgent(SupervisedAgent):
@@ -40,7 +41,6 @@ class KGSFAgent(SupervisedAgent):
         - ``'n_entity'``: the number of entities in the entity KG of dataset.
 
     """
-
     def __init__(self, opt, dataset):
         """
 
@@ -61,6 +61,9 @@ class KGSFAgent(SupervisedAgent):
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
         self.word_truncate = opt.get('word_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def get_pretrain_data(self, mode, batch_size, shuffle=True):
         return self.get_data(mode, self.pretrain_batchify, batch_size, shuffle, self.retain_recommender_target)

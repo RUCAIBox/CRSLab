@@ -1,0 +1,35 @@
+rec:
+  epoch: 50
+  batch_size: 8
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-3
+    weight_decay: !!float 0.0000
+  lr_bert: !!float 1e-5
+  early_stop: true
+  impatience: 3
+  stop_mode: max
+conv:
+  epoch: 50
+  batch_size: 8
+  gradient_clip: 1.0
+  update_freq: 1
+  optimizer:
+    name: AdamW
+    lr: !!float 1.5e-4
+  lr_scheduler:
+    name: TransformersLinearLR
+    warmup_steps: 2000
+  early_stop: true
+  impatience: 3
+  stop_mode: min
+policy:
+  epoch: 50
+  batch_size: 8
+  weight_decay: 0.01
+  optimizer:
+    name: AdamW
+    lr: !!float 1e-5
+  early_stop: true
+  stop_mode: max
+  impatience: 3

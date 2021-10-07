@@ -1,0 +1,5 @@
+dataset: TGReDial
+tokenize:
+  rec: bert
+  conv: gpt2
+  policy: bert

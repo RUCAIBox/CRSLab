@@ -6,8 +6,12 @@ import torch
 from tqdm import tqdm
 
 from crslab.agent.interactive.base import InteractiveAgent
+from crslab.utils import AgentType
 
 
 class EARAgent(InteractiveAgent):
     def __init__(self):
         pass
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.INTERACTIVE

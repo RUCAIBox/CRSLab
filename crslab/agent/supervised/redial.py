@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import padded_tensor, get_onehot, truncate
+from crslab.utils import AgentType
 
 movie_pattern = re.compile(r'^@\d{5,6}$')
 
@@ -42,7 +43,6 @@ class ReDialAgent(SupervisedAgent):
         - ``'vocab_size'``: size of vocab.
 
     """
-
     def __init__(self, opt, dataset):
         """
 
@@ -62,6 +62,9 @@ class ReDialAgent(SupervisedAgent):
         self.item_token_idx = dataset.other_data['vocab']['vocab_size']
         self.conversation_truncate = self.opt.get('conversation_truncate', None)
         self.utterance_truncate = self.opt.get('utterance_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def rec_process_fn(self, mode):
         dataset = []

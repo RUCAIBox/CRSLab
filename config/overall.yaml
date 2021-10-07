@@ -1,0 +1,13 @@
+scale: 1
+use_gpu: True
+gpu_id: 0
+seed: 2021
+debug: False
+restore_model: False
+restore_data: False
+tensorboard: False
+interaction: False
+log_path: log
+checkpoint_path: checkpoint
+intermediate_path: data
+customized_path: custom

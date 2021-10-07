@@ -1,5 +1,5 @@
 from .base import SupervisedAgent
-from .inspired import InspiredAgent
+from .inspired import INSPIREDAgent
 from .kbrd import KBRDAgent
 from .kgsf import KGSFAgent
 from .redial import ReDialAgent

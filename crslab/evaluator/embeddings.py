@@ -8,7 +8,7 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
-from crslab.download import DownloadableFile
+from crslab.utils.download import DownloadableFile
 
 resources = {
     'zh': {

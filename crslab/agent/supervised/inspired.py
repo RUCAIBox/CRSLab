@@ -9,9 +9,10 @@ from tqdm import tqdm
 
 from crslab.agent.supervised.base import SupervisedAgent
 from crslab.agent.supervised.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
+from crslab.utils import AgentType
 
 
-class InspiredAgent(SupervisedAgent):
+class INSPIREDAgent(SupervisedAgent):
     """Agent for model Inspired.
 
     Notes:
@@ -43,7 +44,6 @@ class InspiredAgent(SupervisedAgent):
         - ``'word_split'`` (optional): token used to split word. Defaults to ``'end'``.
 
     """
-
     def __init__(self, opt, dataset, vocab):
         """
 
@@ -77,6 +77,9 @@ class InspiredAgent(SupervisedAgent):
 
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
+
+    def _set_agent_type(self) -> AgentType:
+        return AgentType.SUPERVISED
 
     def rec_process_fn(self, *args, **kwargs):
         augment_dataset = []

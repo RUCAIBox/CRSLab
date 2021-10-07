@@ -1,0 +1,14 @@
+model: ReDial
+utterance_truncate: 80
+conversation_truncate: 40
+autorec_layer_sizes: [ 1000 ]
+autorec_f: sigmoid
+autorec_g: sigmoid
+embedding_dim: 300
+utterance_encoder_hidden_size: 256
+dialog_encoder_hidden_size: 256
+dialog_encoder_num_layers: 1
+use_dropout: False
+dropout: 0.3
+decoder_hidden_size: 256
+decoder_num_layers: 1

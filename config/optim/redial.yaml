@@ -1,0 +1,18 @@
+rec:
+  epoch: 50
+  batch_size: 1024
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  early_stop: true
+  impatience: 3
+  stop_mode: min
+conv:
+  epoch: 50
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  early_stop: true
+  impatience: 3
+  stop_mode: min

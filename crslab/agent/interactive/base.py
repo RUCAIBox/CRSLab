@@ -3,11 +3,12 @@
 # @Email  : czshang@outlook.com
 
 import random
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from loguru import logger
 from math import ceil
 from tqdm import tqdm
+from crslab.utils import AgentType
 
 
 class InteractiveAgent(ABC):
@@ -29,6 +30,19 @@ class InteractiveAgent(ABC):
         self.dataset = dataset
         self.scale = opt.get('scale', 1)
         assert 0 < self.scale <= 1
+        self._agent_type = self._set_agent_type()
+        assert isinstance(self._agent_type, AgentType)
+        if self._agent_type.value != self.dataset.dataset_type:
+            raise TypeError(f"Dataset type '{self.dataset.dataset_type.name}' does not correspond to Agent type" +
+                            f"'{self._agent_type.name}'.")
+
+    @property
+    def agent_type(self):
+        return self._agent_type
+
+    @abstractmethod
+    def _set_agent_type(self) -> AgentType:
+        pass
 
     def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None):
         """Collate batch data for system to fit

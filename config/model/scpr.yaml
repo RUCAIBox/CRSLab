@@ -1,0 +1,5 @@
+# rec model
+quadratic_only: 1
+emb_dim: 64
+fea_init_param: 0.01
+fm_dropout: 0.5
