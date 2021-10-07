@@ -200,6 +200,9 @@ class Config:
         logger.info(f"[Model: {self.model}]")
         logger.info("[Config]\n" + json.dumps(self.final_config_dict, indent=4))
 
+    def update(self, source_dict):
+        self._deep_update(self.final_config_dict, source_dict)
+
     def __setitem__(self, key, value):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")

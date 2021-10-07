@@ -10,7 +10,6 @@ import torch.nn.functional as F
 from loguru import logger
 from transformers import GPT2LMHeadModel, BertModel
 
-from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 
@@ -87,7 +86,7 @@ class INSPIREDRecModel(BaseModel):
         """
         self.item_size = vocab['n_entity']
 
-        language = dataset_language_map[opt['dataset']]
+        language = self.opt['language_type']
         resource = resources['bert'][language]
         dpath = os.path.join(opt.pretrain_path, "bert", language)
         super(INSPIREDRecModel, self).__init__(opt, device, dpath, resource)
@@ -141,7 +140,7 @@ class INSPIREDConvModel(BaseModel):
         self.pad_id = vocab['pad']
         self.label_smoothing = opt['conv']['label_smoothing'] if 'label_smoothing' in opt['conv'] else -1
 
-        language = dataset_language_map[opt['dataset']]
+        language = self.opt['language_type']
         resource = resources['gpt2'][language]
         dpath = os.path.join(opt.pretrain_path, "gpt2", language)
         super(INSPIREDConvModel, self).__init__(opt, device, dpath, resource)

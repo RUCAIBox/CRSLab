@@ -27,7 +27,6 @@ from transformers import GPT2LMHeadModel
 from transformers import BertModel
 from loguru import logger
 
-from crslab.dataset import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.pretrained_models import resources
 from crslab.model.utils.modules.sasrec import SASRec
@@ -58,7 +57,7 @@ class TGConvModel(BaseModel):
         self.response_truncate = opt['response_truncate']
         self.pad_id = vocab['pad']
 
-        language = dataset_language_map[opt['dataset']]
+        language = self.opt['language_type']
         resource = resources['gpt2'][language]
         dpath = os.path.join(opt.pretrain_path, 'gpt2', language)
         super(TGConvModel, self).__init__(opt, device, dpath, resource)
@@ -181,9 +180,9 @@ class TGPolicyModel(BaseModel):
         self.topic_class_num = vocab['n_topic']
         self.n_sent = opt.get('n_sent', 10)
 
-        language = dataset_language_map[opt['dataset']]
+        language = self.opt['language_type']
         resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        dpath = os.path.join(opt.pretrain_path, "bert", language)
         super(TGPolicyModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self, *args, **kwargs):
@@ -258,9 +257,9 @@ class TGRecModel(BaseModel):
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        language = dataset_language_map[opt['dataset']]
+        language = self.opt['language_type']
         resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        dpath = os.path.join(opt.pretrain_path, "bert", language)
         super(TGRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):

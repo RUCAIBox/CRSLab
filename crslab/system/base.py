@@ -39,7 +39,7 @@ class BaseSystem(ABC):
         """
 
         Args:
-            opt (Config or dict): Indicating the hyper parameters.
+            opt (Config): Indicating the hyper parameters.
             agent (SupervisedAgent or Interactive Agent): Indicating the system agent.
             restore (bool, optional): Indicating if we restore saved model. Defaults to False.
             save (bool, optional): Indicating if we store model after training. Defaults to False.
@@ -55,6 +55,7 @@ class BaseSystem(ABC):
 
         # model
         self.agent = agent
+        self.opt.update(self.agent.dataset.properties)
         if 'model' in opt:
             self.model = get_model(opt, opt['model'], self.device, agent.other_data).to(self.device)
         else:

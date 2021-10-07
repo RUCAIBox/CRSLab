@@ -228,6 +228,13 @@ class AttributeBaseDataset(ABC):
         assert isinstance(self._language_type, LanguageType)
 
     @property
+    def properties(self):
+        return {
+            'dataset_type': self._dataset_type.name,
+            'language_type': self._language_type.value
+        }
+
+    @property
     def dataset_type(self):
         return self._dataset_type
 
