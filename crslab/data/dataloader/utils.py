@@ -8,6 +8,12 @@
 # @Author  :   Xiaolei Wang, Yuanhang Zhou
 # @email   :   wxl1999@foxmail.com, sdzyh002@gmail
 
+# UPDATE
+# @Time   : 2021/10/06
+# @Author : Zhipeng Zhao
+# @Email  : oran_official@outlook.com
+
+
 from copy import copy
 
 import torch
@@ -127,6 +133,8 @@ def truncate(vec, max_length, truncate_tail=True):
         return vec
     if len(vec) <= max_length:
         return vec
+    if max_length == 0:
+        return []
     if truncate_tail:
         return vec[:max_length]
     else:
@@ -157,3 +165,16 @@ def merge_utt(conversation, split_token_idx=None, keep_split_in_tail=False, fina
     if final_token_idx:
         merged_conv.append(final_token_idx)
     return merged_conv
+
+def merge_utt_replace(conversation,detect_token=None,replace_token=None,method="in"):
+    if method == 'in': 
+        replaced_conv = []
+        for utt in conversation:
+            for token in utt:
+                if detect_token in token:
+                    replaced_conv.append(replace_token)
+                else:
+                    replaced_conv.append(token)
+        return replaced_conv
+    else:
+        return [token.replace(detect_token,replace_token) for utt in conversation for token in utt]

@@ -7,6 +7,10 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# @Time   : 2021/10/06
+# @Author : Zhipeng Zhao
+# @Email  : oran_official@outlook.com
+
 """Data module which reads, processes and batches data for the whole system
 
 Attributes:
@@ -62,6 +66,7 @@ dataloader_register_table = {
     'ProfileBERT': TGReDialDataLoader,
     'MGCG': TGReDialDataLoader,
     'PMI': TGReDialDataLoader,
+    'NTRD': NTRDDataLoader
 }
 
 

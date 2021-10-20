@@ -63,7 +63,11 @@ class BaseDataLoader(ABC):
         for start_idx in tqdm(range(batch_num)):
             batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
             batch = [dataset[idx] for idx in batch_idx]
-            yield batch_fn(batch)
+            batch = batch_fn(batch)
+            if batch == False:
+                continue
+            else:
+                yield(batch) 
 
     def get_conv_data(self, batch_size, shuffle=True):
         """get_data wrapper for conversation.
