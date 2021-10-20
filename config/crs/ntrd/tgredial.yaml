@@ -1,0 +1,53 @@
+# dataset
+dataset: TGReDial
+tokenize: pkuseg
+embedding: word2vec.npy
+# dataloader
+context_truncate: 256
+response_truncate: 30
+scale: 1.0
+# model
+model: NTRD
+token_emb_dim: 300
+kg_emb_dim: 128
+num_bases: 8
+n_heads: 2
+n_layers: 2
+ffn_size: 300
+dropout: 0.1
+attention_dropout: 0.0
+relu_dropout: 0.1
+learn_positional_embeddings: false
+embeddings_scale: true
+reduction: false
+n_positions: 1024
+gen_loss_weight: 5
+n_movies: 62287
+replace_token: '[ITEM]'
+# optim
+pretrain:
+  epoch: 50
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+rec:
+  epoch: 20
+  batch_size: 128
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  early_stop: true
+  stop_mode: max
+  impatience: 3
+conv:
+  epoch: 10
+  batch_size: 64
+  optimizer:
+    name: Adam
+    lr: !!float 1e-3
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    patience: 3
+    factor: 0.5
+  gradient_clip: 0.1
