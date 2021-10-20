@@ -7,6 +7,10 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+# @Time   : 2021/10/06
+# @Author : Zhipeng Zhao
+# @Email  : oran_official@outlook.com
+
 import torch
 from loguru import logger
 
@@ -36,7 +40,8 @@ Model_register_table = {
     'SASREC': SASRECModel,
     'GRU4REC': GRU4RECModel,
     'Popularity': PopularityModel,
-    'TextCNN': TextCNNModel
+    'TextCNN': TextCNNModel,
+    'NTRD': NTRDModel
 }
 
 
