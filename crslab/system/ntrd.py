@@ -40,7 +40,16 @@ class NTRDSystem(BaseSystem):
 
         # loss weight
         self.gen_loss_weight = self.opt['gen_loss_weight']
-
+    def rec_evaluate(self, rec_predict, item_label):
+        rec_predict = rec_predict.cpu()
+        rec_predict = rec_predict[:, self.item_ids]
+        _, rec_ranks = torch.topk(rec_predict, 50, dim=-1)
+        rec_ranks = rec_ranks.tolist()
+        item_label = item_label.tolist()
+        for rec_rank, item in zip(rec_ranks, item_label):
+            item = self.item_ids.index(item)
+            self.evaluator.rec_evaluate(rec_rank, item)
+            
     def conv_evaluate(self, prediction,movie_prediction,response,movie_response):
         prediction = prediction.tolist()
         response = response.tolist()
