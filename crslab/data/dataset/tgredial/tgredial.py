@@ -133,7 +133,7 @@ class TGReDialDataset(BaseDataset):
                 else:
                     self.ind2tok[len(self.tok2ind)] = self.replace_token
                     self.tok2ind[self.replace_token] = len(self.tok2ind)
-                    self.special_token_idx[self.replace_token] = len(self.tok2ind)-1 #上一排加1之后len变了
+                    self.special_token_idx[self.replace_token] = len(self.tok2ind)-1 
         logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
         logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
         logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")

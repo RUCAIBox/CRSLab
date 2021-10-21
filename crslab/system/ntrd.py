@@ -49,13 +49,13 @@ class NTRDSystem(BaseSystem):
         for rec_rank, item in zip(rec_ranks, item_label):
             item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
-            
+
     def conv_evaluate(self, prediction,movie_prediction,response,movie_response):
         prediction = prediction.tolist()
         response = response.tolist()
         if movie_prediction != None:
-            movie_prediction = movie_prediction * (movie_prediction!=-1) # mask -1 => turn -1 into 0.[!]作用：remove padding token
-            movie_prediction = torch.masked_select(movie_prediction,(movie_prediction!=0)) # do not select -1
+            movie_prediction = movie_prediction * (movie_prediction!=-1) 
+            movie_prediction = torch.masked_select(movie_prediction,(movie_prediction!=0)) 
             movie_prediction = movie_prediction.tolist()
             movie_prediction = ind2slot(movie_prediction,self.ind2movie)
         if movie_response != None:

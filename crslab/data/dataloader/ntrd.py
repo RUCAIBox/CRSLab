@@ -102,7 +102,7 @@ class NTRDDataLoader(BaseDataLoader):
                                         end_token_idx=self.end_token_idx))
             
             batch_all_movies.append(
-                truncate(conv_dict['items'], temp.count(self.replace_token_idx), truncate_tail=False)) #只使用了movie，没有使用所有entities
+                truncate(conv_dict['items'], temp.count(self.replace_token_idx), truncate_tail=False)) #only use movies, not all entities.
         if flag == False:# zero slot in a batch
             return False
 
