@@ -31,6 +31,7 @@ pretrain:
 rec:
   epoch: 9
   batch_size: 128
+  test_print_every_batch: true
   optimizer:
     name: Adam
     lr: !!float 1e-3
