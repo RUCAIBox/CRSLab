@@ -50,7 +50,7 @@ class KGSFDataLoader(BaseDataLoader):
             vocab (dict): all kinds of useful size, idx and map between token and idx.
 
         """
-        super().__init__(opt, dataset)
+        super().__init__(opt, dataset, vocab)
         self.n_entity = vocab['n_entity']
         self.pad_token_idx = vocab['pad']
         self.start_token_idx = vocab['start']
