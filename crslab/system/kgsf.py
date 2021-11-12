@@ -148,8 +148,14 @@ class KGSFSystem(BaseSystem):
         with torch.no_grad():
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+                if self.rec_optim_opt.get('test_print_every_batch'):
+                    self.evaluator.reset_metrics()
+                    # logger.info(batch)
                 self.step(batch, stage='rec', mode='test')
-            self.evaluator.report(mode='test')
+                if self.rec_optim_opt.get('test_print_every_batch'):
+                    self.evaluator.report(mode='test')
+            if self.rec_optim_opt.get('test_print_every_batch'):
+                self.evaluator.report(mode='test')
 
     def train_conversation(self):
         if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
