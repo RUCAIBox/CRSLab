@@ -23,7 +23,7 @@ class BaseDataLoader(ABC):
 
     """
 
-    def __init__(self, opt, dataset):
+    def __init__(self, opt, dataset, vocab=None):
         """
         Args:
             opt (Config or dict): config for dataloader or the whole system.
@@ -32,6 +32,7 @@ class BaseDataLoader(ABC):
         """
         self.opt = opt
         self.dataset = dataset
+        self.vocab = vocab
         self.scale = opt.get('scale', 1)
         assert 0 < self.scale <= 1
 
@@ -63,6 +64,11 @@ class BaseDataLoader(ABC):
         for start_idx in tqdm(range(batch_num)):
             batch_idx = idx_list[start_idx * batch_size: (start_idx + 1) * batch_size]
             batch = [dataset[idx] for idx in batch_idx]
+            if batch_fn == self.rec_batchify and self.opt['rec'].get('test_print_every_batch'):
+                for conv_dict in batch:
+                    for sentence_in_index in conv_dict['context_tokens']:
+                        sentence = " ".join([self.vocab['ind2tok'][index] for index in sentence_in_index])
+                        logger.info(sentence)
             yield batch_fn(batch)
 
     def get_conv_data(self, batch_size, shuffle=True):
