@@ -154,7 +154,7 @@ class KGSFSystem(BaseSystem):
                 self.step(batch, stage='rec', mode='test')
                 if self.rec_optim_opt.get('test_print_every_batch'):
                     self.evaluator.report(mode='test')
-            if self.rec_optim_opt.get('test_print_every_batch'):
+            if not self.rec_optim_opt.get('test_print_every_batch'):
                 self.evaluator.report(mode='test')
 
     def train_conversation(self):
