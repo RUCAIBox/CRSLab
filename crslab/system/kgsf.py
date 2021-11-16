@@ -193,3 +193,29 @@ class KGSFSystem(BaseSystem):
 
     def interact(self):
         pass
+
+    def test_recommendation(self):
+        logger.info('[Recommendation Test]')
+        self.init_optim(self.rec_optim_opt, self.model.parameters())
+        with torch.no_grad():
+            self.evaluator.reset_metrics()
+            for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+                self.step(batch, stage='rec', mode='test')
+            self.evaluator.report(mode='test')
+
+    def test_conversation(self):
+        logger.info('[Conversation Test]')
+        if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
+            self.model.freeze_parameters()
+        else:
+            self.model.module.freeze_parameters()
+        self.init_optim(self.conv_optim_opt, self.model.parameters())
+        with torch.no_grad():
+            self.evaluator.reset_metrics()
+            for batch in self.test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                self.step(batch, stage='conv', mode='test')
+            self.evaluator.report(mode='test')
+        
+    def test(self):
+        self.test_recommendation()
+        self.test_conversation()

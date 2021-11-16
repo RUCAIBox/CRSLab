@@ -69,6 +69,8 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
                      interact, debug, tensorboard)
     if interact:
         CRS.interact()
+    elif restore_system:
+        CRS.test()
     else:
         CRS.fit()
         if save_system:
