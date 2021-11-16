@@ -14,7 +14,7 @@ from crslab.system import get_system
 
 
 def run_crslab(config, save_data=False, restore_data=False, save_system=False, restore_system=False,
-               interact=False, debug=False, tensorboard=False):
+               interact=False, test=False, debug=False, tensorboard=False):
     """A fast running api, which includes the complete process of training and testing models on specified datasets.
 
     Args:
@@ -26,6 +26,7 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
         save_system (bool): whether to save system. Defaults to False.
         restore_system (bool): whether to restore system. Defaults to False.
         interact (bool): whether to interact with the system. Defaults to False.
+        test (bool): wheter to test with the saved system. Defaults to False.
         debug (bool): whether to debug the system. Defaults to False.
 
     .. _Github repo:
@@ -69,7 +70,10 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
                      interact, debug, tensorboard)
     if interact:
         CRS.interact()
-    elif restore_system:
+    elif test:
+        if not restore_system:
+            print('Need to restore saved model by argument --restore_system or -rs for test.')
+            return
         CRS.test()
     else:
         CRS.fit()

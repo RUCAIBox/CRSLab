@@ -361,3 +361,6 @@ class BaseSystem(ABC):
             if entity:
                 linked_entities.append(entity[0])
         return linked_entities
+
+    def test(self):
+        raise NotImplementedError('Method test is not implemented.')

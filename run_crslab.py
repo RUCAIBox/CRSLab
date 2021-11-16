@@ -33,6 +33,8 @@ if __name__ == '__main__':
                         help='use valid dataset to debug your system')
     parser.add_argument('-i', '--interact', action='store_true',
                         help='interact with your system instead of training')
+    parser.add_argument('-t', '--test', action='store_true',
+                        help='test with your saved system instead of training. Note: argument --resotre_system or -rs required')
     parser.add_argument('-tb', '--tensorboard', action='store_true',
                         help='enable tensorboard to monitor train performance')
     args, _ = parser.parse_known_args()
@@ -41,4 +43,4 @@ if __name__ == '__main__':
     from crslab.quick_start import run_crslab
 
     run_crslab(config, args.save_data, args.restore_data, args.save_system, args.restore_system, args.interact,
-               args.debug, args.tensorboard)
+               args.test, args.debug, args.tensorboard)
