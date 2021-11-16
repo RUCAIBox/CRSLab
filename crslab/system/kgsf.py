@@ -71,6 +71,7 @@ class KGSFSystem(BaseSystem):
         for p, r in zip(prediction, response):
             p_str = ind2txt(p, self.ind2tok, self.end_token_idx)
             r_str = ind2txt(r, self.ind2tok, self.end_token_idx)
+            logger.info(f'\n   prediction: {p_str}\n   response: {r_str}')
             self.evaluator.gen_evaluate(p_str, [r_str])
 
     def step(self, batch, stage, mode):
@@ -183,8 +184,14 @@ class KGSFSystem(BaseSystem):
         with torch.no_grad():
             self.evaluator.reset_metrics()
             for batch in self.test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                if self.conv_optim_opt.get('test_print_every_batch'):
+                    self.evaluator.reset_metrics()
+                    # logger.info(batch)
                 self.step(batch, stage='conv', mode='test')
-            self.evaluator.report(mode='test')
+                if self.conv_optim_opt.get('test_print_every_batch'):
+                    self.evaluator.report(mode='test')
+            if not self.conv_optim_opt.get('test_print_every_batch'):
+                self.evaluator.report(mode='test')
 
     def fit(self):
         self.pretrain()
