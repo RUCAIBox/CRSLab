@@ -87,10 +87,15 @@ class StandardEvaluator(BaseEvaluator):
             self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
-    def report(self, epoch=-1, mode='test'):
+    def report(self, epoch=-1, mode='test', file=None):
         for k, v in self.dist_set.items():
             self.gen_metrics.add(k, AverageMetric(len(v) / self.dist_cnt))
         reports = [self.rec_metrics.report(), self.gen_metrics.report(), self.optim_metrics.report()]
+        if file:
+            for each_metric, value in self.rec_metrics.report().items():
+                file.write(f'{str(value.value())}\t')
+            for each_metric, value in self.gen_metrics.report().items():
+                file.write(f'{str(value.value())}\t')
         if self.tensorboard and mode != 'test':
             for idx, task_report in enumerate(reports):
                 for each_metric, value in task_report.items():
