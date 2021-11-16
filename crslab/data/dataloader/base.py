@@ -36,7 +36,7 @@ class BaseDataLoader(ABC):
         self.scale = opt.get('scale', 1)
         assert 0 < self.scale <= 1
 
-    def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None):
+    def get_data(self, batch_fn, batch_size, shuffle=True, process_fn=None, file=None):
         """Collate batch data for system to fit
 
         Args:
@@ -66,12 +66,20 @@ class BaseDataLoader(ABC):
             batch = [dataset[idx] for idx in batch_idx]
             if (batch_fn == self.rec_batchify and self.opt['rec'].get('test_print_every_batch')) or (batch_fn == self.conv_batchify and self.opt['conv'].get('test_print_every_batch')):
                 for conv_dict in batch:
-                    for sentence_in_index in conv_dict['context_tokens']:
-                        sentence = " ".join([self.vocab['ind2tok'][index] for index in sentence_in_index])
-                        logger.info(sentence)
+                    if file:
+                        file.write('"')
+                        for sentence_in_index in conv_dict['context_tokens']:
+                            sentence = " ".join([self.vocab['ind2tok'][index] for index in sentence_in_index])
+                            logger.info(sentence)
+                            file.write(f'{sentence}\n')
+                        file.write('"\t')
+                    else:
+                        for sentence_in_index in conv_dict['context_tokens']:
+                            sentence = " ".join([self.vocab['ind2tok'][index] for index in sentence_in_index])
+                            logger.info(sentence)
             yield batch_fn(batch)
 
-    def get_conv_data(self, batch_size, shuffle=True):
+    def get_conv_data(self, batch_size, shuffle=True, file=None):
         """get_data wrapper for conversation.
 
         You can implement your own process_fn in ``conv_process_fn``, batch_fn in ``conv_batchify``.
@@ -84,9 +92,9 @@ class BaseDataLoader(ABC):
             tuple or dict of torch.Tensor: batch data for conversation.
 
         """
-        return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn)
+        return self.get_data(self.conv_batchify, batch_size, shuffle, self.conv_process_fn, file)
 
-    def get_rec_data(self, batch_size, shuffle=True):
+    def get_rec_data(self, batch_size, shuffle=True, file=None):
         """get_data wrapper for recommendation.
 
         You can implement your own process_fn in ``rec_process_fn``, batch_fn in ``rec_batchify``.
@@ -99,7 +107,7 @@ class BaseDataLoader(ABC):
             tuple or dict of torch.Tensor: batch data for recommendation.
 
         """
-        return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn)
+        return self.get_data(self.rec_batchify, batch_size, shuffle, self.rec_process_fn, file)
 
     def get_policy_data(self, batch_size, shuffle=True):
         """get_data wrapper for policy.
