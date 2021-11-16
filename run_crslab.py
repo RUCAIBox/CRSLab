@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--interact', action='store_true',
                         help='interact with your system instead of training')
     parser.add_argument('-t', '--test', action='store_true',
-                        help='test with your saved system instead of training. Note: argument --resotre_system or -rs required')
+                        help='test with your saved system instead of training. Note: saved system is required')
     parser.add_argument('-tb', '--tensorboard', action='store_true',
                         help='enable tensorboard to monitor train performance')
     args, _ = parser.parse_known_args()

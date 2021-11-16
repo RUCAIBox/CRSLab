@@ -26,7 +26,7 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
         save_system (bool): whether to save system. Defaults to False.
         restore_system (bool): whether to restore system. Defaults to False.
         interact (bool): whether to interact with the system. Defaults to False.
-        test (bool): wheter to test with the saved system. Defaults to False.
+        test (bool): whether to test with the saved system. Defaults to False.
         debug (bool): whether to debug the system. Defaults to False.
 
     .. _Github repo:
@@ -65,15 +65,17 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
             train_dataloader[task] = get_dataloader(config, train_data, vocab[task])
             valid_dataloader[task] = get_dataloader(config, valid_data, vocab[task])
             test_dataloader[task] = get_dataloader(config, test_data, vocab[task])
+
+    # test need saved system
+    if test:
+        restore_system = True
+
     # system
     CRS = get_system(config, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data, restore_system,
                      interact, debug, tensorboard)
     if interact:
         CRS.interact()
     elif test:
-        if not restore_system:
-            print('Need to restore saved model by argument --restore_system or -rs for test.')
-            return
         CRS.test()
     else:
         CRS.fit()
