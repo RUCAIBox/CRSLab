@@ -12,6 +12,7 @@ import os
 import torch
 from loguru import logger
 
+from crslab.config import CSV_PATH
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
@@ -55,6 +56,8 @@ class KGSFSystem(BaseSystem):
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
+        self.cpath = os.path.join(CSV_PATH, "kgsf", opt['dataset'])
+
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
         rec_predict = rec_predict[:, self.item_ids]
@@ -65,7 +68,7 @@ class KGSFSystem(BaseSystem):
             item = self.item_ids.index(item)
             self.evaluator.rec_evaluate(rec_rank, item)
 
-    def conv_evaluate(self, prediction, response):
+    def conv_evaluate(self, prediction, response, file=None):
         prediction = prediction.tolist()
         response = response.tolist()
         for p, r in zip(prediction, response):
@@ -74,7 +77,11 @@ class KGSFSystem(BaseSystem):
             logger.info(f'\n   prediction: {p_str}\n   response: {r_str}')
             self.evaluator.gen_evaluate(p_str, [r_str])
 
-    def step(self, batch, stage, mode):
+            if file:
+                file.write(f'{p_str}\t{r_str}\t')
+                logger.info(f'Write prediction and response into csv')
+
+    def step(self, batch, stage, mode, file=None):
         batch = [ele.to(self.device) for ele in batch]
         if stage == 'pretrain':
             info_loss = self.model.forward(batch, stage, mode)
@@ -109,7 +116,7 @@ class KGSFSystem(BaseSystem):
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
                 pred = self.model.forward(batch, stage, mode)
-                self.conv_evaluate(pred, batch[-1])
+                self.conv_evaluate(pred, batch[-1], file)
         else:
             raise
 
@@ -185,15 +192,22 @@ class KGSFSystem(BaseSystem):
         self.init_optim(self.rec_optim_opt, self.model.parameters())
 
         logger.info('[Recommendation Test]')
+        # f = None
+        f = open(os.path.join(self.cpath, 'rec.csv'), 'w', encoding='utf-8', newline='')
+        f.write('sentences\thit@1\tndcg@1\tmrr@1\thit@10\tndcg@10\tmrr@10\thit@50\tndcg@50\tmrr@50\n')
+        logger.info(f"[Write {os.path.join(self.cpath, 'rec.csv')}]")
         with torch.no_grad():
-            self.evaluator.reset_metrics()
-            for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
-                if self.rec_optim_opt.get('test_print_every_batch'):
+            if self.rec_optim_opt.get('test_print_every_batch'):
+                for batch in self.test_dataloader.get_rec_data(1, shuffle=False, file=f):
                     self.evaluator.reset_metrics()
-                self.step(batch, stage='rec', mode='test')
-                if self.rec_optim_opt.get('test_print_every_batch'):
-                    self.evaluator.report(mode='test')
-            if not self.rec_optim_opt.get('test_print_every_batch'):
+                    self.step(batch, stage='rec', mode='test')
+                    self.evaluator.report(mode='test', file=f)
+                    f.write('\n')
+                f.close()
+            else:
+                self.evaluator.reset_metrics()
+                for batch in self.test_dataloader.get_rec_data(self.rec_batch_size, shuffle=False):
+                    self.step(batch, stage='rec', mode='test')
                 self.evaluator.report(mode='test')
 
     def test_conversation(self):
@@ -204,15 +218,22 @@ class KGSFSystem(BaseSystem):
         self.init_optim(self.conv_optim_opt, self.model.parameters())
 
         logger.info('[Conversation Test]')
+        # f = None
+        f = open(os.path.join(self.cpath, 'conv.csv'), 'w', encoding='utf-8', newline='')
+        f.write('sentences\tprediction\tresponse\tf1\tbleu@1\tbleu@2\tbleu@3\tbleu@4\tgreedy\taverage\textreme\tdist@1\tdist@2\tdist@3\tdist@4\n')
+        logger.info(f"[Write {os.path.join(self.cpath, 'conv.csv')}]")
         with torch.no_grad():
-            self.evaluator.reset_metrics()
-            for batch in self.test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
-                if self.conv_optim_opt.get('test_print_every_batch'):
+            if self.conv_optim_opt.get('test_print_every_batch'):
+                for batch in self.test_dataloader.get_conv_data(1, shuffle=False, file=f):
                     self.evaluator.reset_metrics()
-                self.step(batch, stage='conv', mode='test')
-                if self.conv_optim_opt.get('test_print_every_batch'):
-                    self.evaluator.report(mode='test')
-            if not self.conv_optim_opt.get('test_print_every_batch'):
+                    self.step(batch, stage='conv', mode='test', file=f)
+                    self.evaluator.report(mode='test', file=f)
+                    f.write('\n')
+                f.close()
+            else:
+                self.evaluator.reset_metrics()
+                for batch in self.test_dataloader.get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
+                    self.step(batch, stage='conv', mode='test')
                 self.evaluator.report(mode='test')
 
     def fit(self):
