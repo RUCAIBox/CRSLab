@@ -22,7 +22,7 @@ import json
 import os
 from collections import defaultdict
 from copy import copy
-
+import numpy as np
 from loguru import logger
 from tqdm import tqdm
 
@@ -74,7 +74,15 @@ class TGReDialDataset(BaseDataset):
         self.unk_token_idx = self.special_token_idx['unk']
         self.pad_topic_idx = self.special_token_idx['pad_topic']
         dpath = os.path.join(DATASET_PATH, 'tgredial', tokenize)
+        self.replace_token = opt.get('replace_token',None)
+        self.replace_token_idx = opt.get('replace_token_idx',None)
         super().__init__(opt, dpath, resource, restore, save)
+        if self.replace_token:
+            if self.replace_token_idx:
+                self.side_data["embedding"][self.replace_token_idx] = self.side_data['embedding'][0]
+            else:
+                self.side_data["embedding"] = np.insert(self.side_data["embedding"],len(self.side_data["embedding"]),self.side_data['embedding'][0],axis=0)
+        
 
     def _load_data(self):
         train_data, valid_data, test_data = self._load_raw_data()
@@ -115,7 +123,17 @@ class TGReDialDataset(BaseDataset):
     def _load_vocab(self):
         self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
-
+        # add special tokens
+        if self.replace_token:
+            if self.replace_token not in self.tok2ind:
+                if self.replace_token_idx:
+                    self.ind2tok[self.replace_token_idx] = self.replace_token
+                    self.tok2ind[self.replace_token] = self.replace_token_idx
+                    self.special_token_idx[self.replace_token] = self.replace_token_idx
+                else:
+                    self.ind2tok[len(self.tok2ind)] = self.replace_token
+                    self.tok2ind[self.replace_token] = len(self.tok2ind)
+                    self.special_token_idx[self.replace_token] = len(self.tok2ind)-1 
         logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
         logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
         logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
@@ -155,6 +173,7 @@ class TGReDialDataset(BaseDataset):
         self.user2profile = json.load(open(os.path.join(self.dpath, 'user2profile.json'), 'r', encoding='utf-8'))
         logger.debug(f"[Load user profile from {os.path.join(self.dpath, 'user2profile.json')}")
 
+
     def _data_preprocess(self, train_data, valid_data, test_data):
         processed_train_data = self._raw_data_process(train_data)
         logger.debug("[Finish train data process]")
@@ -178,7 +197,13 @@ class TGReDialDataset(BaseDataset):
         last_role = None
         for utt in conversation['messages']:
             assert utt['role'] != last_role
-
+            # change movies into slots
+            if self.replace_token:
+                if len(utt['movie']) != 0:
+                    while  '《' in utt['text'] :
+                        begin = utt['text'].index("《")
+                        end = utt['text'].index("》")
+                        utt['text'] = utt['text'][:begin] + [self.replace_token] + utt['text'][end+1:]
             text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
             movie_ids = [self.entity2id[movie] for movie in utt['movie'] if movie in self.entity2id]
             entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
@@ -220,6 +245,9 @@ class TGReDialDataset(BaseDataset):
         for i, conv in enumerate(raw_conv_dict):
             text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
                                                              conv['policy']
+            if text_tokens.count(30000) != len(movies): 
+                continue # the number of slots doesn't equal to the number of movies
+                
             if len(context_tokens) > 0:
                 conv_dict = {
                     'role': conv['role'],

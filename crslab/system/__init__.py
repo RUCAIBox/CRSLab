@@ -7,12 +7,19 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+# @Time    :   2021/10/6
+# @Author  :   Zhipeng Zhao
+# @email   :   oran_official@outlook.com
+
+
+
 from loguru import logger
 
 from .inspired import InspiredSystem
 from .kbrd import KBRDSystem
 from .kgsf import KGSFSystem
 from .redial import ReDialSystem
+from .ntrd import NTRDSystem
 from .tgredial import TGReDialSystem
 
 system_register_table = {
@@ -33,7 +40,8 @@ system_register_table = {
     'SASREC': TGReDialSystem,
     'GRU4REC': TGReDialSystem,
     'Popularity': TGReDialSystem,
-    'TextCNN': TGReDialSystem
+    'TextCNN': TGReDialSystem,
+    'NTRD': NTRDSystem
 }
 
 
