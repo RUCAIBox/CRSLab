@@ -50,7 +50,7 @@ resources = {
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EQHOlW2m6mFEqHgt94PfoLsBbmQQeKQEOMyL1lLEHz7LvA?download=1',
             'redial_gpt2.zip',
-            '37b1a64032241903a37b5e014ee36e50d09f7e4a849058688e9af52027a3ac36',
+            '15661f1cb126210a09e30228e9477cf57bbec42140d2b1029cc50489beff4eb8',
         ),
         'special_token_idx': {
             'pad': 0,
