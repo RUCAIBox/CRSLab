@@ -68,8 +68,7 @@ class ConvEvaluator(BaseEvaluator):
             self.dist_cnt += 1
 
             hyp_emb = self._get_sent_embedding(hyp)
-            ref_embs = [self._get_sent_embedding(ref) for ref in refs]
-            
+            ref_embs = [self._get_sent_embedding(ref) for ref in refs]            
             self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
