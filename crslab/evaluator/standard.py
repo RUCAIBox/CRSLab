@@ -52,17 +52,17 @@ class StandardEvaluator(BaseEvaluator):
             self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
             self.reports_name = ['Recommendation Metrics', 'Generation Metrics', 'Optimization Metrics']
 
-    # def _load_embedding(self, language):
-    #     resource = resources[language]
-    #     dpath = os.path.join(EMBEDDING_PATH, language)
-    #     build(dpath, resource['file'], resource['version'])
+    def _load_embedding(self, language):
+        resource = resources[language]
+        dpath = os.path.join(EMBEDDING_PATH, language)
+        build(dpath, resource['file'], resource['version'])
 
-    #     model_file = os.path.join(dpath, f'cc.{language}.300.bin')
-    #     self.ft = fasttext.load_model(model_file)
-    #     logger.info(f'[Load {model_file} for embedding metric')
+        model_file = os.path.join(dpath, f'cc.{language}.300.bin')
+        self.ft = fasttext.load_model(model_file)
+        logger.info(f'[Load {model_file} for embedding metric')
 
-    # def _get_sent_embedding(self, sent):
-    #     return [self.ft[token] for token in sent.split()]
+    def _get_sent_embedding(self, sent):
+        return [self.ft[token] for token in sent.split()]
 
     def rec_evaluate(self, ranks, label):
         for k in [1, 10, 50]:
@@ -81,12 +81,12 @@ class StandardEvaluator(BaseEvaluator):
                     self.dist_set[f"dist@{k}"].add(token)
             self.dist_cnt += 1
 
-            # hyp_emb = self._get_sent_embedding(hyp)
-            # ref_embs = [self._get_sent_embedding(ref) for ref in refs]
-            # 2022
-            # self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
-            # self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
-            # self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
+            hyp_emb = self._get_sent_embedding(hyp)
+            ref_embs = [self._get_sent_embedding(ref) for ref in refs]
+            
+            self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
+            self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
+            self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
     def report(self, epoch=-1, mode='test'):
         for k, v in self.dist_set.items():
