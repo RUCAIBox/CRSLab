@@ -45,7 +45,7 @@ class ConvEvaluator(BaseEvaluator):
             self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
             self.reports_name = ['Generation Metrics', 'Optimization Metrics']
 
-    def _load_embedding(self, language): 
+    def _load_embedding(self, language):
         resource = resources[language]
         dpath = os.path.join(EMBEDDING_PATH, language)
         build(dpath, resource['file'], resource['version'])
@@ -68,7 +68,7 @@ class ConvEvaluator(BaseEvaluator):
             self.dist_cnt += 1
 
             hyp_emb = self._get_sent_embedding(hyp)
-            ref_embs = [self._get_sent_embedding(ref) for ref in refs]            
+            ref_embs = [self._get_sent_embedding(ref) for ref in refs]
             self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
             self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
