@@ -43,7 +43,7 @@ class StandardEvaluator(BaseEvaluator):
         self.dist_set = defaultdict(set)
         self.dist_cnt = 0
         self.gen_metrics = Metrics()
-        # self._load_embedding(language)
+        self._load_embedding(language)
         # optim
         self.optim_metrics = Metrics()
         # tensorboard
