@@ -53,7 +53,7 @@ resources = {
             '15661f1cb126210a09e30228e9477cf57bbec42140d2b1029cc50489beff4eb8',
         ),
         'special_token_idx': {
-            'pad': 0,
+            'pad': -100,
             'start': 1,
             'end': 2,
             'unk': 3,
