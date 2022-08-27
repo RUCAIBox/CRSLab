@@ -245,8 +245,9 @@ class TGReDialDataset(BaseDataset):
         for i, conv in enumerate(raw_conv_dict):
             text_tokens, entities, movies, words, policies = conv["text"], conv["entity"], conv["movie"], conv["word"], \
                                                              conv['policy']
-            if text_tokens.count(30000) != len(movies): 
-                continue # the number of slots doesn't equal to the number of movies
+            if self.replace_token is not None: 
+                if text_tokens.count(30000) != len(movies):
+                    continue # the number of slots doesn't equal to the number of movies
                 
             if len(context_tokens) > 0:
                 conv_dict = {
