@@ -56,7 +56,10 @@ def get_model(config, model_name, device, vocab, side_data=None):
                 if model_name == 'PMI' or model_name == 'KBRD':
                     logger.info(f'[PMI/KBRD model does not support multi GPUs yet, using single GPU now]')
                     return model.to(device)
-            return torch.nn.DataParallel(model, device_ids=config["gpu"])
+                else:
+                    return torch.nn.DataParallel(model, device_ids=config["gpu"])
+            else:
+                return model.to(device)
 
     else:
         raise NotImplementedError('Model [{}] has not been implemented'.format(model_name))
