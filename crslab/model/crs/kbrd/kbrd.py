@@ -308,3 +308,9 @@ class KBRDModel(BaseModel):
             return self.converse(batch, mode)
         if stage == "rec":
             return self.recommend(batch, mode)
+
+    def freeze_parameters(self):
+        freeze_models = [self.kg_encoder, self.kg_attn, self.rec_bias]
+        for model in freeze_models:
+            for p in model.parameters():
+                p.requires_grad = False
