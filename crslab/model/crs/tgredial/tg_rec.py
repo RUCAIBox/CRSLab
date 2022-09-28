@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 TGReDial_Rec
 ============
@@ -25,10 +30,9 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import PRETRAIN_PATH, BERT_EN_PATH, BERT_ZH_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 from crslab.model.recommendation.sasrec.modules import SASRec
 
 
@@ -68,14 +72,22 @@ class TGRecModel(BaseModel):
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(TGRecModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = os.path.join(PRETRAIN_PATH, "bert", self.language)
+        super(TGRecModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.bert = BertModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.bert = BertModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = BERT_ZH_PATH
+                self.bert = BertModel.from_pretrained('base-base-chinese')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = BERT_EN_PATH
+                self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.bert_hidden_size = self.bert.config.hidden_size
         self.concat_embed_size = self.bert_hidden_size + self.hidden_size
         self.fusion = nn.Linear(self.concat_embed_size, self.item_size)

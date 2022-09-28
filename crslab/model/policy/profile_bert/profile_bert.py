@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 Profile_BERT
 ============
@@ -24,10 +29,9 @@ import torch
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import PRETRAIN_PATH, BERT_EN_PATH, BERT_ZH_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 
 
 class ProfileBERTModel(BaseModel):
@@ -52,14 +56,22 @@ class ProfileBERTModel(BaseModel):
         self.topic_class_num = vocab['n_topic']
         self.n_sent = opt.get('n_sent', 10)
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(ProfileBERTModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = os.path.join(PRETRAIN_PATH, "bert", self.language)
+        super(ProfileBERTModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self, *args, **kwargs):
         """build model"""
-        self.profile_bert = BertModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.profile_bert = BertModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = BERT_ZH_PATH
+                self.profile_bert = BertModel.from_pretrained('base-base-chinese')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = BERT_EN_PATH
+                self.profile_bert = BertModel.from_pretrained('bert-base-uncased')
 
         self.bert_hidden_size = self.profile_bert.config.hidden_size
         self.state2topic_id = nn.Linear(self.bert_hidden_size,

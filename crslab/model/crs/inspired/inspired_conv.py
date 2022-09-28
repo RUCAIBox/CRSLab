@@ -2,15 +2,19 @@
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
-import os
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
 
+import os
+import json
 import torch
 from transformers import GPT2LMHeadModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import BERT_EN_PATH, BERT_ZH_PATH, PRETRAIN_PATH, GPT2_ZH_PATH, GPT2_EN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 from .modules import SequenceCrossEntropyLoss
 
 
@@ -39,14 +43,22 @@ class InspiredConvModel(BaseModel):
         self.pad_id = vocab['pad']
         self.label_smoothing = opt['conv']['label_smoothing'] if 'label_smoothing' in opt['conv'] else -1
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['gpt2'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
-        super(InspiredConvModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = os.path.join(PRETRAIN_PATH, "gpt2", self.language)
+        super(InspiredConvModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         """build model for seeker and recommender separately"""
-        self.model_sk = GPT2LMHeadModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.model_sk = GPT2LMHeadModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = GPT2_ZH_PATH
+                self.model_sk = GPT2LMHeadModel.from_pretrained('GPT2-chitchat')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = GPT2_EN_PATH
+                self.model_sk = GPT2LMHeadModel.from_pretrained('gpt2')
         self.model_rm = GPT2LMHeadModel.from_pretrained(self.dpath)
         self.loss = SequenceCrossEntropyLoss(self.pad_id, self.label_smoothing)
 
@@ -68,17 +80,27 @@ class InspiredConvModel(BaseModel):
         past = None
         lm_logits_all = []
 
+        if self.language == 'zh':
+            config_json = os.path.join(GPT2_ZH_PATH, 'config.json')
+        elif self.language == 'en':
+            config_json = os.path.join(GPT2_EN_PATH, 'config.json')
+        
+        with open(config_json, 'r', encoding='utf-8') as f:
+            json_config = json.load(f)
+
+        support_up_limits = json_config['n_ctx']
+
         if mode != 'test':
             for turn, iter in enumerate(input_ids_iters):
                 if (roles[turn] == 0):
                     # considering that gpt2 only supports up to 1024 tokens
-                    if past is not None and past[0].shape[3] + iter.shape[1] > 1024:
+                    if past is not None and past[0][0].shape[-2] + iter.shape[1] > support_up_limits:
                         past = None
                     outputs = self.model_sk(iter, past_key_values=past)
                     lm_logits, past = outputs.logits, outputs.past_key_values
                     lm_logits_all.append(lm_logits)
                 else:
-                    if past is not None and past[0].shape[3] + iter.shape[1] > 1024:
+                    if past is not None and past[0][0].shape[-2] + iter.shape[1] > support_up_limits:
                         past = None
                     outputs = self.model_rm(iter, past_key_values=past)
                     lm_logits, past = outputs.logits, outputs.past_key_values

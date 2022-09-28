@@ -7,6 +7,11 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, sdzyh002@gmail
 
+# UPDATE
+# @Time    :   2022/9/26
+# @Author  :   Xinyu Tang
+# @email   :   txy20010310@163.com
+
 r"""
 TGReDial
 ========
@@ -23,12 +28,15 @@ import os
 from collections import defaultdict
 from copy import copy
 import numpy as np
+import gensim
+
 from loguru import logger
 from tqdm import tqdm
 
-from crslab.config import DATASET_PATH
+from crslab.config import DATASET_PATH, BERT_ZH_PATH, GPT2_ZH_PATH, MODEL_PATH
 from crslab.data.dataset.base import BaseDataset
 from .resources import resources
+from crslab.data.dataset.tokenize import CrsTokenize
 
 
 class TGReDialDataset(BaseDataset):
@@ -69,11 +77,25 @@ class TGReDialDataset(BaseDataset):
             save (bool): whether to save dataset after processing. Defaults to False.
 
         """
-        resource = resources[tokenize]
-        self.special_token_idx = resource['special_token_idx']
+        if 'copy' in opt:
+            self.copy = True 
+        else:
+            self.copy = False
+        resource = resources['resource']
+        token = resource[tokenize]
+        self.special_token_idx = token['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
         self.pad_topic_idx = self.special_token_idx['pad_topic']
-        dpath = os.path.join(DATASET_PATH, 'tgredial', tokenize)
+
+        self.tokenize = tokenize
+        self.path = None
+        if tokenize == 'bert':
+            self.path = BERT_ZH_PATH
+        elif tokenize == 'gpt2':
+            self.path = GPT2_ZH_PATH
+        self.crstokenizer = CrsTokenize('zh', tokenize, self.path)
+        dpath = os.path.join(DATASET_PATH, 'tgredial')
+
         self.replace_token = opt.get('replace_token',None)
         self.replace_token_idx = opt.get('replace_token_idx',None)
         super().__init__(opt, dpath, resource, restore, save)
@@ -111,14 +133,35 @@ class TGReDialDataset(BaseDataset):
         with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
             logger.debug(f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
+        # split token
+        processing_train_data = self.split_token(train_data)
+        logger.info("[Finish train data split]")
+        # generate tok2ind
+        tok2ind = self.generate_tok2ind(processing_train_data)
+        logger.info("[Finish generate train tok2ind]")
+        # generate word2vec
+        self.generate_word2vec(processing_train_data)
+        logger.info('[Finish generate word2vec]')
+        # build copy_mask
+        if self.copy:
+            copy_mask = self.generate_copy_mask(tok2ind, processing_train_data)
+            logger.info('[Finish generate copy_mask]')
+
         with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
             logger.debug(f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
+        # split_token
+        processing_valid_data = self.split_token(valid_data)
+        logger.info("[Finish valid data split]")
+
         with open(os.path.join(self.dpath, 'test_data.json'), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
             logger.debug(f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
+        # split_token
+        processing_test_data = self.split_token(test_data)
+        logger.info("[Finish test data split]")
 
-        return train_data, valid_data, test_data
+        return processing_train_data, processing_valid_data, processing_test_data
 
     def _load_vocab(self):
         self.tok2ind = json.load(open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
@@ -340,3 +383,132 @@ class TGReDialDataset(BaseDataset):
             'edge': list(edges),
             'entity': list(entities)
         }
+
+    def split_token(self, data):
+        
+        all_data = []
+        for each in tqdm(data):
+            each_dict = {}
+            each_data = []
+            each_dict['conv_id'] = each['conv_id']
+            for one in each['messages']:
+                str_text = one['text']
+                tokenizer = self.tokenize
+                crstokenize = self.crstokenizer
+                list_text = crstokenize.tokenize(str_text, tokenizer)
+                one['text'] = list_text
+                each_data.append(one)
+            each_dict['messages'] = each_data
+            each_dict['user_id'] = each['user_id']
+            all_data.append(each_dict)
+        
+        return all_data
+
+    def generate_tok2ind(self, processed_train_data):
+
+        cnt = 0
+        tok2ind = {}
+
+        if self.tokenize == 'nltk' or self.tokenize == 'jieba' or self.tokenize == 'pkuseg':
+            tok2ind['__pad__'] = cnt
+            cnt += 1
+            tok2ind['__start__'] = cnt
+            cnt += 1
+            tok2ind['__end__'] = cnt
+            cnt += 1
+            tok2ind['__unk__'] = cnt
+            cnt += 1
+        elif self.tokenize == 'bert':
+            tok2ind['[PAD]'] = cnt
+            cnt += 1
+
+        for i in tqdm(processed_train_data):
+            dialog = i['messages']
+            for each_dialog in dialog:
+                text = each_dialog['text']
+                for each_word in text:
+                    if each_word not in tok2ind:
+                        tok2ind[each_word] = cnt
+                        cnt += 1
+        
+        if self.tokenize == 'nltk':
+            tok2ind['_split_'] = cnt
+            cnt += 1
+
+        tok2ind_path = os.path.join(DATASET_PATH, 'tgredial', 'token2id.json')
+        with open(tok2ind_path, 'w', encoding='utf-8') as write:
+            json.dump(tok2ind, write, ensure_ascii=False, indent=4, separators=(',', ':'))
+
+        return tok2ind
+
+    def generate_copy_mask(self, tok2ind, processing_train_data):
+        
+        tokenizer = self.tokenize
+        crstokenize = self.crstokenizer
+
+        copy_mask = np.zeros((len(tok2ind)), dtype=bool)
+        for each_data in tqdm(processing_train_data):
+            for dialog in each_data['messages']:
+                match_list = []
+                text = dialog['text']
+                for word in dialog['word']:
+                    list_word = crstokenize.tokenize(word, tokenizer)
+                    match_list += list_word
+
+                for movie in dialog['movie']:
+                    list_word = crstokenize.tokenize(movie, tokenizer)
+                    match_list += list_word
+
+                for entity in dialog['entity']:
+                    list_word = crstokenize.tokenize(entity, tokenizer)
+                    match_list += list_word
+                    
+                match_list = list(set(match_list))
+                
+                for each_word in text:
+                    if each_word in match_list:
+                        token_id = tok2ind[each_word]
+                        copy_mask[token_id] = True
+
+        if not os.path.exists(MODEL_PATH):
+            os.mkdir(MODEL_PATH)
+
+        if not os.path.exists(os.path.join(MODEL_PATH, 'kgsf')):
+            os.mkdir(os.path.join(MODEL_PATH, 'kgsf'))
+
+        copy_mask_dirpath = os.path.join(MODEL_PATH, 'kgsf', 'TGReDial')
+        if not os.path.exists(copy_mask_dirpath):
+            os.mkdir(copy_mask_dirpath)
+
+        path = os.path.join(MODEL_PATH, 'kgsf', 'TGReDial', 'copy_mask.npy')
+        np.save(path, copy_mask)
+
+
+    def generate_word2vec(self, processing_train_data):
+
+        corpus = []
+        for each_data in processing_train_data:
+            for dialog in each_data['messages']:
+                text = dialog['text']
+                corpus.append(text)
+
+        model = gensim.models.word2vec.Word2Vec(corpus, vector_size=300, min_count=1)
+
+        if self.tokenize == 'nltk':
+            word2index = {word: i + 4 for i, word in enumerate(model.wv.index_to_key)}        
+            word2embedding = [[0] * 300] * 4 + [model.wv[word] for word in word2index] + [[0] * 300]
+
+        elif self.tokenize == 'jieba' or self.tokenize == 'pkuseg':
+            word2index = {word: i + 4 for i, word in enumerate(model.wv.index_to_key)}        
+            word2embedding = [[0] * 300] * 4 + [model.wv[word] for word in word2index]            
+
+        elif self.tokenize == 'bert':
+            word2index = {word: i + 1 for i, word in enumerate(model.wv.index_to_key)}        
+            word2embedding = [[0] * 300] + [model.wv[word] for word in word2index]
+
+        elif self.tokenize == 'gpt2':
+            word2index = {word: i + 1 for i, word in enumerate(model.wv.index_to_key)}        
+            word2embedding = [model.wv[word] for word in word2index]
+
+        word2vec_path = os.path.join(DATASET_PATH, 'tgredial', 'word2vec.npy')
+        np.save(word2vec_path, word2embedding)

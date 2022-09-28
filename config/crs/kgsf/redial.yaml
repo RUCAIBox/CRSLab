@@ -21,6 +21,7 @@ learn_positional_embeddings: false
 embeddings_scale: true
 reduction: false
 n_positions: 1024
+copy: true
 # optim
 pretrain:
   epoch: 3
