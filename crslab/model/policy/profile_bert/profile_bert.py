@@ -29,7 +29,7 @@ import torch
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import PRETRAIN_PATH, BERT_EN_PATH, BERT_ZH_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
 
@@ -62,7 +62,16 @@ class ProfileBERTModel(BaseModel):
 
     def build_model(self, *args, **kwargs):
         """build model"""
-        self.profile_bert = BertModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.profile_bert = BertModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = BERT_ZH_PATH
+                self.profile_bert = BertModel.from_pretrained('base-base-chinese')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = BERT_EN_PATH
+                self.profile_bert = BertModel.from_pretrained('bert-base-uncased')
 
         self.bert_hidden_size = self.profile_bert.config.hidden_size
         self.state2topic_id = nn.Linear(self.bert_hidden_size,

@@ -30,7 +30,7 @@ from loguru import logger
 from torch import nn
 from transformers import BertModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import PRETRAIN_PATH, BERT_EN_PATH, BERT_ZH_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
 from crslab.model.recommendation.sasrec.modules import SASRec
@@ -78,7 +78,16 @@ class TGRecModel(BaseModel):
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
-        self.bert = BertModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.bert = BertModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = BERT_ZH_PATH
+                self.bert = BertModel.from_pretrained('base-base-chinese')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = BERT_EN_PATH
+                self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.bert_hidden_size = self.bert.config.hidden_size
         self.concat_embed_size = self.bert_hidden_size + self.hidden_size
         self.fusion = nn.Linear(self.concat_embed_size, self.item_size)
