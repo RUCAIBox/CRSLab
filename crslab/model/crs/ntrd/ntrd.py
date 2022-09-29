@@ -3,6 +3,10 @@
 # @Author  :   Zhipeng Zhao
 # @email   :   oran_official@outlook.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
 
 r"""
 NTRD
@@ -29,7 +33,6 @@ from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionSeq
 from crslab.model.utils.modules.transformer import TransformerEncoder
 from .modules import GateLayer, TransformerDecoderKG,TransformerDecoderSelection
-from .resources import resources
 
 class NTRDModel(BaseModel):
     def __init__(self, opt, device, vocab, side_data):
@@ -87,12 +90,11 @@ class NTRDModel(BaseModel):
         # self.n_movies_label = opt['n_movies_label']
         self.n_movies_label = 64362 # the number of entity2id
         # copy mask
-        dataset = opt['dataset']
-        dpath = os.path.join(MODEL_PATH, "kgsf", dataset)
-        resource = resources[dataset]
+        self.dataset = opt['dataset']
+        self.dpath = os.path.join(MODEL_PATH, "kgsf", self.dataset)
         # loss weight
         self.gen_loss_weight = opt['gen_loss_weight']
-        super(NTRDModel, self).__init__(opt, device, dpath, resource)
+        super(NTRDModel, self).__init__(opt, device, self.dpath)
     
     def build_model(self):
         self._init_embeddings()

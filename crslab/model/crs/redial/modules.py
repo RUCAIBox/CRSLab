@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -71,7 +76,7 @@ class HRNN(nn.Module):
         if self.use_dropout:
             embedded = self.dropout(embedded)
 
-        packed_utterances = pack_padded_sequence(embedded, sorted_lengths, batch_first=True)
+        packed_utterances = pack_padded_sequence(embedded, sorted_lengths.cpu(), batch_first=True)
         _, utterance_encoding = self.utterance_encoder(packed_utterances)
 
         # concat the hidden states of the last layer (two directions of the GRU)
@@ -104,7 +109,7 @@ class HRNN(nn.Module):
 
         # reorder in decreasing sequence length
         sorted_representations = utterance_encoding.index_select(0, sorted_idx)
-        packed_sequences = pack_padded_sequence(sorted_representations, sorted_lengths, batch_first=True)
+        packed_sequences = pack_padded_sequence(sorted_representations, sorted_lengths.cpu(), batch_first=True)
 
         _, context_state = self.dialog_encoder(packed_sequences)
         context_state = context_state.index_select(1, rev_idx)
@@ -144,7 +149,7 @@ class SwitchingDecoder(nn.Module):
         sorted_lengths, sorted_idx, rev_idx = sort_for_packed_sequence(request_lengths)
         sorted_request = request.index_select(0, sorted_idx)
         embedded_request = self.embedding(sorted_request)  # (batch_size, max_utterance_length, embed_dim)
-        packed_request = pack_padded_sequence(embedded_request, sorted_lengths, batch_first=True)
+        packed_request = pack_padded_sequence(embedded_request, sorted_lengths.cpu(), batch_first=True)
 
         sorted_context_state = context_state.index_select(0, sorted_idx)
         h_0 = sorted_context_state.unsqueeze(0).expand(

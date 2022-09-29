@@ -7,6 +7,11 @@
 # @Author : Kun Zhou, Xiaolei Wang, Yuanhang Zhou
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 KGSF
 ====
@@ -33,7 +38,6 @@ from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionSeq
 from crslab.model.utils.modules.transformer import TransformerEncoder
 from .modules import GateLayer, TransformerDecoderKG
-from .resources import resources
 
 
 class KGSFModel(BaseModel):
@@ -116,10 +120,9 @@ class KGSFModel(BaseModel):
         self.n_positions = opt['n_positions']
         self.response_truncate = opt.get('response_truncate', 20)
         # copy mask
-        dataset = opt['dataset']
-        dpath = os.path.join(MODEL_PATH, "kgsf", dataset)
-        resource = resources[dataset]
-        super(KGSFModel, self).__init__(opt, device, dpath, resource)
+        self.dataset = opt['dataset']
+        self.dpath = os.path.join(MODEL_PATH, "kgsf", self.dataset)
+        super(KGSFModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         self._init_embeddings()

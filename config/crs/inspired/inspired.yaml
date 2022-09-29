@@ -3,6 +3,9 @@ dataset: Inspired
 tokenize:
   rec: bert
   conv: gpt2
+# tokenize path
+rec_tokenize_path: 'data/model/pretrain/bert/en'
+conv_tokenize_path: 'data/model/pretrain/gpt2/en'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -11,8 +14,12 @@ scale: 1
 # model
 # rec
 rec_model: InspiredRec
+# pretrained path
+rec_pretrained_path: 'data/model/pretrain/bert/en'
 # conv
 conv_model: InspiredConv
+# pretrained path
+conv_pretrained_path: 'data/model/pretrain/gpt2/en'
 # optim
 rec:
   epoch: 1
