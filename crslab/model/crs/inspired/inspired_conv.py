@@ -71,10 +71,7 @@ class InspiredConvModel(BaseModel):
         past = None
         lm_logits_all = []
 
-        if self.language == 'zh':
-            config_json = os.path.join(GPT2_ZH_PATH, 'config.json')
-        elif self.language == 'en':
-            config_json = os.path.join(GPT2_EN_PATH, 'config.json')
+        config_json = os.path.join(self.dpath, 'config.json')
         
         with open(config_json, 'r', encoding='utf-8') as f:
             json_config = json.load(f)
