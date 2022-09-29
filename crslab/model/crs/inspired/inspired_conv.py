@@ -12,7 +12,7 @@ import json
 import torch
 from transformers import GPT2LMHeadModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import BERT_EN_PATH, BERT_ZH_PATH, PRETRAIN_PATH, GPT2_ZH_PATH, GPT2_EN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
 from .modules import SequenceCrossEntropyLoss
@@ -49,7 +49,16 @@ class InspiredConvModel(BaseModel):
 
     def build_model(self):
         """build model for seeker and recommender separately"""
-        self.model_sk = GPT2LMHeadModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.model_sk = GPT2LMHeadModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = GPT2_ZH_PATH
+                self.model_sk = GPT2LMHeadModel.from_pretrained('GPT2-chitchat')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = GPT2_EN_PATH
+                self.model_sk = GPT2LMHeadModel.from_pretrained('gpt2')
         self.model_rm = GPT2LMHeadModel.from_pretrained(self.dpath)
         self.loss = SequenceCrossEntropyLoss(self.pad_id, self.label_smoothing)
 

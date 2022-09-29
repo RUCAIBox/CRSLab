@@ -29,7 +29,7 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
 
-from crslab.config import PRETRAIN_PATH
+from crslab.config import PRETRAIN_PATH, GPT2_ZH_PATH, GPT2_EN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
 
@@ -64,7 +64,16 @@ class GPT2Model(BaseModel):
 
     def build_model(self):
         """build model"""
-        self.model = GPT2LMHeadModel.from_pretrained(self.dpath)
+        if os.path.exists(self.dpath):
+            self.model = GPT2LMHeadModel.from_pretrained(self.dpath)
+        else:
+            os.makedirs(self.dpath)
+            if self.language == 'zh':
+                os.environ['TORCH_HOME'] = GPT2_ZH_PATH
+                self.model = GPT2LMHeadModel.from_pretrained('GPT2-chitchat')
+            elif self.language == 'en':
+                os.environ['TORCH_HOME'] = GPT2_EN_PATH
+                self.model = GPT2LMHeadModel.from_pretrained('gpt2')
         self.loss = CrossEntropyLoss(ignore_index=self.pad_id)
 
     def forward(self, batch, mode):
