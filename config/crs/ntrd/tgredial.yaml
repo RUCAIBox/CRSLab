@@ -24,6 +24,7 @@ n_positions: 1024
 gen_loss_weight: 5
 n_movies: 62287
 replace_token: '[ITEM]'
+copy: true
 # optim
 pretrain:
   epoch: 50
