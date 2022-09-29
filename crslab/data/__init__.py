@@ -70,7 +70,7 @@ dataloader_register_table = {
 }
 
 
-def get_dataset(opt, tokenize, restore, save) -> BaseDataset:
+def get_dataset(opt, tokenize, restore, save, task=None) -> BaseDataset:
     """get and process dataset
 
     Args:
@@ -85,7 +85,7 @@ def get_dataset(opt, tokenize, restore, save) -> BaseDataset:
     """
     dataset = opt['dataset']
     if dataset in dataset_register_table:
-        return dataset_register_table[dataset](opt, tokenize, restore, save)
+        return dataset_register_table[dataset](opt, tokenize, restore, save, task)
     else:
         raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
 

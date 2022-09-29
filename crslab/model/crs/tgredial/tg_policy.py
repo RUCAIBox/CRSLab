@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 TGReDial_Policy
 ===============
@@ -27,7 +32,6 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 
 
 class TGPolicyModel(BaseModel):
@@ -44,10 +48,9 @@ class TGPolicyModel(BaseModel):
         self.topic_class_num = vocab['n_topic']
         self.n_sent = opt.get('n_sent', 10)
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(TGPolicyModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = opt['policy_pretrained_path']
+        super(TGPolicyModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self, *args, **kwargs):
         """build model"""

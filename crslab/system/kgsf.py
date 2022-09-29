@@ -7,6 +7,11 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import os
 
 import torch
@@ -153,6 +158,8 @@ class KGSFSystem(BaseSystem):
 
     def train_conversation(self):
         if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
+            self.model.freeze_parameters()
+        elif len(os.environ["CUDA_VISIBLE_DEVICES"]) == 1:
             self.model.freeze_parameters()
         else:
             self.model.module.freeze_parameters()

@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 BERT
 ====
@@ -27,7 +32,6 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 
 
 class InspiredRecModel(BaseModel):
@@ -50,10 +54,9 @@ class InspiredRecModel(BaseModel):
         """
         self.item_size = vocab['n_entity']
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(InspiredRecModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = opt['rec_pretrained_path']
+        super(InspiredRecModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters

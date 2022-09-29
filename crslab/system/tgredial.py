@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import os
 
 import torch
@@ -168,6 +173,8 @@ class TGReDialSystem(BaseSystem):
     def train_recommender(self):
         if hasattr(self.rec_model, 'bert'):
             if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
+                bert_param = list(self.rec_model.bert.named_parameters())
+            elif len(os.environ["CUDA_VISIBLE_DEVICES"]) == 1:
                 bert_param = list(self.rec_model.bert.named_parameters())
             else:
                 bert_param = list(self.rec_model.module.bert.named_parameters())

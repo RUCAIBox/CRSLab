@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import os
 import time
 from collections import defaultdict
@@ -83,9 +88,10 @@ class StandardEvaluator(BaseEvaluator):
 
             hyp_emb = self._get_sent_embedding(hyp)
             ref_embs = [self._get_sent_embedding(ref) for ref in refs]
-            self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
-            self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
-            self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
+            if len(ref_embs[0]) > 0:
+                self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
+                self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
+                self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
     def report(self, epoch=-1, mode='test'):
         for k, v in self.dist_set.items():
