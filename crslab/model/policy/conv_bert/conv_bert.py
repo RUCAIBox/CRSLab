@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 Conv_BERT
 =========
@@ -26,7 +31,6 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from ...pretrained_models import resources
 
 
 class ConvBERTModel(BaseModel):
@@ -48,10 +52,9 @@ class ConvBERTModel(BaseModel):
         
         """
         self.topic_class_num = vocab['n_topic']
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(ConvBERTModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = opt['policy_pretrained_path']
+        super(ConvBERTModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self, *args, **kwargs):
         """build model"""

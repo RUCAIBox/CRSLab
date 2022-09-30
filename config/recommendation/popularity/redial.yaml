@@ -2,6 +2,8 @@
 dataset: ReDial
 tokenize:
   rec: bert
+# tokenize path
+rec_tokenize_path: 'data/model/pretrain/bert/en'
 # dataloader
 context_truncate: 256
 response_truncate: 30

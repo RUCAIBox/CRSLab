@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 TGReDial_Conv
 =============
@@ -27,7 +32,6 @@ from transformers import GPT2LMHeadModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 
 
 class TGConvModel(BaseModel):
@@ -54,10 +58,9 @@ class TGConvModel(BaseModel):
         self.response_truncate = opt['response_truncate']
         self.pad_id = vocab['pad']
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['gpt2'][language]
-        dpath = os.path.join(PRETRAIN_PATH, 'gpt2', language)
-        super(TGConvModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = opt['conv_pretrained_path']
+        super(TGConvModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         """build model"""

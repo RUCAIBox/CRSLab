@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 TGReDial_Rec
 ============
@@ -28,7 +33,6 @@ from transformers import BertModel
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
 from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 from crslab.model.recommendation.sasrec.modules import SASRec
 
 
@@ -68,10 +72,9 @@ class TGRecModel(BaseModel):
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(TGRecModel, self).__init__(opt, device, dpath, resource)
+        self.language = dataset_language_map[opt['dataset']]
+        self.dpath = opt['rec_pretrained_path']
+        super(TGRecModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
