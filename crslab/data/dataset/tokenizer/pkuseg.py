@@ -4,7 +4,7 @@
 
 import pkuseg
 
-from crslab.tokenizer.base import BaseCrsTokenize
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
 class pkuseg_tokenize(BaseCrsTokenize):
 

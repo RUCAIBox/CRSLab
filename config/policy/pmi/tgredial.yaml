@@ -3,7 +3,7 @@ dataset: TGReDial
 tokenize:
   policy: bert
 # tokenize path
-policy_tokenize_path: 'data/model/pretrain/bert/zh'
+policy_tokenize_path: 'bert-base-chinese'
 # dataloader
 context_truncate: 256
 response_truncate: 30

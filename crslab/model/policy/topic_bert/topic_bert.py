@@ -54,7 +54,6 @@ class TopicBERTModel(BaseModel):
         """
         self.topic_class_num = vocab['n_topic']
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['policy_pretrained_path']
         super(TopicBERTModel, self).__init__(opt, device, self.dpath)
 

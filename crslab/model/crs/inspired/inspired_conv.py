@@ -10,7 +10,7 @@
 import os
 import json
 import torch
-from transformers import GPT2LMHeadModel
+from transformers import GPT2LMHeadModel, GPT2Config
 
 from crslab.config import PRETRAIN_PATH
 from crslab.data import dataset_language_map
@@ -43,7 +43,6 @@ class InspiredConvModel(BaseModel):
         self.pad_id = vocab['pad']
         self.label_smoothing = opt['conv']['label_smoothing'] if 'label_smoothing' in opt['conv'] else -1
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['conv_pretrained_path']
         super(InspiredConvModel, self).__init__(opt, device, self.dpath)
 
@@ -71,12 +70,9 @@ class InspiredConvModel(BaseModel):
         past = None
         lm_logits_all = []
 
-        config_json = os.path.join(self.dpath, 'config.json')
-        
-        with open(config_json, 'r', encoding='utf-8') as f:
-            json_config = json.load(f)
+        GPT2_Config = GPT2Config.from_pretrained(self.dpath)
 
-        support_up_limits = json_config['n_ctx']
+        support_up_limits = GPT2_Config.n_positions
 
         if mode != 'test':
             for turn, iter in enumerate(input_ids_iters):

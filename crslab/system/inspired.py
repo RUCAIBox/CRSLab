@@ -61,7 +61,6 @@ class InspiredSystem(BaseSystem):
                 conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
-        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

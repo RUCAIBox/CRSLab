@@ -56,7 +56,6 @@ class ProfileBERTModel(BaseModel):
         self.topic_class_num = vocab['n_topic']
         self.n_sent = opt.get('n_sent', 10)
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['policy_pretrained_path']
         super(ProfileBERTModel, self).__init__(opt, device, self.dpath)
 

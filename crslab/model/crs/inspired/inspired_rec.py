@@ -54,7 +54,6 @@ class InspiredRecModel(BaseModel):
         """
         self.item_size = vocab['n_entity']
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['rec_pretrained_path']
         super(InspiredRecModel, self).__init__(opt, device, self.dpath)
 

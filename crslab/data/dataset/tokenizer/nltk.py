@@ -4,7 +4,7 @@
 
 from nltk import word_tokenize
 
-from crslab.tokenizer.base import BaseCrsTokenize
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
 class nltk_tokenize(BaseCrsTokenize):
 

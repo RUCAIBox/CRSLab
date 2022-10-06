@@ -35,11 +35,11 @@ from tqdm import tqdm
 from crslab.config import DATASET_PATH, MODEL_PATH
 from crslab.data.dataset.base import BaseDataset
 from .resources import resources
-from crslab.tokenizer.nltk import nltk_tokenize
-from crslab.tokenizer.bert import bert_tokenize
-from crslab.tokenizer.gpt2 import gpt2_tokenize
-from crslab.tokenizer.jieba import jieba_tokenize
-from crslab.tokenizer.pkuseg import pkuseg_tokenize
+from crslab.data.dataset.tokenizer.nltk import nltk_tokenize
+from crslab.data.dataset.tokenizer.bert import bert_tokenize
+from crslab.data.dataset.tokenizer.gpt2 import gpt2_tokenize
+from crslab.data.dataset.tokenizer.jieba import jieba_tokenize
+from crslab.data.dataset.tokenizer.pkuseg import pkuseg_tokenize
 
 
 class InspiredDataset(BaseDataset):

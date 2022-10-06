@@ -72,7 +72,6 @@ class TGRecModel(BaseModel):
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['rec_pretrained_path']
         super(TGRecModel, self).__init__(opt, device, self.dpath)
 

@@ -1,12 +1,12 @@
-# @Time   : 2022/9/28
+# @Time   : 2022/9/30
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
 from transformers import AutoTokenizer
 
-from crslab.tokenizer.base import BaseCrsTokenize
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
-class gpt2_tokenize(BaseCrsTokenize):
+class bert_tokenize(BaseCrsTokenize):
 
     def __init__(self, path=None) -> None:
         super().__init__(path)

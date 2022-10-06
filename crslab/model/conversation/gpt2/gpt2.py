@@ -58,7 +58,6 @@ class GPT2Model(BaseModel):
         self.response_truncate = opt['response_truncate']
         self.pad_id = vocab['pad']
 
-        self.language = dataset_language_map[opt['dataset']]
         self.dpath = opt['conv_pretrained_path']
         super(GPT2Model, self).__init__(opt, device, self.dpath)
 

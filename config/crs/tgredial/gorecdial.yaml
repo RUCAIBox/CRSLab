@@ -4,8 +4,8 @@ tokenize:
   rec: bert
   conv: gpt2
 # tokenize path
-rec_tokenize_path: 'data/model/pretrain/bert/en'
-conv_tokenize_path: 'data/model/pretrain/gpt2/en'
+rec_tokenize_path: 'bert-base-uncased'
+conv_tokenize_path: 'gpt2'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -15,8 +15,8 @@ scale: 0.01
 rec_model: TGRec
 conv_model: TGConv
 # pretrained path
-rec_pretrained_path: 'data/model/pretrain/bert/en'
-conv_pretrained_path: 'data/model/pretrain/gpt2/en'
+rec_pretrained_path: 'bert-base-uncased'
+conv_pretrained_path: 'gpt2'
 hidden_dropout_prob: 0.2
 initializer_range: 0.02
 hidden_size: 50

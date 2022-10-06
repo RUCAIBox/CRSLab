@@ -51,7 +51,6 @@ class ReDialSystem(BaseSystem):
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
 
-        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()

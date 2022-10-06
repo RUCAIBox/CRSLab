@@ -3,7 +3,7 @@ dataset: TGReDial
 tokenize:
   policy: bert
 # tokenize path
-policy_tokenize_path: 'data/model/pretrain/bert/zh'
+policy_tokenize_path: 'bert-base-chinese'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -12,7 +12,7 @@ scale: 1
 # model
 policy_model: TopicBERT
 # pretrained path
-policy_pretrained_path: 'data/model/pretrain/bert/zh'
+policy_pretrained_path: 'bert-base-chinese'
 # optim
 policy:
   epoch: 50

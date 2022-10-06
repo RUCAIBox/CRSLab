@@ -3,7 +3,7 @@ dataset: Inspired
 tokenize:
   rec: bert
 # tokenize path
-rec_tokenize_path: 'data/model/pretrain/bert/en'
+rec_tokenize_path: 'bert-base-uncased'
 # dataloader
 context_truncate: 256
 response_truncate: 30

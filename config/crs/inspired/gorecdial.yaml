@@ -4,8 +4,8 @@ tokenize:
   rec: bert
   conv: gpt2
 # tokenize path
-rec_tokenize_path: 'data/model/pretrain/bert/en'
-conv_tokenize_path: 'data/model/pretrain/gpt2/en'
+rec_tokenize_path: 'bert-base-uncased'
+conv_tokenize_path: 'gpt2'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -15,11 +15,11 @@ scale: 1
 # rec
 rec_model: InspiredRec
 # pretrained path
-rec_pretrained_path: 'data/model/pretrain/bert/en'
+rec_pretrained_path: 'bert-base-uncased'
 # conv
 conv_model: InspiredConv
 # pretrained path
-conv_pretrained_path: 'data/model/pretrain/gpt2/en'
+conv_pretrained_path: 'gpt2'
 # embedding: word2vec
 embedding_dim: 300
 use_dropout: False
