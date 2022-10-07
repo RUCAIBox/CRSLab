@@ -87,7 +87,8 @@ def get_dataset(opt, tokenize, restore, save, task=None) -> BaseDataset:
     if dataset in dataset_register_table:
         return dataset_register_table[dataset](opt, tokenize, restore, save, task)
     else:
-        raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
+        raise NotImplementedError(
+            f'The dataloader [{dataset}] has not been implemented')
 
 
 def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
@@ -106,4 +107,5 @@ def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
     if model_name in dataloader_register_table:
         return dataloader_register_table[model_name](opt, dataset, vocab)
     else:
-        raise NotImplementedError(f'The dataloader [{model_name}] has not been implemented')
+        raise NotImplementedError(
+            f'The dataloader [{model_name}] has not been implemented')

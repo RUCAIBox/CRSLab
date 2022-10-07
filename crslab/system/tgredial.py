@@ -13,17 +13,16 @@
 # @Email  : txy20010310@163.com
 
 import os
-
-import torch
-from loguru import logger
 from math import floor
 
+import torch
 from crslab.config import PRETRAIN_PATH
-from crslab.data import get_dataloader, dataset_language_map
+from crslab.data import dataset_language_map, get_dataloader
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from loguru import logger
 
 
 class TGReDialSystem(BaseSystem):
@@ -67,11 +66,12 @@ class TGReDialSystem(BaseSystem):
             self.conv_epoch = self.conv_optim_opt['epoch']
             self.conv_batch_size = self.conv_optim_opt['batch_size']
             if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler'][
-                'name']:
+                    'name']:
                 batch_num = 0
                 for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                     batch_num += 1
-                conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
+                conv_training_steps = self.conv_epoch * \
+                    floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
 
         if hasattr(self, 'policy_model'):
@@ -126,7 +126,8 @@ class TGReDialSystem(BaseSystem):
             else:
                 self.policy_model.eval()
 
-            policy_loss, policy_predict = self.policy_model.forward(batch, mode)
+            policy_loss, policy_predict = self.policy_model.forward(
+                batch, mode)
             if mode == "train" and policy_loss is not None:
                 policy_loss = policy_loss.sum()
                 self.backward(policy_loss)
@@ -177,7 +178,8 @@ class TGReDialSystem(BaseSystem):
             elif len(os.environ["CUDA_VISIBLE_DEVICES"]) == 1:
                 bert_param = list(self.rec_model.bert.named_parameters())
             else:
-                bert_param = list(self.rec_model.module.bert.named_parameters())
+                bert_param = list(
+                    self.rec_model.module.bert.named_parameters())
             bert_param_name = ['bert.' + n for n, p in bert_param]
         else:
             bert_param = []
@@ -205,7 +207,8 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
-                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + \
+                    self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
@@ -279,7 +282,8 @@ class TGReDialSystem(BaseSystem):
                     self.step(batch, stage='policy', mode='val')
                 self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
-                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + \
+                    self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
@@ -314,7 +318,8 @@ class TGReDialSystem(BaseSystem):
                 for r in rank.tolist():
                     item_ids.append(self.item_ids[r])
                 first_item_id = item_ids[:1]
-                self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
+                self.update_context(
+                    'rec', entity_ids=first_item_id, item_ids=first_item_id)
 
                 print(f"[Recommend]:")
                 for item_id in item_ids:
@@ -323,18 +328,22 @@ class TGReDialSystem(BaseSystem):
             # conv
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
-                preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
+                preds = self.conv_model.forward(
+                    conv_input, 'infer').tolist()[0]
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
 
-                token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
-                self.update_context('conv', token_ids, entity_ids, movie_ids, word_ids)
+                token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(
+                    p_str, 'conv')
+                self.update_context('conv', token_ids,
+                                    entity_ids, movie_ids, word_ids)
 
                 print(f"[Response]:\n{p_str}")
             # input
             input_text = self.get_input(self.language)
 
     def process_input(self, input_text, stage):
-        token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(input_text, stage)
+        token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(
+            input_text, stage)
         self.update_context(stage, token_ids, entity_ids, movie_ids, word_ids)
 
         data = {'role': 'Seeker', 'context_tokens': self.context[stage]['context_tokens'],
@@ -349,7 +358,8 @@ class TGReDialSystem(BaseSystem):
         elif stage == 'conv':
             data = dataloader.conv_interact(data)
 
-        data = [ele.to(self.device) if isinstance(ele, torch.Tensor) else ele for ele in data]
+        data = [ele.to(self.device) if isinstance(
+            ele, torch.Tensor) else ele for ele in data]
         return data
 
     def convert_to_id(self, text, stage):
@@ -360,18 +370,23 @@ class TGReDialSystem(BaseSystem):
         else:
             raise
 
-        entities = self.link(tokens, self.side_data[stage]['entity_kg']['entity'])
+        entities = self.link(
+            tokens, self.side_data[stage]['entity_kg']['entity'])
         words = self.link(tokens, self.side_data[stage]['word_kg']['entity'])
 
         if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
             language = dataset_language_map[self.opt['dataset']]
-            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
+            path = os.path.join(
+                PRETRAIN_PATH, self.opt['tokenize'][stage], language)
             tokens = self.tokenize(text, 'bert', path)
 
-        token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
+        token_ids = [self.vocab[stage]['tok2ind'].get(
+            token, self.vocab[stage]['unk']) for token in tokens]
         entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
                       entity in self.vocab[stage]['entity2id']]
-        movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
-        word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
+        movie_ids = [
+            entity_id for entity_id in entity_ids if entity_id in self.item_ids]
+        word_ids = [self.vocab[stage]['word2id'][word]
+                    for word in words if word in self.vocab[stage]['word2id']]
 
         return token_ids, entity_ids, movie_ids, word_ids

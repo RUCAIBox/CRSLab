@@ -23,15 +23,11 @@ References:
 
 """
 
-import os
 
+from crslab.model.base import BaseModel
 from loguru import logger
 from torch import nn
 from transformers import BertModel
-
-from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
-from crslab.model.base import BaseModel
 
 
 class BERTModel(BaseModel):

@@ -28,15 +28,15 @@ import os
 import numpy as np
 import torch
 import torch.nn.functional as F
-from loguru import logger
-from torch import nn
-from torch_geometric.nn import GCNConv, RGCNConv
-
 from crslab.config import MODEL_PATH
 from crslab.model.base import BaseModel
 from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionSeq
 from crslab.model.utils.modules.transformer import TransformerEncoder
+from loguru import logger
+from torch import nn
+from torch_geometric.nn import GCNConv, RGCNConv
+
 from .modules import GateLayer, TransformerDecoderKG
 
 
@@ -98,7 +98,8 @@ class KGSFModel(BaseModel):
         entity_kg = side_data['entity_kg']
         self.n_relation = entity_kg['n_relation']
         entity_edges = entity_kg['edge']
-        self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(entity_edges, 'RGCN')
+        self.entity_edge_idx, self.entity_edge_type = edge_to_pyg_format(
+            entity_edges, 'RGCN')
         self.entity_edge_idx = self.entity_edge_idx.to(device)
         self.entity_edge_type = self.entity_edge_type.to(device)
         word_edges = side_data['word_kg']['edge']
@@ -137,24 +138,32 @@ class KGSFModel(BaseModel):
                 torch.as_tensor(self.pretrained_embedding, dtype=torch.float), freeze=False,
                 padding_idx=self.pad_token_idx)
         else:
-            self.token_embedding = nn.Embedding(self.vocab_size, self.token_emb_dim, self.pad_token_idx)
-            nn.init.normal_(self.token_embedding.weight, mean=0, std=self.kg_emb_dim ** -0.5)
-            nn.init.constant_(self.token_embedding.weight[self.pad_token_idx], 0)
+            self.token_embedding = nn.Embedding(
+                self.vocab_size, self.token_emb_dim, self.pad_token_idx)
+            nn.init.normal_(self.token_embedding.weight,
+                            mean=0, std=self.kg_emb_dim ** -0.5)
+            nn.init.constant_(
+                self.token_embedding.weight[self.pad_token_idx], 0)
 
-        self.word_kg_embedding = nn.Embedding(self.n_word, self.kg_emb_dim, self.pad_word_idx)
-        nn.init.normal_(self.word_kg_embedding.weight, mean=0, std=self.kg_emb_dim ** -0.5)
+        self.word_kg_embedding = nn.Embedding(
+            self.n_word, self.kg_emb_dim, self.pad_word_idx)
+        nn.init.normal_(self.word_kg_embedding.weight,
+                        mean=0, std=self.kg_emb_dim ** -0.5)
         nn.init.constant_(self.word_kg_embedding.weight[self.pad_word_idx], 0)
 
         logger.debug('[Finish init embeddings]')
 
     def _build_kg_layer(self):
         # db encoder
-        self.entity_encoder = RGCNConv(self.n_entity, self.kg_emb_dim, self.n_relation, self.num_bases)
-        self.entity_self_attn = SelfAttentionSeq(self.kg_emb_dim, self.kg_emb_dim)
+        self.entity_encoder = RGCNConv(
+            self.n_entity, self.kg_emb_dim, self.n_relation, self.num_bases)
+        self.entity_self_attn = SelfAttentionSeq(
+            self.kg_emb_dim, self.kg_emb_dim)
 
         # concept encoder
         self.word_encoder = GCNConv(self.kg_emb_dim, self.kg_emb_dim)
-        self.word_self_attn = SelfAttentionSeq(self.kg_emb_dim, self.kg_emb_dim)
+        self.word_self_attn = SelfAttentionSeq(
+            self.kg_emb_dim, self.kg_emb_dim)
 
         # gate mechanism
         self.gate_layer = GateLayer(self.kg_emb_dim)
@@ -175,7 +184,8 @@ class KGSFModel(BaseModel):
         logger.debug('[Finish build rec layer]')
 
     def _build_conversation_layer(self):
-        self.register_buffer('START', torch.tensor([self.start_token_idx], dtype=torch.long))
+        self.register_buffer('START', torch.tensor(
+            [self.start_token_idx], dtype=torch.long))
         self.conv_encoder = TransformerEncoder(
             n_heads=self.n_heads,
             n_layers=self.n_layers,
@@ -229,15 +239,19 @@ class KGSFModel(BaseModel):
         if loss_mask.item() == 0:
             return None
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
-        word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
+        entity_graph_representations = self.entity_encoder(
+            None, self.entity_edge_idx, self.entity_edge_type)
+        word_graph_representations = self.word_encoder(
+            self.word_kg_embedding.weight, self.word_edges)
 
         word_representations = word_graph_representations[words]
         word_padding_mask = words.eq(self.pad_word_idx)  # (bs, seq_len)
 
-        word_attn_rep = self.word_self_attn(word_representations, word_padding_mask)
+        word_attn_rep = self.word_self_attn(
+            word_representations, word_padding_mask)
         word_info_rep = self.infomax_norm(word_attn_rep)  # (bs, dim)
-        info_predict = F.linear(word_info_rep, entity_graph_representations, self.infomax_bias.bias)  # (bs, #entity)
+        info_predict = F.linear(
+            word_info_rep, entity_graph_representations, self.infomax_bias.bias)  # (bs, #entity)
         loss = self.infomax_loss(info_predict, entity_labels) / loss_mask
         return loss
 
@@ -249,20 +263,27 @@ class KGSFModel(BaseModel):
         """
         context_entities, context_words, entities, movie = batch
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
-        word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
+        entity_graph_representations = self.entity_encoder(
+            None, self.entity_edge_idx, self.entity_edge_type)
+        word_graph_representations = self.word_encoder(
+            self.word_kg_embedding.weight, self.word_edges)
 
-        entity_padding_mask = context_entities.eq(self.pad_entity_idx)  # (bs, entity_len)
-        word_padding_mask = context_words.eq(self.pad_word_idx)  # (bs, word_len)
+        entity_padding_mask = context_entities.eq(
+            self.pad_entity_idx)  # (bs, entity_len)
+        word_padding_mask = context_words.eq(
+            self.pad_word_idx)  # (bs, word_len)
 
         entity_representations = entity_graph_representations[context_entities]
         word_representations = word_graph_representations[context_words]
 
-        entity_attn_rep = self.entity_self_attn(entity_representations, entity_padding_mask)
-        word_attn_rep = self.word_self_attn(word_representations, word_padding_mask)
+        entity_attn_rep = self.entity_self_attn(
+            entity_representations, entity_padding_mask)
+        word_attn_rep = self.word_self_attn(
+            word_representations, word_padding_mask)
 
         user_rep = self.gate_layer(entity_attn_rep, word_attn_rep)
-        rec_scores = F.linear(user_rep, entity_graph_representations, self.rec_bias.bias)  # (bs, #entity)
+        rec_scores = F.linear(
+            user_rep, entity_graph_representations, self.rec_bias.bias)  # (bs, #entity)
 
         rec_loss = self.rec_loss(rec_scores, movie)
 
@@ -273,7 +294,8 @@ class KGSFModel(BaseModel):
             word_info_rep = self.infomax_norm(word_attn_rep)  # (bs, dim)
             info_predict = F.linear(word_info_rep, entity_graph_representations,
                                     self.infomax_bias.bias)  # (bs, #entity)
-            info_loss = self.infomax_loss(info_predict, entities) / info_loss_mask
+            info_loss = self.infomax_loss(
+                info_predict, entities) / info_loss_mask
 
         return rec_loss, info_loss, rec_scores
 
@@ -303,7 +325,8 @@ class KGSFModel(BaseModel):
 
         copy_logits = self.copy_output(copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(
             0)  # (bs, seq_len, vocab_size)
-        gen_logits = F.linear(dialog_latent, self.token_embedding.weight)  # (bs, seq_len, vocab_size)
+        # (bs, seq_len, vocab_size)
+        gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
         sum_logits = copy_logits + gen_logits
         preds = sum_logits.argmax(dim=-1)
         return sum_logits, preds
@@ -320,16 +343,19 @@ class KGSFModel(BaseModel):
             dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
             db_latent = entity_emb_attn.unsqueeze(1)
             concept_latent = word_emb_attn.unsqueeze(1)
-            copy_latent = self.copy_norm(torch.cat((db_latent, concept_latent, dialog_latent), dim=-1))
+            copy_latent = self.copy_norm(
+                torch.cat((db_latent, concept_latent, dialog_latent), dim=-1))
 
-            copy_logits = self.copy_output(copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(0)
+            copy_logits = self.copy_output(
+                copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(0)
             gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
             sum_logits = copy_logits + gen_logits
             preds = sum_logits.argmax(dim=-1).long()
             logits.append(sum_logits)
             inputs = torch.cat((inputs, preds), dim=1)
 
-            finished = ((inputs == self.end_token_idx).sum(dim=-1) > 0).sum().item() == batch_size
+            finished = ((inputs == self.end_token_idx).sum(
+                dim=-1) > 0).sum().item() == batch_size
             if finished:
                 break
         logits = torch.cat(logits, dim=1)
@@ -360,7 +386,8 @@ class KGSFModel(BaseModel):
                     for j in range(batch_size):
                         text = sequences[j][d][0]
                         inputs.append(text)
-                inputs = torch.stack(inputs).reshape(beam, batch_size, -1)  # (beam, batch_size, _)
+                inputs = torch.stack(inputs).reshape(
+                    beam, batch_size, -1)  # (beam, batch_size, _)
 
             with torch.no_grad():
                 dialog_latent, incr_state = self.conv_decoder(
@@ -371,15 +398,19 @@ class KGSFModel(BaseModel):
                 dialog_latent = dialog_latent[:, -1:, :]  # (bs, 1, dim)
                 db_latent = entity_emb_attn.unsqueeze(1)
                 concept_latent = word_emb_attn.unsqueeze(1)
-                copy_latent = self.copy_norm(torch.cat((db_latent, concept_latent, dialog_latent), dim=-1))
+                copy_latent = self.copy_norm(
+                    torch.cat((db_latent, concept_latent, dialog_latent), dim=-1))
 
-                copy_logits = self.copy_output(copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(0)
-                gen_logits = F.linear(dialog_latent, self.token_embedding.weight)
+                copy_logits = self.copy_output(
+                    copy_latent) * self.copy_mask.unsqueeze(0).unsqueeze(0)
+                gen_logits = F.linear(
+                    dialog_latent, self.token_embedding.weight)
                 sum_logits = copy_logits + gen_logits
 
             logits = sum_logits.reshape(len(sequences[0]), batch_size, 1, -1)
             # turn into probabilities,in case of negative numbers
-            probs, preds = torch.nn.functional.softmax(logits).topk(beam, dim=-1)
+            probs, preds = torch.nn.functional.softmax(
+                logits).topk(beam, dim=-1)
 
             # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
 
@@ -392,15 +423,20 @@ class KGSFModel(BaseModel):
                         if logit == []:
                             logit_tmp = logits[n][j][0].unsqueeze(0)
                         else:
-                            logit_tmp = torch.cat((logit, logits[n][j][0].unsqueeze(0)), dim=0)
-                        seq_tmp = torch.cat((inputs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
-                        candidate = [seq_tmp, logit_tmp, prob * probs[n][j][0][k]]
+                            logit_tmp = torch.cat(
+                                (logit, logits[n][j][0].unsqueeze(0)), dim=0)
+                        seq_tmp = torch.cat(
+                            (inputs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
+                        candidate = [seq_tmp, logit_tmp,
+                                     prob * probs[n][j][0][k]]
                         all_candidates.append(candidate)
-                ordered = sorted(all_candidates, key=lambda tup: tup[2], reverse=True)
+                ordered = sorted(
+                    all_candidates, key=lambda tup: tup[2], reverse=True)
                 sequences[j] = ordered[:beam]
 
             # check if everyone has generated an end token
-            all_finished = ((inputs == self.end_token_idx).sum(dim=1) > 0).sum().item() == batch_size
+            all_finished = ((inputs == self.end_token_idx).sum(
+                dim=1) > 0).sum().item() == batch_size
             if all_finished:
                 break
         logits = torch.stack([seq[0][1] for seq in sequences])
@@ -410,17 +446,23 @@ class KGSFModel(BaseModel):
     def converse(self, batch, mode):
         context_tokens, context_entities, context_words, response = batch
 
-        entity_graph_representations = self.entity_encoder(None, self.entity_edge_idx, self.entity_edge_type)
-        word_graph_representations = self.word_encoder(self.word_kg_embedding.weight, self.word_edges)
+        entity_graph_representations = self.entity_encoder(
+            None, self.entity_edge_idx, self.entity_edge_type)
+        word_graph_representations = self.word_encoder(
+            self.word_kg_embedding.weight, self.word_edges)
 
-        entity_padding_mask = context_entities.eq(self.pad_entity_idx)  # (bs, entity_len)
-        word_padding_mask = context_words.eq(self.pad_word_idx)  # (bs, seq_len)
+        entity_padding_mask = context_entities.eq(
+            self.pad_entity_idx)  # (bs, entity_len)
+        word_padding_mask = context_words.eq(
+            self.pad_word_idx)  # (bs, seq_len)
 
         entity_representations = entity_graph_representations[context_entities]
         word_representations = word_graph_representations[context_words]
 
-        entity_attn_rep = self.entity_self_attn(entity_representations, entity_padding_mask)
-        word_attn_rep = self.word_self_attn(word_representations, word_padding_mask)
+        entity_attn_rep = self.entity_self_attn(
+            entity_representations, entity_padding_mask)
+        word_attn_rep = self.word_self_attn(
+            word_representations, word_padding_mask)
 
         # encoder-decoder
         tokens_encoding = self.conv_encoder(context_tokens)
@@ -447,8 +489,10 @@ class KGSFModel(BaseModel):
     def forward(self, batch, stage, mode):
         if len(self.gpu) >= 2:
             #  forward function operates on different gpus, the weight of graph network need to be copied to other gpu
-            self.entity_edge_idx = self.entity_edge_idx.cuda(torch.cuda.current_device())
-            self.entity_edge_type = self.entity_edge_type.cuda(torch.cuda.current_device())
+            self.entity_edge_idx = self.entity_edge_idx.cuda(
+                torch.cuda.current_device())
+            self.entity_edge_type = self.entity_edge_type.cuda(
+                torch.cuda.current_device())
             self.word_edges = self.word_edges.cuda(torch.cuda.current_device())
             self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
                                              ).cuda(torch.cuda.current_device())

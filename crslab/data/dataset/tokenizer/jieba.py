@@ -2,9 +2,10 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
+
 import jieba
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
 class jieba_tokenize(BaseCrsTokenize):
 

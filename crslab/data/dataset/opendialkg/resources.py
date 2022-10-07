@@ -23,7 +23,7 @@ resources = {
             'opendialkg.zip',
             '73c2632ddf27d15a9f89cd288dae4e200a6a7a2487edc303f881077bc6884671',
         ),
-        'nltk':{
+        'nltk': {
             'special_token_idx': {
                 'pad': 0,
                 'start': 1,
@@ -56,6 +56,6 @@ resources = {
                 'pad_entity': 0,
                 'pad_word': 0
             },
-        }        
+        }
     },
 }

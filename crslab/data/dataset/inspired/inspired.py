@@ -26,20 +26,20 @@ References:
 import json
 import os
 from copy import copy
-import numpy as np
+
 import gensim
-
-from loguru import logger
-from tqdm import tqdm
-
+import numpy as np
 from crslab.config import DATASET_PATH, MODEL_PATH
 from crslab.data.dataset.base import BaseDataset
-from .resources import resources
-from crslab.data.dataset.tokenizer.nltk import nltk_tokenize
 from crslab.data.dataset.tokenizer.bert import bert_tokenize
 from crslab.data.dataset.tokenizer.gpt2 import gpt2_tokenize
 from crslab.data.dataset.tokenizer.jieba import jieba_tokenize
+from crslab.data.dataset.tokenizer.nltk import nltk_tokenize
 from crslab.data.dataset.tokenizer.pkuseg import pkuseg_tokenize
+from loguru import logger
+from tqdm import tqdm
+
+from .resources import resources
 
 
 class InspiredDataset(BaseDataset):
@@ -78,7 +78,7 @@ class InspiredDataset(BaseDataset):
 
         """
         if 'copy' in opt:
-            self.copy = True 
+            self.copy = True
         else:
             self.copy = False
         resource = resources['resource']
@@ -118,7 +118,8 @@ class InspiredDataset(BaseDataset):
         # load train/valid/test data
         with open(os.path.join(self.dpath, 'train_data.json'), 'r', encoding='utf-8') as f:
             train_data = json.load(f)
-            logger.debug(f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
+            logger.debug(
+                f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
          # split token
         processing_train_data = self.split_token(train_data)
         logger.info("[Finish train data split]")
@@ -132,17 +133,19 @@ class InspiredDataset(BaseDataset):
         if self.copy:
             copy_mask = self.generate_copy_mask(tok2ind, processing_train_data)
             logger.info('[Finish generate copy_mask]')
-        
+
         with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
-            logger.debug(f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
+            logger.debug(
+                f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
         # split_token
         processing_valid_data = self.split_token(valid_data)
         logger.info("[Finish valid data split]")
-        
+
         with open(os.path.join(self.dpath, 'test_data.json'), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
-            logger.debug(f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
+            logger.debug(
+                f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
         # split_token
         processing_test_data = self.split_token(test_data)
         logger.info("[Finish test data split]")
@@ -154,18 +157,23 @@ class InspiredDataset(BaseDataset):
             self.tok2ind = json.load(f)
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
 
-        logger.debug(f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
-        logger.debug(f"[The size of token2index dictionary is {len(self.tok2ind)}]")
-        logger.debug(f"[The size of index2token dictionary is {len(self.ind2tok)}]")
+        logger.debug(
+            f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
+        logger.debug(
+            f"[The size of token2index dictionary is {len(self.tok2ind)}]")
+        logger.debug(
+            f"[The size of index2token dictionary is {len(self.ind2tok)}]")
 
     def _load_other_data(self):
         # dbpedia
         with open(os.path.join(self.dpath, 'entity2id.json'), encoding='utf-8') as f:
             self.entity2id = json.load(f)  # {entity: entity_id}
-        self.id2entity = {idx: entity for entity, idx in self.entity2id.items()}
+        self.id2entity = {idx: entity for entity,
+                          idx in self.entity2id.items()}
         self.n_entity = max(self.entity2id.values()) + 1
         # {head_entity_id: [(relation_id, tail_entity_id)]}
-        self.entity_kg = open(os.path.join(self.dpath, 'dbpedia_subkg.txt'), encoding='utf-8')
+        self.entity_kg = open(os.path.join(
+            self.dpath, 'dbpedia_subkg.txt'), encoding='utf-8')
         logger.debug(
             f"[Load entity dictionary and KG from {os.path.join(self.dpath, 'entity2id.json')} and {os.path.join(self.dpath, 'entity_subkg.txt')}]")
 
@@ -175,7 +183,8 @@ class InspiredDataset(BaseDataset):
             self.word2id = json.load(f)
         self.n_word = max(self.word2id.values()) + 1
         # {concept \t relation\t concept}
-        self.word_kg = open(os.path.join(self.dpath, 'concept_subkg.txt'), encoding='utf-8')
+        self.word_kg = open(os.path.join(
+            self.dpath, 'concept_subkg.txt'), encoding='utf-8')
         logger.debug(
             f"[Load word dictionary and KG from {os.path.join(self.dpath, 'word2id.json')} and {os.path.join(self.dpath, 'concept_subkg.txt')}]")
 
@@ -191,7 +200,8 @@ class InspiredDataset(BaseDataset):
         return processed_train_data, processed_valid_data, processed_test_data, processed_side_data
 
     def _raw_data_process(self, raw_data):
-        augmented_convs = [self._convert_to_id(conversation) for conversation in tqdm(raw_data)]
+        augmented_convs = [self._convert_to_id(
+            conversation) for conversation in tqdm(raw_data)]
         augmented_conv_dicts = []
         for conv in tqdm(augmented_convs):
             augmented_conv_dicts.extend(self._augment_and_add(conv))
@@ -201,10 +211,14 @@ class InspiredDataset(BaseDataset):
         augmented_convs = []
         last_role = None
         for utt in conversation['dialog']:
-            text_token_ids = [self.tok2ind.get(word, self.unk_token_idx) for word in utt["text"]]
-            movie_ids = [self.entity2id[movie] for movie in utt['movies'] if movie in self.entity2id]
-            entity_ids = [self.entity2id[entity] for entity in utt['entity'] if entity in self.entity2id]
-            word_ids = [self.word2id[word] for word in utt['word'] if word in self.word2id]
+            text_token_ids = [self.tok2ind.get(
+                word, self.unk_token_idx) for word in utt["text"]]
+            movie_ids = [self.entity2id[movie]
+                         for movie in utt['movies'] if movie in self.entity2id]
+            entity_ids = [self.entity2id[entity]
+                          for entity in utt['entity'] if entity in self.entity2id]
+            word_ids = [self.word2id[word]
+                        for word in utt['word'] if word in self.word2id]
 
             if utt["role"] == last_role:
                 augmented_convs[-1]["text"] += text_token_ids
@@ -315,7 +329,7 @@ class InspiredDataset(BaseDataset):
         }
 
     def split_token(self, data):
-        
+
         all_data = []
         for each in tqdm(data):
             each_dict = {}
@@ -329,7 +343,7 @@ class InspiredDataset(BaseDataset):
                 each_data.append(one)
             each_dict['dialog'] = each_data
             all_data.append(each_dict)
-        
+
         return all_data
 
     def generate_tok2ind(self, processed_train_data):
@@ -358,19 +372,20 @@ class InspiredDataset(BaseDataset):
                     if each_word not in tok2ind:
                         tok2ind[each_word] = cnt
                         cnt += 1
-        
+
         if self.tokenize == 'nltk':
             tok2ind['_split_'] = cnt
             cnt += 1
 
         tok2ind_path = os.path.join(DATASET_PATH, 'inspired', 'token2id.json')
         with open(tok2ind_path, 'w', encoding='utf-8') as write:
-            json.dump(tok2ind, write, ensure_ascii=False, indent=4, separators=(',', ':'))
+            json.dump(tok2ind, write, ensure_ascii=False,
+                      indent=4, separators=(',', ':'))
 
         return tok2ind
 
     def generate_copy_mask(self, tok2ind, processing_train_data):
-        
+
         tokenizer = self.tokenize
         crstokenize = self.crstokenizer
 
@@ -397,27 +412,19 @@ class InspiredDataset(BaseDataset):
                 for people in dialog['people']:
                     list_word = crstokenize.tokenize(people)
                     match_list += list_word
-                    
+
                 match_list = list(set(match_list))
-                
+
                 for each_word in text:
                     if each_word in match_list:
                         token_id = tok2ind[each_word]
                         copy_mask[token_id] = True
 
-        if not os.path.exists(MODEL_PATH):
-            os.mkdir(MODEL_PATH)
-
-        if not os.path.exists(os.path.join(MODEL_PATH, 'kgsf')):
-            os.mkdir(os.path.join(MODEL_PATH, 'kgsf'))
-
-        copy_mask_dirpath = os.path.join(MODEL_PATH, 'kgsf', 'Inspired')
-        if not os.path.exists(copy_mask_dirpath):
-            os.mkdir(copy_mask_dirpath)
-
         path = os.path.join(MODEL_PATH, 'kgsf', 'Inspired', 'copy_mask.npy')
-        np.save(path, copy_mask)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
+        np.save(path, copy_mask)
 
     def generate_word2vec(self, processing_train_data):
 
@@ -427,23 +434,20 @@ class InspiredDataset(BaseDataset):
                 text = dialog['text']
                 corpus.append(text)
 
-        model = gensim.models.word2vec.Word2Vec(corpus, vector_size=300, min_count=1)
+        model = gensim.models.word2vec.Word2Vec(
+            corpus, vector_size=300, min_count=1)
 
         if self.tokenize == 'nltk':
-            word2index = {word: i + 4 for i, word in enumerate(model.wv.index_to_key)}        
-            word2embedding = [[0] * 300] * 4 + [model.wv[word] for word in word2index] + [[0] * 300]
-        
+            word2index = {word: i + 4 for i,
+                          word in enumerate(model.wv.index_to_key)}
+            word2embedding = [[0] * 300] * 4 + [model.wv[word]
+                                                for word in word2index] + [[0] * 300]
+
         elif self.tokenize == 'jieba':
-            word2index = {word: i + 4 for i, word in enumerate(model.wv.index_to_key)}        
-            word2embedding = [[0] * 300] * 4 + [model.wv[word] for word in word2index]
-
-        elif self.tokenize == 'bert':
-            word2index = {word: i + 1 for i, word in enumerate(model.wv.index_to_key)}        
-            word2embedding = [[0] * 300] + [model.wv[word] for word in word2index]
-
-        elif self.tokenize == 'gpt2':
-            word2index = {word: i + 1 for i, word in enumerate(model.wv.index_to_key)}        
-            word2embedding = [model.wv[word] for word in word2index]
+            word2index = {word: i + 4 for i,
+                          word in enumerate(model.wv.index_to_key)}
+            word2embedding = [[0] * 300] * 4 + [model.wv[word]
+                                                for word in word2index]
 
         word2vec_path = os.path.join(DATASET_PATH, 'inspired', 'word2vec.npy')
         np.save(word2vec_path, word2embedding)

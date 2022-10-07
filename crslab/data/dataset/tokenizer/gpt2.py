@@ -2,9 +2,9 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 from transformers import AutoTokenizer
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
 class gpt2_tokenize(BaseCrsTokenize):
 

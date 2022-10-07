@@ -23,7 +23,7 @@ resources = {
             'redial.zip',
             '9fcccc47095c6c8764a3f92e9ec993a2f5f635458836ac3314dcf007ad80d639',
         ),
-        'nltk':{
+        'nltk': {
             'special_token_idx': {
                 'pad': 0,
                 'start': 1,
@@ -56,6 +56,6 @@ resources = {
                 'pad_entity': 0,
                 'pad_word': 0
             },
-        }    
+        }
     },
 }

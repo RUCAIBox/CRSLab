@@ -23,14 +23,10 @@ References:
 
 """
 
-import os
 
+from crslab.model.base import BaseModel
 from torch import nn
 from transformers import BertModel
-
-from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
-from crslab.model.base import BaseModel
 
 
 class ConvBERTModel(BaseModel):
@@ -49,7 +45,7 @@ class ConvBERTModel(BaseModel):
             device (torch.device): A variable indicating which device to place the data and model.
             vocab (dict): A dictionary record the vocabulary information.
             side_data (dict): A dictionary record the side data.
-        
+
         """
         self.topic_class_num = vocab['n_topic']
         self.dpath = opt['policy_pretrained_path']

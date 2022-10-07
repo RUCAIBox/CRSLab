@@ -7,14 +7,12 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-import os
-import json
-import torch
-from transformers import GPT2LMHeadModel, GPT2Config
 
-from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
+
+import torch
 from crslab.model.base import BaseModel
+from transformers import GPT2Config, GPT2LMHeadModel
+
 from .modules import SequenceCrossEntropyLoss
 
 
@@ -90,7 +88,8 @@ class InspiredConvModel(BaseModel):
                     lm_logits, past = outputs.logits, outputs.past_key_values
                     lm_logits_all.append(lm_logits)
 
-            lm_logits_all = torch.cat(lm_logits_all, dim=0)  # (b_s, seq_len, vocab_size)
+            # (b_s, seq_len, vocab_size)
+            lm_logits_all = torch.cat(lm_logits_all, dim=0)
 
             # index from 1 to self.reponse_truncate is valid response
             loss = self.calculate_loss(
@@ -122,9 +121,11 @@ class InspiredConvModel(BaseModel):
             context_iters = context.unsqueeze(1)
             for turn, iter in enumerate(context_iters):
                 if roles[turn] == 0:
-                    outputs = self.model_sk(iter, former_hidden_state)  # (1, s_l, v_s),
+                    outputs = self.model_sk(
+                        iter, former_hidden_state)  # (1, s_l, v_s),
                 else:
-                    outputs = self.model_rm(iter, former_hidden_state)  # (1, s_l, v_s),
+                    outputs = self.model_rm(
+                        iter, former_hidden_state)  # (1, s_l, v_s),
                 last_hidden_state, former_hidden_state = outputs.logits, outputs.past_key_values
                 last_hidden_state_all.append(last_hidden_state)
 

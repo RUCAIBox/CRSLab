@@ -16,7 +16,7 @@
 from crslab.download import DownloadableFile
 
 resources = {
-    'resource':{
+    'resource': {
         'version': '1.0',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/ERN4GhkC-fBLk1gRKZeHgo4BnQglDxv7VTVmbqgPdL108A?download=1',
@@ -60,6 +60,6 @@ resources = {
                 'pad_word': 0,
                 'pad_topic': 0,
             },
-        }        
-    },    
+        }
+    },
 }

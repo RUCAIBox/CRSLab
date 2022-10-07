@@ -2,9 +2,6 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-import os
-from transformers import AutoTokenizer
-
 class BaseCrsTokenize:
 
     def __init__(self, path=None) -> None:

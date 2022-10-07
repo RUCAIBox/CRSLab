@@ -23,20 +23,16 @@ References:
 
 """
 
-import os
 
 import torch
+from crslab.model.base import BaseModel
 from torch.nn import CrossEntropyLoss
 from transformers import GPT2LMHeadModel
-
-from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
-from crslab.model.base import BaseModel
 
 
 class GPT2Model(BaseModel):
     """
-        
+
     Attributes:
         context_truncate: A integer indicating the length of dialogue context.
         response_truncate: A integer indicating the length of dialogue response.
@@ -97,7 +93,8 @@ class GPT2Model(BaseModel):
         context = context[..., -self.response_truncate + 1:]
 
         for i in range(self.response_truncate - 1):
-            outputs = self.model(context, former_hidden_state)  # (bs, c_t, v_s),
+            outputs = self.model(
+                context, former_hidden_state)  # (bs, c_t, v_s),
             last_hidden_state, former_hidden_state = outputs.logits, outputs.past_key_values
 
             next_token_logits = last_hidden_state[:, -1, :]  # (bs, v_s)
@@ -141,8 +138,10 @@ class GPT2Model(BaseModel):
             next_token_logits = last_hidden_state[:, -1, :]
             next_token_probs = torch.nn.functional.softmax(next_token_logits)
             topk = torch.topk(next_token_probs, beam, dim=-1)
-            probs = topk.values.reshape([batch_size, -1, beam])  # (bs, candidate, beam)
-            preds = topk.indices.reshape([batch_size, -1, beam])  # (bs, candidate, beam)
+            probs = topk.values.reshape(
+                [batch_size, -1, beam])  # (bs, candidate, beam)
+            preds = topk.indices.reshape(
+                [batch_size, -1, beam])  # (bs, candidate, beam)
 
             for j in range(batch_size):
                 all_candidates = []
@@ -154,7 +153,8 @@ class GPT2Model(BaseModel):
                         seq_tmp.append(preds[j][n][k])
                         candidate = [seq_tmp, prob * probs[j][n][k]]
                         all_candidates.append(candidate)
-                ordered = sorted(all_candidates, key=lambda tup: tup[1], reverse=True)
+                ordered = sorted(
+                    all_candidates, key=lambda tup: tup[1], reverse=True)
                 sequences[j] = ordered[:beam]
 
         res = []

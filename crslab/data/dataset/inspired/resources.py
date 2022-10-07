@@ -23,7 +23,7 @@ resources = {
             'inspired.zip',
             '1085c2ab31fd7691f24531f9beef9016b0f3137366495784569a63f82ddd95ed',
         ),
-        'nltk':{
+        'nltk': {
             'special_token_idx': {
                 'pad': 0,
                 'start': 1,

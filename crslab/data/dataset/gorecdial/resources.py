@@ -58,7 +58,7 @@ resources = {
                 'pad_entity': 0,
                 'pad_word': 0
             },
-        },        
+        },
     },
-    
+
 }

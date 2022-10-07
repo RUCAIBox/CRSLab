@@ -2,9 +2,10 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
+from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
+
 import pkuseg
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 
 class pkuseg_tokenize(BaseCrsTokenize):
 
@@ -12,5 +13,5 @@ class pkuseg_tokenize(BaseCrsTokenize):
         self.pkuseg_tokenizer = pkuseg.pkuseg()
         super().__init__(path)
 
-    def tokenize(self, text):        
+    def tokenize(self, text):
         return self.pkuseg_tokenizer.cut(text)

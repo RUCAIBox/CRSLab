@@ -21,14 +21,14 @@ References:
 
 import torch
 import torch.nn.functional as F
-from loguru import logger
-from torch import nn
-from torch_geometric.nn import RGCNConv
-
 from crslab.model.base import BaseModel
 from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionBatch
-from crslab.model.utils.modules.transformer import TransformerDecoder, TransformerEncoder
+from crslab.model.utils.modules.transformer import (TransformerDecoder,
+                                                    TransformerEncoder)
+from loguru import logger
+from torch import nn
+from torch_geometric.nn import RGCNConv
 
 
 class KBRDModel(BaseModel):
@@ -84,7 +84,8 @@ class KBRDModel(BaseModel):
         self.n_entity = vocab['n_entity']
         entity_kg = side_data['entity_kg']
         self.n_relation = entity_kg['n_relation']
-        self.edge_idx, self.edge_type = edge_to_pyg_format(entity_kg['edge'], 'RGCN')
+        self.edge_idx, self.edge_type = edge_to_pyg_format(
+            entity_kg['edge'], 'RGCN')
         self.edge_idx = self.edge_idx.to(device)
         self.edge_type = self.edge_type.to(device)
         self.num_bases = opt.get('num_bases', 8)
@@ -98,7 +99,8 @@ class KBRDModel(BaseModel):
         self.attention_dropout = opt.get('attention_dropout', 0.0)
         self.relu_dropout = opt.get('relu_dropout', 0.1)
         self.embeddings_scale = opt.get('embedding_scale', True)
-        self.learn_positional_embeddings = opt.get('learn_positional_embeddings', False)
+        self.learn_positional_embeddings = opt.get(
+            'learn_positional_embeddings', False)
         self.reduction = opt.get('reduction', False)
         self.n_positions = opt.get('n_positions', 1024)
         self.longest_label = opt.get('longest_label', 1)
@@ -118,13 +120,17 @@ class KBRDModel(BaseModel):
                 torch.as_tensor(self.pretrain_embedding, dtype=torch.float), freeze=False,
                 padding_idx=self.pad_token_idx)
         else:
-            self.token_embedding = nn.Embedding(self.vocab_size, self.token_emb_dim, self.pad_token_idx)
-            nn.init.normal_(self.token_embedding.weight, mean=0, std=self.kg_emb_dim ** -0.5)
-            nn.init.constant_(self.token_embedding.weight[self.pad_token_idx], 0)
+            self.token_embedding = nn.Embedding(
+                self.vocab_size, self.token_emb_dim, self.pad_token_idx)
+            nn.init.normal_(self.token_embedding.weight,
+                            mean=0, std=self.kg_emb_dim ** -0.5)
+            nn.init.constant_(
+                self.token_embedding.weight[self.pad_token_idx], 0)
         logger.debug('[Build embedding]')
 
     def _build_kg_layer(self):
-        self.kg_encoder = RGCNConv(self.n_entity, self.kg_emb_dim, self.n_relation, num_bases=self.num_bases)
+        self.kg_encoder = RGCNConv(
+            self.n_entity, self.kg_emb_dim, self.n_relation, num_bases=self.num_bases)
         self.kg_attn = SelfAttentionBatch(self.kg_emb_dim, self.kg_emb_dim)
         logger.debug('[Build kg layer]')
 
@@ -134,7 +140,8 @@ class KBRDModel(BaseModel):
         logger.debug('[Build recommendation layer]')
 
     def _build_conversation_layer(self):
-        self.register_buffer('START', torch.tensor([self.start_token_idx], dtype=torch.long))
+        self.register_buffer('START', torch.tensor(
+            [self.start_token_idx], dtype=torch.long))
         self.dialog_encoder = TransformerEncoder(
             self.n_heads,
             self.n_layers,
@@ -175,7 +182,8 @@ class KBRDModel(BaseModel):
         user_repr_list = []
         for entity_list in entity_lists:
             if entity_list is None:
-                user_repr_list.append(torch.zeros(self.user_emb_dim, device=self.device))
+                user_repr_list.append(torch.zeros(
+                    self.user_emb_dim, device=self.device))
                 continue
             user_repr = kg_embedding[entity_list]
             user_repr = self.kg_attn(user_repr)
@@ -201,7 +209,8 @@ class KBRDModel(BaseModel):
         inputs = torch.cat([self._starts(bsz), inputs], 1)
         latent, _ = self.decoder(inputs, encoder_states)
         token_logits = F.linear(latent, self.token_embedding.weight)
-        user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
+        user_logits = self.user_proj_2(torch.relu(
+            self.user_proj_1(user_embedding))).unsqueeze(1)
         sum_logits = token_logits + user_logits
         _, preds = sum_logits.max(dim=-1)
         return sum_logits, preds
@@ -213,16 +222,19 @@ class KBRDModel(BaseModel):
         incr_state = None
         logits = []
         for i in range(self.longest_label):
-            scores, incr_state = self.decoder(xs, encoder_states, incr_state)  # incr_state is always None
+            scores, incr_state = self.decoder(
+                xs, encoder_states, incr_state)  # incr_state is always None
             scores = scores[:, -1:, :]
             token_logits = F.linear(scores, self.token_embedding.weight)
-            user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
+            user_logits = self.user_proj_2(torch.relu(
+                self.user_proj_1(user_embedding))).unsqueeze(1)
             sum_logits = token_logits + user_logits
             probs, preds = sum_logits.max(dim=-1)
             logits.append(scores)
             xs = torch.cat([xs, preds], dim=1)
             # check if everyone has generated an end token
-            all_finished = ((xs == self.end_token_idx).sum(dim=1) > 0).sum().item() == bsz
+            all_finished = ((xs == self.end_token_idx).sum(
+                dim=1) > 0).sum().item() == bsz
             if all_finished:
                 break
         logits = torch.cat(logits, 1)
@@ -240,7 +252,8 @@ class KBRDModel(BaseModel):
                     for j in range(bsz):
                         text = sequences[j][d][0]
                         xs.append(text)
-                xs = torch.stack(xs).reshape(beam, bsz, -1)  # (beam, batch_size, _)
+                xs = torch.stack(xs).reshape(
+                    beam, bsz, -1)  # (beam, batch_size, _)
 
             with torch.no_grad():
                 if i == 1:
@@ -248,15 +261,18 @@ class KBRDModel(BaseModel):
                     encoder_states = (encoder_states[0].repeat(beam, 1, 1),
                                       encoder_states[1].repeat(beam, 1, 1))
 
-                scores, _ = self.decoder(xs.reshape(len(sequences[0]) * bsz, -1), encoder_states)
+                scores, _ = self.decoder(xs.reshape(
+                    len(sequences[0]) * bsz, -1), encoder_states)
                 scores = scores[:, -1:, :]
                 token_logits = F.linear(scores, self.token_embedding.weight)
-                user_logits = self.user_proj_2(torch.relu(self.user_proj_1(user_embedding))).unsqueeze(1)
+                user_logits = self.user_proj_2(torch.relu(
+                    self.user_proj_1(user_embedding))).unsqueeze(1)
                 sum_logits = token_logits + user_logits
 
             logits = sum_logits.reshape(len(sequences[0]), bsz, 1, -1)
             scores = scores.reshape(len(sequences[0]), bsz, 1, -1)
-            logits = torch.nn.functional.softmax(logits)  # turn into probabilities,in case of negative numbers
+            # turn into probabilities,in case of negative numbers
+            logits = torch.nn.functional.softmax(logits)
             probs, preds = logits.topk(beam, dim=-1)
             # (candeidate, bs, 1 , beam) during first loop, candidate=1, otherwise candidate=beam
 
@@ -269,15 +285,20 @@ class KBRDModel(BaseModel):
                         if score == []:
                             score_tmp = scores[n][j][0].unsqueeze(0)
                         else:
-                            score_tmp = torch.cat((score, scores[n][j][0].unsqueeze(0)), dim=0)
-                        seq_tmp = torch.cat((xs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
-                        candidate = [seq_tmp, score_tmp, prob * probs[n][j][0][k]]
+                            score_tmp = torch.cat(
+                                (score, scores[n][j][0].unsqueeze(0)), dim=0)
+                        seq_tmp = torch.cat(
+                            (xs[n][j].reshape(-1), preds[n][j][0][k].reshape(-1)))
+                        candidate = [seq_tmp, score_tmp,
+                                     prob * probs[n][j][0][k]]
                         all_candidates.append(candidate)
-                ordered = sorted(all_candidates, key=lambda tup: tup[2], reverse=True)
+                ordered = sorted(
+                    all_candidates, key=lambda tup: tup[2], reverse=True)
                 sequences[j] = ordered[:beam]
 
             # check if everyone has generated an end token
-            all_finished = ((xs == self.end_token_idx).sum(dim=1) > 0).sum().item() == bsz
+            all_finished = ((xs == self.end_token_idx).sum(
+                dim=1) > 0).sum().item() == bsz
             if all_finished:
                 break
         logits = torch.stack([seq[0][1] for seq in sequences])
@@ -292,7 +313,8 @@ class KBRDModel(BaseModel):
         encoder_state = self.dialog_encoder(context_tokens)
         if mode != 'test':
             self.longest_label = max(self.longest_label, response.shape[1])
-            logits, preds = self.decode_forced(encoder_state, user_embedding, response)
+            logits, preds = self.decode_forced(
+                encoder_state, user_embedding, response)
             logits = logits.view(-1, logits.shape[-1])
             labels = response.view(-1)
             return self.conv_loss(logits, labels), preds

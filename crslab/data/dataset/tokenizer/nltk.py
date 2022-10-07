@@ -2,9 +2,11 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-from nltk import word_tokenize
-
 from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
+
+from nltk import word_tokenize
+import nltk
+
 
 class nltk_tokenize(BaseCrsTokenize):
 
@@ -12,5 +14,5 @@ class nltk_tokenize(BaseCrsTokenize):
         super().__init__(path)
 
     def tokenize(self, text):
-        # nltk.download('punkt')
+        nltk.download('punkt')
         return word_tokenize(text)
