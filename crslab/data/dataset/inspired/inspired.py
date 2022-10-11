@@ -91,7 +91,7 @@ class InspiredDataset(BaseDataset):
         if task_tokenize_path in opt:
             self.tokenize_path = opt[task_tokenize_path]
         self.tokenize_class = globals()[tokenize + '_tokenize']
-        self.crstokenizer = self.tokenize_class(self.tokenize_path)
+        self.Tokenizer = self.tokenize_class(self.tokenize_path)
         dpath = os.path.join(DATASET_PATH, 'inspired')
         super().__init__(opt, dpath, resource, restore, save)
 
@@ -337,7 +337,7 @@ class InspiredDataset(BaseDataset):
             for one in each['dialog']:
                 str_text = one['text']
                 tokenizer = self.tokenize
-                crstokenize = self.crstokenizer
+                crstokenize = self.Tokenizer
                 list_text = crstokenize.tokenize(str_text)
                 one['text'] = list_text
                 each_data.append(one)
@@ -387,7 +387,7 @@ class InspiredDataset(BaseDataset):
     def generate_copy_mask(self, tok2ind, processed_train_data):
 
         tokenizer = self.tokenize
-        crstokenize = self.crstokenizer
+        crstokenize = self.Tokenizer
 
         copy_mask = np.zeros((len(tok2ind)), dtype=bool)
         for each_data in tqdm(processed_train_data):
