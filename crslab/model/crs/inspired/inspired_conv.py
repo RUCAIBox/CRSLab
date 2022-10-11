@@ -67,10 +67,7 @@ class InspiredConvModel(BaseModel):
 
         past = None
         lm_logits_all = []
-
-        GPT2_Config = GPT2Config.from_pretrained(self.dpath)
-
-        support_up_limits = GPT2_Config.n_positions
+        support_up_limits = self.model_sk.config.n_positions
 
         if mode != 'test':
             for turn, iter in enumerate(input_ids_iters):
