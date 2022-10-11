@@ -85,6 +85,12 @@ class TGReDialDataset(BaseDataset):
             self.copy = True
         else:
             self.copy = False
+
+        if 'embedding' in opt:
+            self.generate_embedding = True
+        else:
+            self.generate_embedding = False
+
         resource = resources['resource']
         token = resource[tokenize]
         self.special_token_idx = token['special_token_idx']
@@ -145,8 +151,9 @@ class TGReDialDataset(BaseDataset):
         tok2ind = self.generate_tok2ind(processed_train_data)
         logger.info("[Finish generate train tok2ind]")
         # generate word2vec
-        self.generate_word2vec(processed_train_data)
-        logger.info('[Finish generate word2vec]')
+        if self.generate_embedding:
+            self.generate_word2vec(processed_train_data)
+            logger.info('[Finish generate word2vec]')
         # build copy_mask
         if self.copy:
             copy_mask = self.generate_copy_mask(tok2ind, processed_train_data)
