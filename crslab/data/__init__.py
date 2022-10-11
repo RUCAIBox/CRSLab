@@ -22,6 +22,15 @@ Attributes:
 
 from crslab.data.dataloader import *
 from crslab.data.dataset import *
+from crslab.data.dataset.tokenizer import *
+
+tokenizer_register_table = {
+    'nltk': nltk_tokenize,
+    'jieba': jieba_tokenize,
+    'gpt2': gpt2_tokenize,
+    'bert': bert_tokenize,
+    'pkuseg': pkuseg_tokenize
+}
 
 dataset_register_table = {
     'ReDial': ReDialDataset,
@@ -70,7 +79,14 @@ dataloader_register_table = {
 }
 
 
-def get_dataset(opt, tokenize, restore, save, task=None) -> BaseDataset:
+def get_tokenizer(tokenize, path=None) -> BaseCrsTokenize:
+    """
+    get tokenizer from opt
+    """
+    return tokenizer_register_table[tokenize](path)
+
+
+def get_dataset(opt, tokenize, CRS_Tokenizer, restore, save) -> BaseDataset:
     """get and process dataset
 
     Args:
@@ -85,7 +101,7 @@ def get_dataset(opt, tokenize, restore, save, task=None) -> BaseDataset:
     """
     dataset = opt['dataset']
     if dataset in dataset_register_table:
-        return dataset_register_table[dataset](opt, tokenize, restore, save, task)
+        return dataset_register_table[dataset](opt, tokenize, CRS_Tokenizer, restore, save)
     else:
         raise NotImplementedError(
             f'The dataloader [{dataset}] has not been implemented')

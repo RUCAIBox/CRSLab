@@ -31,11 +31,6 @@ import gensim
 import numpy as np
 from crslab.config import DATASET_PATH, MODEL_PATH
 from crslab.data.dataset.base import BaseDataset
-from crslab.data.dataset.tokenizer.bert import bert_tokenize
-from crslab.data.dataset.tokenizer.gpt2 import gpt2_tokenize
-from crslab.data.dataset.tokenizer.jieba import jieba_tokenize
-from crslab.data.dataset.tokenizer.nltk import nltk_tokenize
-from crslab.data.dataset.tokenizer.pkuseg import pkuseg_tokenize
 from loguru import logger
 from tqdm import tqdm
 
@@ -67,7 +62,7 @@ class GoRecDialDataset(BaseDataset):
 
     """
 
-    def __init__(self, opt, tokenize, restore=False, save=False, task=None):
+    def __init__(self, opt, tokenize, CRS_Tokenizer, restore=False, save=False):
         """Specify tokenized resource and init base dataset.
 
         Args:
@@ -92,12 +87,7 @@ class GoRecDialDataset(BaseDataset):
         self.special_token_idx = token['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
         self.tokenize = tokenize
-        task_tokenize_path = str(task) + '_tokenize_path'
-        self.tokenize_path = None
-        if task_tokenize_path in opt:
-            self.tokenize_path = opt[task_tokenize_path]
-        self.tokenize_class = globals()[tokenize + '_tokenize']
-        self.Tokenizer = self.tokenize_class(self.tokenize_path)
+        self.Tokenizer = CRS_Tokenizer
         dpath = os.path.join(DATASET_PATH, 'gorecdial')
         super().__init__(opt, dpath, resource, restore, save)
 
@@ -343,7 +333,6 @@ class GoRecDialDataset(BaseDataset):
             each_data = []
             for one in each['dialog']:
                 str_text = one['text']
-                tokenizer = self.tokenize
                 crstokenize = self.Tokenizer
                 list_text = crstokenize.tokenize(str_text)
                 one['text'] = list_text
@@ -393,7 +382,6 @@ class GoRecDialDataset(BaseDataset):
 
     def generate_copy_mask(self, tok2ind, processed_train_data):
 
-        tokenizer = self.tokenize
         crstokenize = self.Tokenizer
 
         copy_mask = np.zeros((len(tok2ind)), dtype=bool)
