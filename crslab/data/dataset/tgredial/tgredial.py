@@ -138,37 +138,37 @@ class TGReDialDataset(BaseDataset):
             train_data = json.load(f)
             logger.debug(
                 f"[Load train data from {os.path.join(self.dpath, 'train_data.json')}]")
-        # split token
-        processing_train_data = self.split_token(train_data)
+        # split text
+        processed_train_data = self.split_text(train_data)
         logger.info("[Finish train data split]")
         # generate tok2ind
-        tok2ind = self.generate_tok2ind(processing_train_data)
+        tok2ind = self.generate_tok2ind(processed_train_data)
         logger.info("[Finish generate train tok2ind]")
         # generate word2vec
-        self.generate_word2vec(processing_train_data)
+        self.generate_word2vec(processed_train_data)
         logger.info('[Finish generate word2vec]')
         # build copy_mask
         if self.copy:
-            copy_mask = self.generate_copy_mask(tok2ind, processing_train_data)
+            copy_mask = self.generate_copy_mask(tok2ind, processed_train_data)
             logger.info('[Finish generate copy_mask]')
 
         with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
             valid_data = json.load(f)
             logger.debug(
                 f"[Load valid data from {os.path.join(self.dpath, 'valid_data.json')}]")
-        # split_token
-        processing_valid_data = self.split_token(valid_data)
+        # split_text
+        processed_valid_data = self.split_text(valid_data)
         logger.info("[Finish valid data split]")
 
         with open(os.path.join(self.dpath, 'test_data.json'), 'r', encoding='utf-8') as f:
             test_data = json.load(f)
             logger.debug(
                 f"[Load test data from {os.path.join(self.dpath, 'test_data.json')}]")
-        # split_token
-        processing_test_data = self.split_token(test_data)
+        # split_text
+        processed_test_data = self.split_text(test_data)
         logger.info("[Finish test data split]")
 
-        return processing_train_data, processing_valid_data, processing_test_data
+        return processed_train_data, processed_valid_data, processed_test_data
 
     def _load_vocab(self):
         self.tok2ind = json.load(
@@ -418,7 +418,7 @@ class TGReDialDataset(BaseDataset):
             'entity': list(entities)
         }
 
-    def split_token(self, data):
+    def split_text(self, data):
 
         all_data = []
         for each in tqdm(data):
@@ -476,13 +476,13 @@ class TGReDialDataset(BaseDataset):
 
         return tok2ind
 
-    def generate_copy_mask(self, tok2ind, processing_train_data):
+    def generate_copy_mask(self, tok2ind, processed_train_data):
 
         tokenizer = self.tokenize
         crstokenize = self.crstokenizer
 
         copy_mask = np.zeros((len(tok2ind)), dtype=bool)
-        for each_data in tqdm(processing_train_data):
+        for each_data in tqdm(processed_train_data):
             for dialog in each_data['messages']:
                 match_list = []
                 text = dialog['text']
@@ -511,10 +511,10 @@ class TGReDialDataset(BaseDataset):
 
         np.save(path, copy_mask)
 
-    def generate_word2vec(self, processing_train_data):
+    def generate_word2vec(self, processed_train_data):
 
         corpus = []
-        for each_data in processing_train_data:
+        for each_data in processed_train_data:
             for dialog in each_data['messages']:
                 text = dialog['text']
                 corpus.append(text)
