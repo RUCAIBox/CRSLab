@@ -415,11 +415,11 @@ class ReDialDataset(BaseDataset):
                         token_id = tok2ind[each_word]
                         copy_mask[token_id] = True
 
-        path = os.path.join(MODEL_PATH, 'kgsf', 'ReDial', 'copy_mask.npy')
+        path = os.path.join(MODEL_PATH, 'kgsf', 'ReDial')
         if not os.path.exists(path):
             os.makedirs(path)
 
-        np.save(path, copy_mask)
+        np.save(os.path.join(path, 'copy_mask.npy'), copy_mask)
 
     def generate_word2vec(self, processed_train_data):
 
