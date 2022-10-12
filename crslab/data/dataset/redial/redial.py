@@ -122,7 +122,7 @@ class ReDialDataset(BaseDataset):
         processed_train_data = self.split_text(train_data)
         logger.info("[Finish train data split]")
         # generate tok2ind
-        tok2ind = self.generate_tok2ind(processed_train_data)
+        self.tok2ind = self.generate_tok2ind(processed_train_data)
         logger.info("[Finish generate train tok2ind]")
         # generate word2vec
         if self.generate_embedding:
@@ -130,7 +130,7 @@ class ReDialDataset(BaseDataset):
             logger.info('[Finish generate word2vec]')
         # build copy_mask
         if self.copy:
-            copy_mask = self.generate_copy_mask(tok2ind, processed_train_data)
+            copy_mask = self.generate_copy_mask(self.tok2ind, processed_train_data)
             logger.info('[Finish generate copy_mask]')
 
         with open(os.path.join(self.dpath, 'valid_data.json'), 'r', encoding='utf-8') as f:
@@ -152,12 +152,10 @@ class ReDialDataset(BaseDataset):
         return processed_train_data, processed_valid_data, processed_test_data
 
     def _load_vocab(self):
-        self.tok2ind = json.load(
-            open(os.path.join(self.dpath, 'token2id.json'), 'r', encoding='utf-8'))
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
 
         logger.debug(
-            f"[Load vocab from {os.path.join(self.dpath, 'token2id.json')}]")
+            f"[Load vocab from token2id]")
         logger.debug(
             f"[The size of token2index dictionary is {len(self.tok2ind)}]")
         logger.debug(
@@ -377,11 +375,6 @@ class ReDialDataset(BaseDataset):
         if self.tokenize == 'nltk':
             tok2ind['_split_'] = cnt
             cnt += 1
-
-        tok2ind_path = os.path.join(DATASET_PATH, 'redial', 'token2id.json')
-        with open(tok2ind_path, 'w', encoding='utf-8') as write:
-            json.dump(tok2ind, write, ensure_ascii=False,
-                      indent=4, separators=(',', ':'))
 
         return tok2ind
 
