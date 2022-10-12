@@ -58,7 +58,7 @@ class NTRDModel(BaseModel):
         self.pretrained_embedding = side_data.get('embedding', None)
         self.replace_token = opt.get('replace_token', None)
         self.replace_token_idx = vocab[self.replace_token]
-        self.copy_mask = vocab['copy_mask']
+        self.copy_mask = torch.as_tensor(vocab['copy_mask'].astype(bool)).to(self.device)
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']
