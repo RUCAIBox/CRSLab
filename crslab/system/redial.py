@@ -38,7 +38,7 @@ class ReDialSystem(BaseSystem):
         super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
                                            restore_system, interact, debug, tensorboard)
         self.ind2tok = vocab['conv']['ind2tok']
-        self.end_token_idx = vocab['conv']['end']
+        self.end_token_idx = vocab['conv']['special_token_idx']['end']
         self.item_ids = side_data['rec']['item_entity_ids']
         self.id2entity = vocab['rec']['id2entity']
 

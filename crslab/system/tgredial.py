@@ -51,7 +51,7 @@ class TGReDialSystem(BaseSystem):
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']
-            self.end_token_idx = vocab['conv']['end']
+            self.end_token_idx = vocab['conv']['special_token_idx']['end']
         if hasattr(self, 'rec_model'):
             self.item_ids = side_data['rec']['item_entity_ids']
             self.id2entity = vocab['rec']['id2entity']
