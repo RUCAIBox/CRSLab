@@ -11,10 +11,9 @@ import re
 from copy import copy
 
 import torch
-from tqdm import tqdm
-
 from crslab.data.dataloader.base import BaseDataLoader
-from crslab.data.dataloader.utils import padded_tensor, get_onehot, truncate
+from crslab.data.dataloader.utils import get_onehot, padded_tensor, truncate
+from tqdm import tqdm
 
 movie_pattern = re.compile(r'^@\d{5,6}$')
 
@@ -55,10 +54,10 @@ class ReDialDataLoader(BaseDataLoader):
         super().__init__(opt, dataset)
         self.ind2tok = vocab['ind2tok']
         self.n_entity = vocab['n_entity']
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.unk_token_idx = vocab['unk']
+        self.pad_token_idx = vocab['special_token_idx']['pad']
+        self.start_token_idx = vocab['special_token_idx']['start']
+        self.end_token_idx = vocab['special_token_idx']['end']
+        self.unk_token_idx = vocab['special_token_idx']['unk']
         self.item_token_idx = vocab['vocab_size']
         self.conversation_truncate = self.opt.get('conversation_truncate', None)
         self.utterance_truncate = self.opt.get('utterance_truncate', None)

@@ -74,9 +74,9 @@ class KBRDModel(BaseModel):
         self.device = device
         self.gpu = opt.get("gpu", [-1])
         # vocab
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
+        self.pad_token_idx = vocab['special_token_idx']['pad']
+        self.start_token_idx = vocab['special_token_idx']['start']
+        self.end_token_idx = vocab['special_token_idx']['end']
         self.vocab_size = vocab['vocab_size']
         self.token_emb_dim = opt.get('token_emb_dim', 300)
         self.pretrain_embedding = side_data.get('embedding', None)

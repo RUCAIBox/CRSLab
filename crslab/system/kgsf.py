@@ -46,7 +46,7 @@ class KGSFSystem(BaseSystem):
                                          restore_system, interact, debug, tensorboard)
 
         self.ind2tok = vocab['ind2tok']
-        self.end_token_idx = vocab['end']
+        self.end_token_idx = vocab['special_token_idx']['end']
         self.item_ids = side_data['item_entity_ids']
 
         self.pretrain_optim_opt = self.opt['pretrain']

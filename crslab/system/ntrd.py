@@ -3,16 +3,15 @@
 # @Email  : oran_official@outlook.com
 
 import os
-from crslab.evaluator.metrics import gen
-from numpy.core.numeric import NaN
 
 import torch
-from loguru import logger
-
+from crslab.evaluator.metrics import gen
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
-from crslab.system.utils.functions import ind2slot,ind2txt_with_slots
+from crslab.system.utils.functions import ind2slot, ind2txt_with_slots
+from loguru import logger
+from numpy.core.numeric import NaN
 
 
 class NTRDSystem(BaseSystem):
@@ -25,7 +24,7 @@ class NTRDSystem(BaseSystem):
 
         self.ind2tok = vocab['ind2tok']
         self.ind2movie = vocab['id2entity']
-        self.end_token_idx = vocab['end']
+        self.end_token_idx = vocab['special_token_idx']['end']
         self.item_ids = side_data['item_entity_ids']
 
         self.pretrain_optim_opt = self.opt['pretrain']

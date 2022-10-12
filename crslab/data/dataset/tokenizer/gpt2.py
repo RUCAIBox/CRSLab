@@ -9,8 +9,21 @@ from transformers import AutoTokenizer
 class gpt2_tokenize(BaseCrsTokenize):
 
     def __init__(self, path=None) -> None:
-        super().__init__(path)
+        self.special_token_idx = {
+            'pad': 0,
+            'start': 1,
+            'end': 2,
+            'unk': 3,
+            'cls': 101,
+            'sep': 102,
+            'sent_split': 4,
+            'word_split': 5,
+            'pad_entity': 0,
+            'pad_word': 0,
+            'pad_topic': 0,
+        }
         self.my_tokenizer = AutoTokenizer.from_pretrained(path)
+        super().__init__(path)        
 
     def tokenize(self, text):
         return self.my_tokenizer.tokenize(text)

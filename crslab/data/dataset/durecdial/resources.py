@@ -23,43 +23,5 @@ resources = {
             'durecdial.zip',
             '9b781f82a9192e96a1e7a9f7501edc930e0e13c0732faf8e3964360a6d5c6ca5',
         ),
-        'jieba': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'bert': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-                'pad_topic': 0
-            },
-        },
-        'gpt2': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'cls': 101,
-                'sep': 102,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-                'pad_topic': 0,
-            },
-        }
     },
 }

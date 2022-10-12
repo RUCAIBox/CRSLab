@@ -15,7 +15,6 @@ PMI
 from collections import defaultdict
 
 import torch
-
 from crslab.model.base import BaseModel
 
 
@@ -39,7 +38,7 @@ class PMIModel(BaseModel):
 
         """
         self.topic_class_num = vocab['n_topic']
-        self.pad_topic = vocab['pad_topic']
+        self.pad_topic = vocab['special_token_idx']['pad_topic']
         super(PMIModel, self).__init__(opt, device)
 
     def build_model(self, *args, **kwargs):

@@ -23,39 +23,5 @@ resources = {
             'opendialkg.zip',
             '73c2632ddf27d15a9f89cd288dae4e200a6a7a2487edc303f881077bc6884671',
         ),
-        'nltk': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'bert': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'gpt2': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'sent_split': 4,
-                'word_split': 5,
-                'pad_entity': 0,
-                'pad_word': 0
-            },
-        }
     },
 }

@@ -23,39 +23,5 @@ resources = {
             'inspired.zip',
             '1085c2ab31fd7691f24531f9beef9016b0f3137366495784569a63f82ddd95ed',
         ),
-        'nltk': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'bert': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'gpt2': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'sent_split': 4,
-                'word_split': 5,
-                'pad_entity': 0,
-                'pad_word': 0
-            },
-        }
     }
 }

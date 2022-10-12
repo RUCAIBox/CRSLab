@@ -23,42 +23,5 @@ resources = {
             'gorecdial.zip',
             '66035bf24862535a072cc6778a3affd541ae0a4aa1fe31455d4fb063b301f087',
         ),
-        'nltk': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-                'pad_topic': 0
-            },
-        },
-        'bert': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-                'pad_topic': 0
-            }
-        },
-        'gpt2': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'sent_split': 4,
-                'word_split': 5,
-                'pad_entity': 0,
-                'pad_word': 0
-            },
-        },
     },
-
 }

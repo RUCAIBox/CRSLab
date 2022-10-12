@@ -19,9 +19,9 @@ References:
 """
 
 import torch
+from crslab.model.base import BaseModel
 from torch import nn
 
-from crslab.model.base import BaseModel
 from .modules import HRNN, SwitchingDecoder
 
 
@@ -59,10 +59,10 @@ class ReDialConvModel(BaseModel):
         """
         # dataset
         self.vocab_size = vocab['vocab_size']
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.unk_token_idx = vocab['unk']
+        self.pad_token_idx = vocab['special_token_idx']['pad']
+        self.start_token_idx = vocab['special_token_idx']['start']
+        self.end_token_idx = vocab['special_token_idx']['end']
+        self.unk_token_idx = vocab['special_token_idx']['unk']
         self.pretrained_embedding = side_data.get('embedding', None)
         self.embedding_dim = opt.get('embedding_dim', None)
         if opt.get('embedding', None) and self.embedding_dim is None:

@@ -85,8 +85,7 @@ class OpenDialKGDataset(BaseDataset):
             self.generate_embedding = False
 
         resource = resources['resource']
-        token = resource[tokenize]
-        self.special_token_idx = token['special_token_idx']
+        self.special_token_idx = CRS_Tokenizer.special_token_idx
         self.unk_token_idx = self.special_token_idx['unk']
         self.tokenize = tokenize
         self.Tokenizer = CRS_Tokenizer
@@ -109,8 +108,8 @@ class OpenDialKGDataset(BaseDataset):
             'n_word': self.n_word,
             'word2vec': npy_dict['word2vec'],
             'copy_mask': npy_dict['copy_mask'],
+            'special_token_idx': self.special_token_idx
         }
-        vocab.update(self.special_token_idx)
 
         return train_data, valid_data, test_data, vocab
 

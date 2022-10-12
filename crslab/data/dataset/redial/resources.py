@@ -23,39 +23,5 @@ resources = {
             'redial.zip',
             '9fcccc47095c6c8764a3f92e9ec993a2f5f635458836ac3314dcf007ad80d639',
         ),
-        'nltk': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'pad_entity': 0,
-                'pad_word': 0
-            },
-        },
-        'bert': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 101,
-                'end': 102,
-                'unk': 100,
-                'sent_split': 2,
-                'word_split': 3,
-                'pad_entity': 0,
-                'pad_word': 0,
-            },
-        },
-        'gpt2': {
-            'special_token_idx': {
-                'pad': 0,
-                'start': 1,
-                'end': 2,
-                'unk': 3,
-                'sent_split': 4,
-                'word_split': 5,
-                'pad_entity': 0,
-                'pad_word': 0
-            },
-        }
     },
 }

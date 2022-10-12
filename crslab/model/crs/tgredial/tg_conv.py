@@ -52,7 +52,7 @@ class TGConvModel(BaseModel):
         """
         self.context_truncate = opt['context_truncate']
         self.response_truncate = opt['response_truncate']
-        self.pad_id = vocab['pad']
+        self.pad_id = vocab['special_token_idx']['pad']
 
         self.dpath = opt['conv_pretrained_path']
         super(TGConvModel, self).__init__(opt, device, self.dpath)

@@ -38,7 +38,7 @@ class InspiredConvModel(BaseModel):
         """
         self.context_truncate = opt['context_truncate']
         self.response_truncate = opt['response_truncate']
-        self.pad_id = vocab['pad']
+        self.pad_id = vocab['special_token_idx']['pad']
         self.label_smoothing = opt['conv']['label_smoothing'] if 'label_smoothing' in opt['conv'] else -1
 
         self.dpath = opt['conv_pretrained_path']

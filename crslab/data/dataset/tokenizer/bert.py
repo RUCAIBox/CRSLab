@@ -9,8 +9,19 @@ from transformers import AutoTokenizer
 class bert_tokenize(BaseCrsTokenize):
 
     def __init__(self, path=None) -> None:
-        super().__init__(path)
+        self.special_token_idx =  {
+            'pad': 0,
+            'start': 101,
+            'end': 102,
+            'unk': 100,
+            'sent_split': 2,
+            'word_split': 3,
+            'pad_entity': 0,
+            'pad_word': 0,
+            'pad_topic': 0
+        }
         self.my_tokenizer = AutoTokenizer.from_pretrained(path)
+        super().__init__(path)
 
     def tokenize(self, text):
         return self.my_tokenizer.tokenize(text)
