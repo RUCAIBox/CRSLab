@@ -88,8 +88,7 @@ class ReDialDataset(BaseDataset):
         self.special_token_idx = token['special_token_idx']
         self.unk_token_idx = self.special_token_idx['unk']
         self.tokenize = tokenize
-        self.tokenize_class = CRS_Tokenizer
-        self.Tokenizer = self.tokenize_class(self.tokenize_path)
+        self.Tokenizer = CRS_Tokenizer
         dpath = os.path.join(DATASET_PATH, "redial")
         super().__init__(opt, dpath, resource, restore, save)
 
