@@ -12,9 +12,8 @@ import pickle as pkl
 from abc import ABC, abstractmethod
 
 import numpy as np
-from loguru import logger
-
 from crslab.download import build
+from loguru import logger
 
 
 class BaseDataset(ABC):
@@ -52,7 +51,7 @@ class BaseDataset(ABC):
                                                                                                      test_data)
             embedding = opt.get('embedding', None)
             if embedding:
-                self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
+                self.side_data["embedding"] = self.vocab['word2vec']
                 logger.debug(f'[Load pretrained embedding {embedding}]')
             logger.info('[Finish data preprocess]')
         else:

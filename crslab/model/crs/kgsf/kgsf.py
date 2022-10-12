@@ -90,6 +90,7 @@ class KGSFModel(BaseModel):
         self.end_token_idx = vocab['end']
         self.token_emb_dim = opt['token_emb_dim']
         self.pretrained_embedding = side_data.get('embedding', None)
+        self.copy_mask = vocab['copy_mask']
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']
@@ -210,8 +211,6 @@ class KGSFModel(BaseModel):
 
         self.copy_norm = nn.Linear(self.ffn_size * 3, self.token_emb_dim)
         self.copy_output = nn.Linear(self.token_emb_dim, self.vocab_size)
-        self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
-                                         ).to(self.device)
 
         self.conv_decoder = TransformerDecoderKG(
             self.n_heads, self.n_layers, self.token_emb_dim, self.ffn_size, self.vocab_size,
@@ -494,8 +493,6 @@ class KGSFModel(BaseModel):
             self.entity_edge_type = self.entity_edge_type.cuda(
                 torch.cuda.current_device())
             self.word_edges = self.word_edges.cuda(torch.cuda.current_device())
-            self.copy_mask = torch.as_tensor(np.load(os.path.join(self.dpath, "copy_mask.npy")).astype(bool),
-                                             ).cuda(torch.cuda.current_device())
         if stage == "pretrain":
             loss = self.pretrain_infomax(batch)
         elif stage == "rec":

@@ -27,6 +27,7 @@ import json
 import os
 from collections import defaultdict
 from copy import copy
+from http.client import NotConnected
 
 import gensim
 import numpy as np
@@ -93,7 +94,7 @@ class OpenDialKGDataset(BaseDataset):
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_data(self):
-        train_data, valid_data, test_data = self._load_raw_data()
+        train_data, valid_data, test_data, npy_dict = self._load_raw_data()
         self._load_vocab()
         self._load_other_data()
 
@@ -106,6 +107,8 @@ class OpenDialKGDataset(BaseDataset):
             'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
             'n_word': self.n_word,
+            'word2vec': npy_dict['word2vec'],
+            'copy_mask': npy_dict['copy_mask'],
         }
         vocab.update(self.special_token_idx)
 
@@ -124,10 +127,12 @@ class OpenDialKGDataset(BaseDataset):
         self.tok2ind = self.generate_tok2ind(processed_train_data)
         logger.info("[Finish generate train tok2ind]")
         # generate word2vec
-        if self. generate_embedding:
-            self.generate_word2vec(processed_train_data)
+        wordembedding = None
+        if self.generate_embedding:
+            wordembedding = self.generate_word2vec(processed_train_data)
             logger.info('[Finish generate word2vec]')
         # build copy_mask
+        copy_mask = None
         if self.copy:
             copy_mask = self.generate_copy_mask(self.tok2ind, processed_train_data)
             logger.info('[Finish generate copy_mask]')
@@ -148,7 +153,9 @@ class OpenDialKGDataset(BaseDataset):
         processed_test_data = self.split_text(test_data)
         logger.info("[Finish test data split]")
 
-        return processed_train_data, processed_valid_data, processed_test_data
+        npy_dict = {'word2vec': wordembedding, 'copy_mask': copy_mask}
+
+        return processed_train_data, processed_valid_data, processed_test_data, npy_dict
 
     def _load_vocab(self):
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
@@ -407,11 +414,7 @@ class OpenDialKGDataset(BaseDataset):
                         token_id = tok2ind[each_word]
                         copy_mask[token_id] = True
 
-        path = os.path.join(MODEL_PATH, 'kgsf', 'OpenDialKG')
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        np.save(os.path.join(path, 'copy_mask.npy'), copy_mask)
+        return copy_mask
 
     def generate_word2vec(self, processed_train_data):
 
@@ -436,6 +439,4 @@ class OpenDialKGDataset(BaseDataset):
             word2embedding = [[0] * 300] * 4 + [model.wv[word]
                                                 for word in word2index]
 
-        word2vec_path = os.path.join(
-            DATASET_PATH, 'opendialkg', 'word2vec.npy')
-        np.save(word2vec_path, word2embedding)
+        return word2embedding

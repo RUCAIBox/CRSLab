@@ -1,7 +1,7 @@
 # dataset
 dataset: OpenDialKG
 tokenize: nltk
-embedding: word2vec.npy
+embedding: True
 # dataloader
 context_truncate: 256
 response_truncate: 30
