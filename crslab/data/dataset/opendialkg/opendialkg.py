@@ -127,9 +127,9 @@ class OpenDialKGDataset(BaseDataset):
         self.tok2ind = self.generate_tok2ind(processed_train_data)
         logger.info("[Finish generate train tok2ind]")
         # generate word2vec
-        wordembedding = None
+        word_embedding = None
         if self.generate_embedding:
-            wordembedding = self.generate_word2vec(processed_train_data)
+            word_embedding = self.generate_word2vec(processed_train_data)
             logger.info('[Finish generate word2vec]')
         # build copy_mask
         copy_mask = None
@@ -153,7 +153,7 @@ class OpenDialKGDataset(BaseDataset):
         processed_test_data = self.split_text(test_data)
         logger.info("[Finish test data split]")
 
-        npy_dict = {'word2vec': wordembedding, 'copy_mask': copy_mask}
+        npy_dict = {'word2vec': word_embedding, 'copy_mask': copy_mask}
 
         return processed_train_data, processed_valid_data, processed_test_data, npy_dict
 
