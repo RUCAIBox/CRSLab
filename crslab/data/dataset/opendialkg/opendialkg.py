@@ -31,10 +31,11 @@ from http.client import NotConnected
 
 import gensim
 import numpy as np
-from crslab.config import DATASET_PATH, MODEL_PATH
-from crslab.data.dataset.base import BaseDataset
 from loguru import logger
 from tqdm import tqdm
+
+from crslab.config import DATASET_PATH, MODEL_PATH
+from crslab.data.dataset.base import BaseDataset
 
 from .resources import resources
 
@@ -64,7 +65,7 @@ class OpenDialKGDataset(BaseDataset):
 
     """
 
-    def __init__(self, opt, tokenize, CRS_Tokenizer, restore=False, save=False):
+    def __init__(self, opt, tokenize, crs_tokenizer, restore=False, save=False):
         """Specify tokenized resource and init base dataset.
 
         Args:
@@ -85,10 +86,10 @@ class OpenDialKGDataset(BaseDataset):
             self.generate_embedding = False
 
         resource = resources['resource']
-        self.special_token_idx = CRS_Tokenizer.special_token_idx
+        self.special_token_idx = crs_tokenizer.special_token_idx
         self.unk_token_idx = self.special_token_idx['unk']
         self.tokenize = tokenize
-        self.Tokenizer = CRS_Tokenizer
+        self.Tokenizer = crs_tokenizer
         dpath = os.path.join(DATASET_PATH, 'opendialkg')
         super().__init__(opt, dpath, resource, restore, save)
 

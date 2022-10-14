@@ -86,7 +86,7 @@ def get_tokenizer(tokenize, path=None) -> BaseCrsTokenize:
     return tokenizer_register_table[tokenize](path)
 
 
-def get_dataset(opt, tokenize, CRS_Tokenizer, restore, save) -> BaseDataset:
+def get_dataset(opt, tokenize, crs_tokenizer, restore, save) -> BaseDataset:
     """get and process dataset
 
     Args:
@@ -101,7 +101,7 @@ def get_dataset(opt, tokenize, CRS_Tokenizer, restore, save) -> BaseDataset:
     """
     dataset = opt['dataset']
     if dataset in dataset_register_table:
-        return dataset_register_table[dataset](opt, tokenize, CRS_Tokenizer, restore, save)
+        return dataset_register_table[dataset](opt, tokenize, crs_tokenizer, restore, save)
     else:
         raise NotImplementedError(
             f'The dataloader [{dataset}] has not been implemented')

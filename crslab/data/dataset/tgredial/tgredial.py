@@ -30,10 +30,11 @@ from copy import copy
 
 import gensim
 import numpy as np
-from crslab.config import DATASET_PATH, MODEL_PATH
-from crslab.data.dataset.base import BaseDataset
 from loguru import logger
 from tqdm import tqdm
+
+from crslab.config import DATASET_PATH, MODEL_PATH
+from crslab.data.dataset.base import BaseDataset
 
 from .resources import resources
 
@@ -66,7 +67,7 @@ class TGReDialDataset(BaseDataset):
 
     """
 
-    def __init__(self, opt, tokenize, CRS_Tokenizer, restore=False, save=False):
+    def __init__(self, opt, tokenize, crs_tokenizer, restore=False, save=False):
         """Specify tokenized resource and init base dataset.
 
         Args:
@@ -87,12 +88,12 @@ class TGReDialDataset(BaseDataset):
             self.generate_embedding = False
 
         resource = resources['resource']
-        self.special_token_idx = CRS_Tokenizer.special_token_idx
+        self.special_token_idx = crs_tokenizer.special_token_idx
         self.unk_token_idx = self.special_token_idx['unk']
         self.pad_topic_idx = self.special_token_idx['pad_topic']
 
         self.tokenize = tokenize
-        self.Tokenizer = CRS_Tokenizer
+        self.Tokenizer = crs_tokenizer
         dpath = os.path.join(DATASET_PATH, 'tgredial')
 
         self.replace_token = opt.get('replace_token', None)

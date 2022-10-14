@@ -33,9 +33,9 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
     """
     # dataset & dataloader
     if isinstance(config['tokenize'], str):
-        CRS_Tokenizer = get_tokenizer(config['tokenize'], path=None)
+        CRS_tokenizer = get_tokenizer(config['tokenize'], path=None)
         CRS_dataset = get_dataset(
-            config, config['tokenize'],  CRS_Tokenizer, restore_data, save_data)
+            config, config['tokenize'],  CRS_tokenizer, restore_data, save_data)
         side_data = CRS_dataset.side_data
         vocab = CRS_dataset.vocab
 
@@ -60,9 +60,9 @@ def run_crslab(config, save_data=False, restore_data=False, save_system=False, r
                 tokenize_path = None
                 if task_tokenize_path in config:
                     tokenize_path = config[task_tokenize_path]
-                CRS_Tokenizer = get_tokenizer(tokenize, tokenize_path)
+                CRS_tokenizer = get_tokenizer(tokenize, tokenize_path)
                 dataset = get_dataset(
-                    config, tokenize, CRS_Tokenizer, restore_data, save_data)
+                    config, tokenize, CRS_tokenizer, restore_data, save_data)
                 tokenized_dataset[tokenize] = dataset
             train_data = dataset.train_data
             valid_data = dataset.valid_data
