@@ -93,7 +93,7 @@ class ReDialDataset(BaseDataset):
         super().__init__(opt, dpath, resource, restore, save)
 
     def _load_data(self):
-        train_data, valid_data, test_data, npy_dict = self._load_raw_data()
+        train_data, valid_data, test_data, word2vec, copy_mask = self._load_raw_data()
         self._load_vocab()
         self._load_other_data()
 
@@ -106,8 +106,8 @@ class ReDialDataset(BaseDataset):
             'vocab_size': len(self.tok2ind),
             'n_entity': self.n_entity,
             'n_word': self.n_word,
-            'word2vec': npy_dict['word2vec'],
-            'copy_mask': npy_dict['copy_mask'],
+            'word2vec': word2vec,
+            'copy_mask': copy_mask,
             'special_token_idx': self.special_token_idx
         }
 
@@ -152,9 +152,7 @@ class ReDialDataset(BaseDataset):
         processed_test_data = self.split_text(test_data)
         logger.info("[Finish test data split]")
 
-        npy_dict = {'word2vec': word_embedding, 'copy_mask': copy_mask}
-
-        return processed_train_data, processed_valid_data, processed_test_data, npy_dict
+        return processed_train_data, processed_valid_data, processed_test_data, word_embedding, copy_mask
 
     def _load_vocab(self):
         self.ind2tok = {idx: word for word, idx in self.tok2ind.items()}
