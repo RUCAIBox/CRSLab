@@ -2,12 +2,12 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
-
 import jieba
 
+from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
-class jieba_tokenize(BaseCrsTokenize):
+
+class jieba_tokenize(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx = {

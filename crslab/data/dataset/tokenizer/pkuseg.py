@@ -2,12 +2,12 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
-
 import pkuseg
 
+from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
-class pkuseg_tokenize(BaseCrsTokenize):
+
+class pkuseg_tokenize(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.pkuseg_tokenizer = pkuseg.pkuseg()

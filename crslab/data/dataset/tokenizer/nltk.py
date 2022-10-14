@@ -2,13 +2,13 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
-
 import nltk
 from nltk import word_tokenize
 
+from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
-class nltk_tokenize(BaseCrsTokenize):
+
+class nltk_tokenize(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx = {

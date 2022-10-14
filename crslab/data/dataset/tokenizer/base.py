@@ -2,7 +2,7 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-class BaseCrsTokenize:
+class BaseTokenizer:
 
     def __init__(self, path=None) -> None:
         pass

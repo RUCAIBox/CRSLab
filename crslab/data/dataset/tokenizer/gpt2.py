@@ -2,11 +2,12 @@
 # @Author : Xinyu Tang
 # @Email  : txy20010310@163.com
 
-from crslab.data.dataset.tokenizer.base import BaseCrsTokenize
 from transformers import AutoTokenizer
 
+from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
-class gpt2_tokenize(BaseCrsTokenize):
+
+class gpt2_tokenize(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx = {

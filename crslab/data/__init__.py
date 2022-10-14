@@ -79,7 +79,7 @@ dataloader_register_table = {
 }
 
 
-def get_tokenizer(tokenize, path=None) -> BaseCrsTokenize:
+def get_tokenizer(tokenize, path=None) -> BaseTokenizer:
     """
     get tokenizer from opt
     """

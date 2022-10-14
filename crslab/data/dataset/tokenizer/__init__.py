@@ -1,4 +1,4 @@
-from .base import BaseCrsTokenize
+from .base import BaseTokenizer
 from .bert import bert_tokenize
 from .gpt2 import gpt2_tokenize
 from .jieba import jieba_tokenize
