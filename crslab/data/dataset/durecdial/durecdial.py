@@ -331,8 +331,7 @@ class DuRecDialDataset(BaseDataset):
             each_data = []
             for one in each['dialog']:
                 str_text = one['text']
-                crstokenize = self.Tokenizer
-                list_text = crstokenize.tokenize(str_text)
+                list_text = self.Tokenizer.tokenize(str_text)
                 one['text'] = list_text
                 each_data.append(one)
             each_dict['dialog'] = each_data
@@ -371,20 +370,19 @@ class DuRecDialDataset(BaseDataset):
         return tok2ind
 
     def generate_copy_mask(self, tok2ind, processed_train_data):
-        crstokenize = self.Tokenizer
         copy_mask = np.zeros((len(tok2ind)), dtype=bool)
         for each_data in tqdm(processed_train_data):
             for dialog in each_data['dialog']:
                 match_list = []
                 text = dialog['text']
                 for word in dialog['word']:
-                    list_word = crstokenize.tokenize(word)
+                    list_word = self.Tokenizer.tokenize(word)
                     match_list += list_word
                 for item in dialog['item']:
-                    list_word = crstokenize.tokenize(item)
+                    list_word = self.Tokenizer.tokenize(item)
                     match_list += list_word
                 for entity in dialog['entity']:
-                    list_word = crstokenize.tokenize(entity)
+                    list_word = self.Tokenizer.tokenize(entity)
                     match_list += list_word
                 match_list = list(set(match_list))
                 for each_word in text:
