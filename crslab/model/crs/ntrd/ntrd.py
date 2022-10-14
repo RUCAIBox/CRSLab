@@ -23,14 +23,15 @@ import os
 import numpy as np
 import torch
 import torch.nn.functional as F
+from loguru import logger
+from torch import nn
+from torch_geometric.nn import GCNConv, RGCNConv
+
 from crslab.config import MODEL_PATH
 from crslab.model.base import BaseModel
 from crslab.model.utils.functions import edge_to_pyg_format
 from crslab.model.utils.modules.attention import SelfAttentionSeq
 from crslab.model.utils.modules.transformer import TransformerEncoder
-from loguru import logger
-from torch import nn
-from torch_geometric.nn import GCNConv, RGCNConv
 
 from .modules import (GateLayer, TransformerDecoderKG,
                       TransformerDecoderSelection)
@@ -58,7 +59,7 @@ class NTRDModel(BaseModel):
         self.pretrained_embedding = side_data.get('embedding', None)
         self.replace_token = opt.get('replace_token', None)
         self.replace_token_idx = vocab[self.replace_token]
-        self.copy_mask = torch.as_tensor(vocab['copy_mask'].astype(bool)).to(self.device)
+        self.copy_mask = torch.as_tensor(vocab['copy_mask'], dtype=torch.bool, device=self.device)
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']
@@ -191,7 +192,7 @@ class NTRDModel(BaseModel):
                 copy_mask[self.replace_token_idx] = False
             else:
                 copy_mask = np.insert(copy_mask, len(copy_mask), False)
-        self.copy_mask = torch.as_tensor(copy_mask).to(self.device)
+        self.copy_mask = torch.as_tensor(copy_mask, device=self.device)
 
         self.conv_decoder = TransformerDecoderKG(
             self.n_heads, self.n_layers, self.token_emb_dim, self.ffn_size, self.vocab_size,
