@@ -93,7 +93,7 @@ class TGReDialDataset(BaseDataset):
         self.pad_topic_idx = self.special_token_idx['pad_topic']
 
         self.tokenize = tokenize
-        self.Tokenizer = crs_tokenizer
+        self.tokenizer = crs_tokenizer
         dpath = os.path.join(DATASET_PATH, 'tgredial')
 
         self.replace_token = opt.get('replace_token', None)
@@ -426,7 +426,7 @@ class TGReDialDataset(BaseDataset):
             each_dict['conv_id'] = each['conv_id']
             for one in each['messages']:
                 str_text = one['text']
-                list_text = self.Tokenizer.tokenize(str_text)
+                list_text = self.tokenizer.tokenize(str_text)
                 one['text'] = list_text
                 each_data.append(one)
             each_dict['messages'] = each_data
@@ -476,15 +476,15 @@ class TGReDialDataset(BaseDataset):
                 match_list = []
                 text = dialog['text']
                 for word in dialog['word']:
-                    list_word = self.Tokenizer.tokenize(word)
+                    list_word = self.tokenizer.tokenize(word)
                     match_list += list_word
 
                 for movie in dialog['movie']:
-                    list_word = self.Tokenizer.tokenize(movie)
+                    list_word = self.tokenizer.tokenize(movie)
                     match_list += list_word
 
                 for entity in dialog['entity']:
-                    list_word = self.Tokenizer.tokenize(entity)
+                    list_word = self.tokenizer.tokenize(entity)
                     match_list += list_word
 
                 match_list = list(set(match_list))

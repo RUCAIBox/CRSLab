@@ -87,7 +87,7 @@ class GoRecDialDataset(BaseDataset):
         self.special_token_idx = crs_tokenizer.special_token_idx
         self.unk_token_idx = self.special_token_idx['unk']
         self.tokenize = tokenize
-        self.Tokenizer = crs_tokenizer
+        self.tokenizer = crs_tokenizer
         dpath = os.path.join(DATASET_PATH, 'gorecdial')
         super().__init__(opt, dpath, resource, restore, save)
 
@@ -335,7 +335,7 @@ class GoRecDialDataset(BaseDataset):
             each_data = []
             for one in each['dialog']:
                 str_text = one['text']
-                list_text = self.Tokenizer.tokenize(str_text)
+                list_text = self.tokenizer.tokenize(str_text)
                 one['text'] = list_text
                 each_data.append(one)
             each_dict['dialog'] = each_data
@@ -384,14 +384,14 @@ class GoRecDialDataset(BaseDataset):
                 match_list = []
                 text = dialog['text']
                 for word in dialog['word']:
-                    list_word = self.Tokenizer.tokenize(word)
+                    list_word = self.tokenizer.tokenize(word)
                     match_list += list_word
                 for movie in dialog['movies']:
-                    list_word = self.Tokenizer.tokenize(movie)
+                    list_word = self.tokenizer.tokenize(movie)
                     match_list += list_word
 
                 for entity in dialog['entity']:
-                    list_word = self.Tokenizer.tokenize(entity)
+                    list_word = self.tokenizer.tokenize(entity)
                     match_list += list_word
 
                 match_list = list(set(match_list))
