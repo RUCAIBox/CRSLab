@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
 
-class bert_tokenize(BaseTokenizer):
+class BertTokenizer(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx =  {

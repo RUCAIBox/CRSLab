@@ -7,7 +7,7 @@ import jieba
 from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
 
-class jieba_tokenize(BaseTokenizer):
+class JiebaTokenizer(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx = {

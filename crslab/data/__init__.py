@@ -25,11 +25,11 @@ from crslab.data.dataset import *
 from crslab.data.dataset.tokenizer import *
 
 tokenizer_register_table = {
-    'nltk': nltk_tokenize,
-    'jieba': jieba_tokenize,
-    'gpt2': gpt2_tokenize,
-    'bert': bert_tokenize,
-    'pkuseg': pkuseg_tokenize
+    'nltk': NltkTokenizer,
+    'jieba': JiebaTokenizer,
+    'gpt2': Gpt2Tokenizer,
+    'bert': BertTokenizer,
+    'pkuseg': PkusegTokenizer
 }
 
 dataset_register_table = {

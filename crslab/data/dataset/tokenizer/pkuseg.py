@@ -7,10 +7,10 @@ import pkuseg
 from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
 
-class pkuseg_tokenize(BaseTokenizer):
+class PkusegTokenizer(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
-        self.pkuseg_tokenizer = pkuseg.pkuseg()
+        self.PkusegTokenizerr = pkuseg.pkuseg()
         self.special_token_idx = {
             'pad': 0,
             'start': 1,
@@ -23,4 +23,4 @@ class pkuseg_tokenize(BaseTokenizer):
         super().__init__(path)
 
     def tokenize(self, text):
-        return self.pkuseg_tokenizer.cut(text)
+        return self.PkusegTokenizerr.cut(text)

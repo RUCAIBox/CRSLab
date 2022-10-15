@@ -8,7 +8,7 @@ from nltk import word_tokenize
 from crslab.data.dataset.tokenizer.base import BaseTokenizer
 
 
-class nltk_tokenize(BaseTokenizer):
+class NltkTokenizer(BaseTokenizer):
 
     def __init__(self, path=None) -> None:
         self.special_token_idx = {
