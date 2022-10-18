@@ -130,6 +130,7 @@ class InspiredDataset(BaseDataset):
             word_embedding = self.generate_word2vec(processed_train_data)
             logger.info('[Finish generate word2vec]')
         # build copy_mask
+        copy_mask = None
         if self.copy:
             copy_mask = self.generate_copy_mask(self.tok2ind, processed_train_data)
             logger.info('[Finish generate copy_mask]')
