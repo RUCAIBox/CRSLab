@@ -373,7 +373,6 @@ class GoRecDialDataset(BaseDataset):
         if self.tokenize == 'nltk':
             tok2ind['_split_'] = cnt
             cnt += 1
-
         return tok2ind
 
     def generate_copy_mask(self, tok2ind, processed_train_data):
