@@ -400,6 +400,8 @@ class GoRecDialDataset(BaseDataset):
                     if each_word in match_list:
                         token_id = tok2ind[each_word]
                         copy_mask[token_id] = True
+        
+        return copy_mask
 
     def generate_word2vec(self, processed_train_data):
 
