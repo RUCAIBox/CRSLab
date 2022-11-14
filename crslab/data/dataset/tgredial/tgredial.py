@@ -425,9 +425,9 @@ class TGReDialDataset(BaseDataset):
             each_data = []
             each_dict['conv_id'] = each['conv_id']
             for one in each['messages']:
-                str_text = one['text']
-                list_text = self.tokenizer.tokenize(str_text)
-                one['text'] = list_text
+                text_str = one['text']
+                text_list = self.tokenizer.tokenize(text_str)
+                one['text'] = text_list
                 each_data.append(one)
             each_dict['messages'] = each_data
             each_dict['user_id'] = each['user_id']
@@ -476,16 +476,16 @@ class TGReDialDataset(BaseDataset):
                 match_list = []
                 text = dialog['text']
                 for word in dialog['word']:
-                    list_word = self.tokenizer.tokenize(word)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(word)
+                    match_list += word_list
 
                 for movie in dialog['movie']:
-                    list_word = self.tokenizer.tokenize(movie)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(movie)
+                    match_list += word_list
 
                 for entity in dialog['entity']:
-                    list_word = self.tokenizer.tokenize(entity)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(entity)
+                    match_list += word_list
 
                 match_list = list(set(match_list))
 

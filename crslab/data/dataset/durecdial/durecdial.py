@@ -328,9 +328,9 @@ class DuRecDialDataset(BaseDataset):
             each_dict = {}
             each_data = []
             for one in each['dialog']:
-                str_text = one['text']
-                list_text = self.tokenizer.tokenize(str_text)
-                one['text'] = list_text
+                text_str = one['text']
+                text_list = self.tokenizer.tokenize(text_str)
+                one['text'] = text_list
                 each_data.append(one)
             each_dict['dialog'] = each_data
             all_data.append(each_dict)
@@ -374,14 +374,14 @@ class DuRecDialDataset(BaseDataset):
                 match_list = []
                 text = dialog['text']
                 for word in dialog['word']:
-                    list_word = self.tokenizer.tokenize(word)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(word)
+                    match_list += word_list
                 for item in dialog['item']:
-                    list_word = self.tokenizer.tokenize(item)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(item)
+                    match_list += word_list
                 for entity in dialog['entity']:
-                    list_word = self.tokenizer.tokenize(entity)
-                    match_list += list_word
+                    word_list = self.tokenizer.tokenize(entity)
+                    match_list += word_list
                 match_list = list(set(match_list))
                 for each_word in text:
                     if each_word in match_list:
