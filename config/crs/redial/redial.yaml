@@ -6,7 +6,7 @@ tokenize:
 # dataloader
 utterance_truncate: 80
 conversation_truncate: 40
-scale: 0.01
+scale: 1
 # model
 # rec
 rec_model: ReDialRec

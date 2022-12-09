@@ -6,7 +6,7 @@ tokenize:
 context_truncate: 256
 response_truncate: 30
 item_truncate: 100
-scale: 0.01
+scale: 1
 # model
 conv_model: GPT2
 # optim

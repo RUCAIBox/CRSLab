@@ -5,7 +5,7 @@ embedding: word2vec.npy
 # dataloader
 context_truncate: 256
 response_truncate: 30
-scale: 0.01
+scale: 1
 # model
 model: KGSF
 token_emb_dim: 300

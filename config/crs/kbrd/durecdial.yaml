@@ -4,7 +4,7 @@ tokenize: jieba
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
-scale: 0.1
+scale: 1
 # model
 model: KBRD
 token_emb_dim: 300
