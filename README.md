@@ -48,9 +48,9 @@ CRSLab works with the following operating systems：
 - Windows 10
 - macOS X
 
-CRSLab requires Python version 3.6 or later.
+CRSLab requires Python version 3.7 or later.
 
-CRSLab requires torch version 1.4.0 or later. If you want to use CRSLab with GPU, please ensure that CUDA or CUDAToolkit version is 9.2 or later. Please use the combinations shown in this [Link](https://pytorch-geometric.com/whl/) to ensure the normal operation of PyTorch Geometric.
+CRSLab requires torch version 1.8. If you want to use CRSLab with GPU, please ensure that CUDA or CUDAToolkit version is 10.2 or later. Please use the combinations shown in this [Link](https://pytorch-geometric.com/whl/) to ensure the normal operation of PyTorch Geometric.
 
 
 
@@ -59,11 +59,14 @@ CRSLab requires torch version 1.4.0 or later. If you want to use CRSLab with GPU
 Use PyTorch [Locally Installation](https://pytorch.org/get-started/locally/) or [Previous Versions Installation](https://pytorch.org/get-started/previous-versions/) commands to install PyTorch. For example, on Linux and Windows 10:
 
 ```bash
-# CUDA 10.1
-pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+# CUDA 10.2
+conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch
 
-# CPU only
-pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+# CUDA 11.1
+conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch -c conda-forge
+
+# CPU Only
+conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cpuonly -c pytorch
 ```
 
 If you want to use CRSLab with GPU, make sure the following command prints `True` after installation:
@@ -77,39 +80,31 @@ $ python -c "import torch; print(torch.cuda.is_available())"
 
 ### Install PyTorch Geometric
 
-Ensure that at least PyTorch 1.4.0 is installed:
+Ensure that at least PyTorch 1.8.0 is installed:
 
 ```bash
 $ python -c "import torch; print(torch.__version__)"
->>> 1.6.0
+>>> 1.8.0
 ```
 
 Find the CUDA version PyTorch was installed with:
 
 ```bash
 $ python -c "import torch; print(torch.version.cuda)"
->>> 10.1
+>>> 11.1
 ```
+
+For Linux:
 
 Install the relevant packages:
 
-```bash
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html
-pip install torch-geometric
+```
+conda install pyg -c pyg
 ```
 
-where `${CUDA}` and `${TORCH}` should be replaced by your specific CUDA version (`cpu`, `cu92`, `cu101`, `cu102`, `cu110`) and PyTorch version (`1.4.0`, `1.5.0`, `1.6.0`, `1.7.0`) respectively. For example, for PyTorch 1.6.0 and CUDA 10.1, type:
+For others：
 
-```bash
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-pip install torch-geometric
-```
+Check PyG [installation documents](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) to install the relevant packages.
 
 
 
