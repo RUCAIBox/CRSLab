@@ -7,26 +7,31 @@
 # @Author : Xiaolei Wang
 # @Email  : wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import os
 import time
 from collections import defaultdict
 
 import fasttext
+from crslab.evaluator.base import BaseEvaluator
+from crslab.evaluator.utils import nice_report
 from loguru import logger
 from nltk import ngrams
 from torch.utils.tensorboard import SummaryWriter
 
-from crslab.evaluator.base import BaseEvaluator
-from crslab.evaluator.utils import nice_report
-from .embeddings import resources
-from .metrics import *
 from ..config import EMBEDDING_PATH
 from ..download import build
+from .embeddings import resources
+from .metrics import *
 
 
 class StandardEvaluator(BaseEvaluator):
     """The evaluator for all kind of model(recommender, conversation, policy)
-    
+
     Args:
         rec_metrics: the metrics to evaluate recommender model, including hit@K, ndcg@K and mrr@K
         dist_set: the set to record dist n-gram
@@ -49,8 +54,10 @@ class StandardEvaluator(BaseEvaluator):
         # tensorboard
         self.tensorboard = tensorboard
         if self.tensorboard:
-            self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
-            self.reports_name = ['Recommendation Metrics', 'Generation Metrics', 'Optimization Metrics']
+            self.writer = SummaryWriter(
+                log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+            self.reports_name = ['Recommendation Metrics',
+                                 'Generation Metrics', 'Optimization Metrics']
 
     def _load_embedding(self, language):
         resource = resources[language]
@@ -67,34 +74,44 @@ class StandardEvaluator(BaseEvaluator):
     def rec_evaluate(self, ranks, label):
         for k in [1, 10, 50]:
             if len(ranks) >= k:
-                self.rec_metrics.add(f"hit@{k}", HitMetric.compute(ranks, label, k))
-                self.rec_metrics.add(f"ndcg@{k}", NDCGMetric.compute(ranks, label, k))
-                self.rec_metrics.add(f"mrr@{k}", MRRMetric.compute(ranks, label, k))
+                self.rec_metrics.add(
+                    f"hit@{k}", HitMetric.compute(ranks, label, k))
+                self.rec_metrics.add(
+                    f"ndcg@{k}", NDCGMetric.compute(ranks, label, k))
+                self.rec_metrics.add(
+                    f"mrr@{k}", MRRMetric.compute(ranks, label, k))
 
     def gen_evaluate(self, hyp, refs):
         if hyp:
             self.gen_metrics.add("f1", F1Metric.compute(hyp, refs))
 
             for k in range(1, 5):
-                self.gen_metrics.add(f"bleu@{k}", BleuMetric.compute(hyp, refs, k))
+                self.gen_metrics.add(
+                    f"bleu@{k}", BleuMetric.compute(hyp, refs, k))
                 for token in ngrams(hyp, k):
                     self.dist_set[f"dist@{k}"].add(token)
             self.dist_cnt += 1
 
             hyp_emb = self._get_sent_embedding(hyp)
             ref_embs = [self._get_sent_embedding(ref) for ref in refs]
-            self.gen_metrics.add('greedy', GreedyMatch.compute(hyp_emb, ref_embs))
-            self.gen_metrics.add('average', EmbeddingAverage.compute(hyp_emb, ref_embs))
-            self.gen_metrics.add('extreme', VectorExtrema.compute(hyp_emb, ref_embs))
+            if len(ref_embs[0]) > 0:
+                self.gen_metrics.add(
+                    'greedy', GreedyMatch.compute(hyp_emb, ref_embs))
+                self.gen_metrics.add(
+                    'average', EmbeddingAverage.compute(hyp_emb, ref_embs))
+                self.gen_metrics.add(
+                    'extreme', VectorExtrema.compute(hyp_emb, ref_embs))
 
     def report(self, epoch=-1, mode='test'):
         for k, v in self.dist_set.items():
             self.gen_metrics.add(k, AverageMetric(len(v) / self.dist_cnt))
-        reports = [self.rec_metrics.report(), self.gen_metrics.report(), self.optim_metrics.report()]
+        reports = [self.rec_metrics.report(), self.gen_metrics.report(),
+                   self.optim_metrics.report()]
         if self.tensorboard and mode != 'test':
             for idx, task_report in enumerate(reports):
                 for each_metric, value in task_report.items():
-                    self.writer.add_scalars(f'{self.reports_name[idx]}/{each_metric}', {mode: value.value()}, epoch)
+                    self.writer.add_scalars(
+                        f'{self.reports_name[idx]}/{each_metric}', {mode: value.value()}, epoch)
         logger.info('\n' + nice_report(aggregate_unnamed_reports(reports)))
 
     def reset_metrics(self):

@@ -7,6 +7,11 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 r"""
 BERT
 ====
@@ -18,16 +23,11 @@ References:
 
 """
 
-import os
 
+from crslab.model.base import BaseModel
 from loguru import logger
 from torch import nn
 from transformers import BertModel
-
-from crslab.config import PRETRAIN_PATH
-from crslab.data import dataset_language_map
-from crslab.model.base import BaseModel
-from crslab.model.pretrained_models import resources
 
 
 class BERTModel(BaseModel):
@@ -50,10 +50,8 @@ class BERTModel(BaseModel):
         """
         self.item_size = vocab['n_entity']
 
-        language = dataset_language_map[opt['dataset']]
-        resource = resources['bert'][language]
-        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
-        super(BERTModel, self).__init__(opt, device, dpath, resource)
+        self.dpath = opt['rec_pretrained_path']
+        super(BERTModel, self).__init__(opt, device, self.dpath)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters

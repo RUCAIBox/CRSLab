@@ -1,7 +1,7 @@
 # dataset
 dataset: TGReDial
 tokenize: pkuseg
-embedding: word2vec.npy
+embedding: True
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -21,6 +21,7 @@ learn_positional_embeddings: false
 embeddings_scale: true
 reduction: false
 n_positions: 1024
+copy: true
 # optim
 pretrain:
   epoch: 50

@@ -2,6 +2,8 @@
 dataset: TGReDial
 tokenize:
   conv: gpt2
+# tokenize path
+conv_tokenize_path: 'GPT2-chitchat'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -9,6 +11,8 @@ item_truncate: 100
 scale: 1
 # model
 conv_model: GPT2
+# pretrained path
+conv_pretrained_path: 'GPT2-chitchat'
 # optim
 conv:
   epoch: 50

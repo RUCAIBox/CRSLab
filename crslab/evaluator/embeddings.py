@@ -8,11 +8,16 @@
 # @Author  :   Xiaolei Wang
 # @email   :   wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 from crslab.download import DownloadableFile
 
 resources = {
     'zh': {
-        'version': '0.2',
+        'version': '1.0',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EVyPGnSEWZlGsLn0tpCa7BABjY7u3Ii6o_6aqYzDmw0xNw?download=1',
             'cc.zh.300.zip',
@@ -20,7 +25,7 @@ resources = {
         )
     },
     'en': {
-        'version': '0.2',
+        'version': '1.0',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/Ee3JyLp8wblAoQfFY7balSYB8g2wRebRek8QLOmYs8jcKw?download=1',
             'cc.en.300.zip',

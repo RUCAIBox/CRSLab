@@ -11,10 +11,10 @@ import random
 from copy import deepcopy
 
 import torch
-from tqdm import tqdm
-
 from crslab.data.dataloader.base import BaseDataLoader
-from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
+from crslab.data.dataloader.utils import (add_start_end_token_idx, merge_utt,
+                                          padded_tensor, truncate)
+from tqdm import tqdm
 
 
 class TGReDialDataLoader(BaseDataLoader):
@@ -65,26 +65,26 @@ class TGReDialDataLoader(BaseDataLoader):
 
         self.n_entity = vocab['n_entity']
         self.item_size = self.n_entity
-        self.pad_token_idx = vocab['pad']
-        self.start_token_idx = vocab['start']
-        self.end_token_idx = vocab['end']
-        self.unk_token_idx = vocab['unk']
-        self.conv_bos_id = vocab['start']
-        self.cls_id = vocab['start']
-        self.sep_id = vocab['end']
-        if 'sent_split' in vocab:
-            self.sent_split_idx = vocab['sent_split']
+        self.pad_token_idx = vocab['special_token_idx']['pad']
+        self.start_token_idx = vocab['special_token_idx']['start']
+        self.end_token_idx = vocab['special_token_idx']['end']
+        self.unk_token_idx = vocab['special_token_idx']['unk']
+        self.conv_bos_id = vocab['special_token_idx']['start']
+        self.cls_id = vocab['special_token_idx']['start']
+        self.sep_id = vocab['special_token_idx']['end']
+        if 'sent_split' in vocab['special_token_idx']:
+            self.sent_split_idx = vocab['special_token_idx']['sent_split']
         else:
-            self.sent_split_idx = vocab['end']
-        if 'word_split' in vocab:
-            self.word_split_idx = vocab['word_split']
+            self.sent_split_idx = vocab['special_token_idx']['end']
+        if 'word_split' in vocab['special_token_idx']:
+            self.word_split_idx = vocab['special_token_idx']['word_split']
         else:
-            self.word_split_idx = vocab['end']
+            self.word_split_idx = vocab['special_token_idx']['end']
 
-        self.pad_entity_idx = vocab['pad_entity']
-        self.pad_word_idx = vocab['pad_word']
-        if 'pad_topic' in vocab:
-            self.pad_topic_idx = vocab['pad_topic']
+        self.pad_entity_idx = vocab['special_token_idx']['pad_entity']
+        self.pad_word_idx = vocab['special_token_idx']['pad_word']
+        if 'pad_topic' in vocab['special_token_idx']:
+            self.pad_topic_idx = vocab['special_token_idx']['pad_topic']
 
         self.tok2ind = vocab['tok2ind']
         self.ind2tok = vocab['ind2tok']

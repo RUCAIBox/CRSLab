@@ -7,15 +7,19 @@
 # @Author : Kun Zhou, Xiaolei Wang
 # @Email  : francis_kun_zhou@163.com, wxl1999@foxmail.com
 
+# UPDATE:
+# @Time   : 2022/9/28
+# @Author : Xinyu Tang
+# @Email  : txy20010310@163.com
+
 import os
 
 import torch
-from loguru import logger
-
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from loguru import logger
 
 
 class KGSFSystem(BaseSystem):
@@ -42,7 +46,7 @@ class KGSFSystem(BaseSystem):
                                          restore_system, interact, debug, tensorboard)
 
         self.ind2tok = vocab['ind2tok']
-        self.end_token_idx = vocab['end']
+        self.end_token_idx = vocab['special_token_idx']['end']
         self.item_ids = side_data['item_entity_ids']
 
         self.pretrain_optim_opt = self.opt['pretrain']
@@ -80,9 +84,11 @@ class KGSFSystem(BaseSystem):
             if info_loss is not None:
                 self.backward(info_loss.sum())
                 info_loss = info_loss.sum().item()
-                self.evaluator.optim_metrics.add("info_loss", AverageMetric(info_loss))
+                self.evaluator.optim_metrics.add(
+                    "info_loss", AverageMetric(info_loss))
         elif stage == 'rec':
-            rec_loss, info_loss, rec_predict = self.model.forward(batch, stage, mode)
+            rec_loss, info_loss, rec_predict = self.model.forward(
+                batch, stage, mode)
             if info_loss:
                 loss = rec_loss + 0.025 * info_loss
             else:
@@ -92,10 +98,12 @@ class KGSFSystem(BaseSystem):
             else:
                 self.rec_evaluate(rec_predict, batch[-1])
             rec_loss = rec_loss.sum().item()
-            self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
+            self.evaluator.optim_metrics.add(
+                "rec_loss", AverageMetric(rec_loss))
             if info_loss:
                 info_loss = info_loss.sum().item()
-                self.evaluator.optim_metrics.add("info_loss", AverageMetric(info_loss))
+                self.evaluator.optim_metrics.add(
+                    "info_loss", AverageMetric(info_loss))
         elif stage == "conv":
             if mode != "test":
                 gen_loss, pred = self.model.forward(batch, stage, mode)
@@ -104,7 +112,8 @@ class KGSFSystem(BaseSystem):
                 else:
                     self.conv_evaluate(pred, batch[-1])
                 gen_loss = gen_loss.sum().item()
-                self.evaluator.optim_metrics.add("gen_loss", AverageMetric(gen_loss))
+                self.evaluator.optim_metrics.add(
+                    "gen_loss", AverageMetric(gen_loss))
                 self.evaluator.gen_metrics.add("ppl", PPLMetric(gen_loss))
             else:
                 pred = self.model.forward(batch, stage, mode)
@@ -140,7 +149,8 @@ class KGSFSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
-                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + \
+                    self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
@@ -153,6 +163,8 @@ class KGSFSystem(BaseSystem):
 
     def train_conversation(self):
         if os.environ["CUDA_VISIBLE_DEVICES"] == '-1':
+            self.model.freeze_parameters()
+        elif len(os.environ["CUDA_VISIBLE_DEVICES"]) == 1:
             self.model.freeze_parameters()
         else:
             self.model.module.freeze_parameters()

@@ -1,7 +1,7 @@
 # dataset
 dataset: TGReDial
 tokenize:
-  rec: sougou
+  rec: jieba
 # dataloader
 context_truncate: 256
 response_truncate: 30

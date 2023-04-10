@@ -4,6 +4,10 @@ tokenize:
   rec: bert
   conv: gpt2
   policy: bert
+# tokenize path
+rec_tokenize_path: 'bert-base-chinese'
+conv_tokenize_path: 'GPT2-chitchat'
+policy_tokenize_path: 'bert-base-chinese'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -13,6 +17,10 @@ scale: 1
 rec_model: TGRec
 conv_model: TGConv
 policy_model: TGPolicy
+# pretrained path
+rec_pretrained_path: 'bert-base-chinese'
+conv_pretrained_path: 'GPT2-chitchat'
+policy_pretrained_path: 'bert-base-chinese'
 hidden_dropout_prob: 0.2
 initializer_range: 0.02
 hidden_size: 50

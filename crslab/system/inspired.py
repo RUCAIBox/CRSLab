@@ -2,15 +2,14 @@
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
-import torch
-from loguru import logger
 from math import floor
 
-from crslab.data import dataset_language_map
+import torch
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
+from loguru import logger
 
 
 class InspiredSystem(BaseSystem):
@@ -39,7 +38,7 @@ class InspiredSystem(BaseSystem):
 
         if hasattr(self, 'conv_model'):
             self.ind2tok = vocab['conv']['ind2tok']
-            self.end_token_idx = vocab['conv']['end']
+            self.end_token_idx = vocab['conv']['special_token_idx']['end']
         if hasattr(self, 'rec_model'):
             self.item_ids = side_data['rec']['item_entity_ids']
             self.id2entity = vocab['rec']['id2entity']
@@ -54,14 +53,13 @@ class InspiredSystem(BaseSystem):
             self.conv_epoch = self.conv_optim_opt['epoch']
             self.conv_batch_size = self.conv_optim_opt['batch_size']
             if self.conv_optim_opt.get('lr_scheduler', None) and 'Transformers' in self.conv_optim_opt['lr_scheduler'][
-                'name']:
+                    'name']:
                 batch_num = 0
                 for _ in self.train_dataloader['conv'].get_conv_data(batch_size=self.conv_batch_size, shuffle=False):
                     batch_num += 1
-                conv_training_steps = self.conv_epoch * floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
+                conv_training_steps = self.conv_epoch * \
+                    floor(batch_num / self.conv_optim_opt.get('update_freq', 1))
                 self.conv_optim_opt['lr_scheduler']['training_steps'] = conv_training_steps
-
-        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
@@ -159,7 +157,8 @@ class InspiredSystem(BaseSystem):
                     self.step(batch, stage='rec', mode='val')
                 self.evaluator.report(epoch=epoch, mode='val')
                 # early stop
-                metric = self.evaluator.rec_metrics['hit@1'] + self.evaluator.rec_metrics['hit@50']
+                metric = self.evaluator.rec_metrics['hit@1'] + \
+                    self.evaluator.rec_metrics['hit@50']
                 if self.early_stop(metric):
                     break
         # test
