@@ -14,7 +14,7 @@ resources = {
     'nltk': {
         'version': '0.3',
         'file': DownloadableFile(
-            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EdDgeChYguFLvz8hmkNdRhABmQF-LBfYtdb7rcdnB3kUgA?download=1',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EdDgeChYguFLvz8hmkNdRhABmQF-LBfYtdb7rcdnB3kUgA?download=1',
             'inspired_nltk.zip',
             '776cadc7585abdbca2738addae40488826c82de3cfd4c2dc13dcdd63aefdc5c4',
         ),
@@ -30,7 +30,7 @@ resources = {
     'bert': {
         'version': '0.3',
         'file': DownloadableFile(
-            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EfBfyxLideBDsupMWb2tANgB6WxySTPQW11uM1F4UV5mTQ?download=1',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EfBfyxLideBDsupMWb2tANgB6WxySTPQW11uM1F4UV5mTQ?download=1',
             'inspired_bert.zip',
             '9affea30978a6cd48b8038dddaa36f4cb4d8491cf8ae2de44a6d3dde2651f29c'
         ),
@@ -48,9 +48,9 @@ resources = {
     'gpt2': {
         'version': '0.3',
         'file': DownloadableFile(
-            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EVwbqtjDReZHnvb_l9TxaaIBAC63BjbqkN5ZKb24Mhsm_A?download=1',
+            'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EVwbqtjDReZHnvb_l9TxaaIBAC63BjbqkN5ZKb24Mhsm_A?download=1',
             'inspired_gpt2.zip',
-            '23bb4ce3299186630fdf673e17f43ee43e91573ea786c922e3527e4c341a313c'
+            '261ad7e5325258d5cb8ffef0751925a58270fb6d9f17490f8552f6b86ef1eed2'
         ),
         'special_token_idx': {
             'pad': 0,
