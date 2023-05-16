@@ -29,7 +29,7 @@ resources = {
         'zh': {
             'version': '0.1',
             'file': DownloadableFile(
-                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EXm6uTgSkO1PgDD3TV9UtzMBfsAlJOun12vwB-hVkPRbXw?download=1',
+                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EXm6uTgSkO1PgDD3TV9UtzMBfsAlJOun12vwB-hVkPRbXw?download=1',
                 'bert_zh.zip',
                 'e48ff2f3c2409bb766152dc5577cd5600838c9052622fd6172813dce31806ed3'
             )
@@ -37,7 +37,7 @@ resources = {
         'en': {
             'version': '0.1',
             'file': DownloadableFile(
-                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EfcnG_CkYAtKvEFUWvRF8i0BwmtCKnhnjOBwPW0W1tXqMQ?download=1',
+                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EfcnG_CkYAtKvEFUWvRF8i0BwmtCKnhnjOBwPW0W1tXqMQ?download=1',
                 'bert_en.zip',
                 '61b08202e8ad09088c9af78ab3f8902cd990813f6fa5b8b296d0da9d370006e3'
             )
@@ -47,7 +47,7 @@ resources = {
         'zh': {
             'version': '0.1',
             'file': DownloadableFile(
-                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/EdwPgkE_-_BCsVSqo4Ao9D8BKj6H_0wWGGxHxt_kPmoSwA?download=1',
+                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EdwPgkE_-_BCsVSqo4Ao9D8BKj6H_0wWGGxHxt_kPmoSwA?download=1',
                 'gpt2_zh.zip',
                 '5f366b729e509164bfd55026e6567e22e101bfddcfaac849bae96fc263c7de43'
             )
@@ -55,7 +55,7 @@ resources = {
         'en': {
             'version': '0.1',
             'file': DownloadableFile(
-                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pku_edu_cn/Ebe4PS0rYQ9InxmGvJ9JNXgBMI808ibQc93N-dAubtbTgQ?download=1',
+                'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/Ebe4PS0rYQ9InxmGvJ9JNXgBMI808ibQc93N-dAubtbTgQ?download=1',
                 'gpt2_en.zip',
                 '518c1c8a1868d4433d93688f2bf7f34b6216334395d1800d66308a80f4cac35e'
             )
