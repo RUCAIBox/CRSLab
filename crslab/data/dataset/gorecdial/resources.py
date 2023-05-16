@@ -12,7 +12,7 @@ from crslab.download import DownloadableFile
 
 resources = {
     'nltk': {
-        'version': '0.3',
+        'version': '0.31',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/ESIqjwAg0ItAu7WGfukIt3cBXjzi7AZ9L_lcbFT1aS1qYQ?download=1',
             'gorecdial_nltk.zip',
@@ -29,7 +29,7 @@ resources = {
         },
     },
     'bert': {
-        'version': '0.3',
+        'version': '0.31',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/Ed1HT8gzvRpDosVT83BEj5QBnzKpjR3Zbf5u49yyWP-k6Q?download=1',
             'gorecdial_bert.zip',
@@ -48,7 +48,7 @@ resources = {
         }
     },
     'gpt2': {
-        'version': '0.3',
+        'version': '0.31',
         'file': DownloadableFile(
             'https://pkueducn-my.sharepoint.com/:u:/g/personal/franciszhou_pkueducn_onmicrosoft_com/EUJOHmX8v79DkZMq0x5r9d4B0UJlfw85v-VdciwKfAhpng?download=1',
             'gorecdial_gpt2.zip',
