@@ -22,15 +22,6 @@ Attributes:
 
 from crslab.data.dataloader import *
 from crslab.data.dataset import *
-from crslab.data.dataset.tokenizer import *
-
-tokenizer_register_table = {
-    'nltk': NltkTokenizer,
-    'jieba': JiebaTokenizer,
-    'gpt2': Gpt2Tokenizer,
-    'bert': BertTokenizer,
-    'pkuseg': PkusegTokenizer
-}
 
 dataset_register_table = {
     'ReDial': ReDialDataset,
@@ -75,18 +66,12 @@ dataloader_register_table = {
     'ProfileBERT': TGReDialDataLoader,
     'MGCG': TGReDialDataLoader,
     'PMI': TGReDialDataLoader,
-    'NTRD': NTRDDataLoader
+    'NTRD': NTRDDataLoader,
+    'ChatGPT': ChatGPTDataLoader
 }
 
 
-def get_tokenizer(tokenize, path=None) -> BaseTokenizer:
-    """
-    get tokenizer from opt
-    """
-    return tokenizer_register_table[tokenize](path)
-
-
-def get_dataset(opt, tokenize, crs_tokenizer, restore, save) -> BaseDataset:
+def get_dataset(opt, tokenize, restore, save) -> BaseDataset:
     """get and process dataset
 
     Args:
@@ -101,10 +86,9 @@ def get_dataset(opt, tokenize, crs_tokenizer, restore, save) -> BaseDataset:
     """
     dataset = opt['dataset']
     if dataset in dataset_register_table:
-        return dataset_register_table[dataset](opt, tokenize, crs_tokenizer, restore, save)
+        return dataset_register_table[dataset](opt, tokenize, restore, save)
     else:
-        raise NotImplementedError(
-            f'The dataloader [{dataset}] has not been implemented')
+        raise NotImplementedError(f'The dataloader [{dataset}] has not been implemented')
 
 
 def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
@@ -123,5 +107,4 @@ def get_dataloader(opt, dataset, vocab) -> BaseDataLoader:
     if model_name in dataloader_register_table:
         return dataloader_register_table[model_name](opt, dataset, vocab)
     else:
-        raise NotImplementedError(
-            f'The dataloader [{model_name}] has not been implemented')
+        raise NotImplementedError(f'The dataloader [{model_name}] has not been implemented')

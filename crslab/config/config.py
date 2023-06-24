@@ -38,7 +38,7 @@ class Config:
         # gpu
         os.environ['CUDA_VISIBLE_DEVICES'] = gpu
         if gpu != '-1':
-            self.opt['gpu'] = [i for i in range(len(gpu.split(',')))]
+            self.opt['gpu'] = [i for i in gpu.split(',')]
         else:
             self.opt['gpu'] = [-1]
         # dataset

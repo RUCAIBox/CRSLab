@@ -1,0 +1,11 @@
+model: ChatGPT
+tokenize: nltk
+dataset: ReDial
+api_key: your_api_key
+turn_num: 5
+rec:
+  batch_size: 1
+conv:
+  batch_size: 1
+cache_item:
+  batch_size: 1000

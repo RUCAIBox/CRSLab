@@ -11,11 +11,12 @@
 import os
 
 import torch
+from loguru import logger
+
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
-from loguru import logger
 
 
 class KBRDSystem(BaseSystem):
@@ -42,7 +43,7 @@ class KBRDSystem(BaseSystem):
                                          restore_system, interact, debug, tensorboard)
 
         self.ind2tok = vocab['ind2tok']
-        self.end_token_idx = vocab['special_token_idx']['end']
+        self.end_token_idx = vocab['end']
         self.item_ids = side_data['item_entity_ids']
 
         self.rec_optim_opt = opt['rec']

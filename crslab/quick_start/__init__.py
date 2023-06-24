@@ -1,1 +1,1 @@
-from .quick_start import run_crslab
+from .quick_start import quick_start

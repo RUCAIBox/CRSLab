@@ -12,8 +12,11 @@ import pickle as pkl
 from abc import ABC, abstractmethod
 
 import numpy as np
-from crslab.download import build
 from loguru import logger
+
+import json
+
+from crslab.download import build
 
 
 class BaseDataset(ABC):
@@ -51,7 +54,7 @@ class BaseDataset(ABC):
                                                                                                      test_data)
             embedding = opt.get('embedding', None)
             if embedding:
-                self.side_data["embedding"] = self.vocab['word2vec']
+                self.side_data["embedding"] = np.load(os.path.join(self.dpath, embedding))
                 logger.debug(f'[Load pretrained embedding {embedding}]')
             logger.info('[Finish data preprocess]')
         else:
@@ -131,6 +134,14 @@ class BaseDataset(ABC):
                     'item_entity_ids' (list of int): entity id of each item;
                 }
 
+        """
+        pass
+    
+    @abstractmethod
+    def get_attr_list(self):
+        """
+        Returns:
+            (list of str): attributes
         """
         pass
 

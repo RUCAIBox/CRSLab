@@ -16,6 +16,7 @@ from collections import OrderedDict
 import math
 import torch
 from typing import Union, Tuple
+from rapidfuzz import fuzz, process
 
 from .metrics import Metric
 
@@ -158,3 +159,23 @@ def nice_report(report) -> str:
                 for k, v in output.items()
             }
         )
+
+def get_entity(text, entity2id):
+    entity_list = list(entity2id.keys())
+    extractions = process.extract(text, entity_list, scorer=fuzz.WRatio, limit=20)
+    extractions = [extraction[0] for extraction in extractions if extraction[1] >= 90]
+    extractions_ids = [entity2id[extraction] for extraction in extractions]
+    return extractions_ids
+
+def get_instruction():
+    
+    recommender_instruction = '''You are a recommender chatting with the user to provide recommendation. You must follow the instructions below during chat.
+    If you do not have enough information about user preference, you should ask the user for his preference.
+    If you have enough information about user preference, you can give recommendation.\n'''
+    seeker_instruction_template = '''You are a seeker chatting with a recommender for recommendation. Your target items: {}. You must follow the instructions below during chat.
+    If the recommender recommend {}, you should accept.
+    If the recommender recommend other items, you should refuse them and provide the information about {}. You should never directly tell the target item title.
+    If the recommender asks for your preference, you should provide the information about {}. You should never directly tell the target item title\n.
+    '''
+
+    return recommender_instruction, seeker_instruction_template

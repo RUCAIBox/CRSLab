@@ -7,11 +7,6 @@
 # @Author : Xiaolei Wang, Yuanhang Zhou
 # @Email  : wxl1999@foxmail.com, sdzyh002@gmail.com
 
-# UPDATE:
-# @Time   : 2022/9/28
-# @Author : Xinyu Tang
-# @Email  : txy20010310@163.com
-
 r"""
 TGReDial_Rec
 ============
@@ -23,18 +18,23 @@ References:
 
 """
 
+import os
 
 import torch
-from crslab.model.base import BaseModel
-from crslab.model.recommendation.sasrec.modules import SASRec
 from loguru import logger
 from torch import nn
 from transformers import BertModel
 
+from crslab.config import PRETRAIN_PATH
+from crslab.data import dataset_language_map
+from crslab.model.base import BaseModel
+from crslab.model.pretrained_models import resources
+from crslab.model.recommendation.sasrec.modules import SASRec
+
 
 class TGRecModel(BaseModel):
     """
-
+        
     Attributes:
         hidden_dropout_prob: A float indicating the dropout rate to dropout hidden state in SASRec.
         initializer_range: A float indicating the range of parameters initization in SASRec.
@@ -68,8 +68,10 @@ class TGRecModel(BaseModel):
         self.hidden_act = opt['hidden_act']
         self.num_hidden_layers = opt['num_hidden_layers']
 
-        self.dpath = opt['rec_pretrained_path']
-        super(TGRecModel, self).__init__(opt, device, self.dpath)
+        language = dataset_language_map[opt['dataset']]
+        resource = resources['bert'][language]
+        dpath = os.path.join(PRETRAIN_PATH, "bert", language)
+        super(TGRecModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         # build BERT layer, give the architecture, load pretrained parameters
@@ -94,8 +96,7 @@ class TGRecModel(BaseModel):
 
         bert_embed = self.bert(context, attention_mask=mask).pooler_output
 
-        # bs, max_len, hidden_size2
-        sequence_output = self.SASREC(input_ids, input_mask)
+        sequence_output = self.SASREC(input_ids, input_mask)  # bs, max_len, hidden_size2
         sas_embed = sequence_output[:, -1, :]  # bs, hidden_size2
 
         embed = torch.cat((sas_embed, bert_embed), dim=1)

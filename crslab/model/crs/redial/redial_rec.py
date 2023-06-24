@@ -19,6 +19,7 @@ References:
 """
 
 import torch.nn as nn
+
 from crslab.model.base import BaseModel
 
 
@@ -44,7 +45,7 @@ class ReDialRecModel(BaseModel):
         """
         self.n_entity = vocab['n_entity']
         self.layer_sizes = opt['autorec_layer_sizes']
-        self.pad_entity_idx = vocab['special_token_idx']['pad_entity']
+        self.pad_entity_idx = vocab['pad_entity']
 
         super(ReDialRecModel, self).__init__(opt, device)
 

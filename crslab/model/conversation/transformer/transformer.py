@@ -20,12 +20,12 @@ References:
 
 import torch
 import torch.nn.functional as F
-from crslab.model.base import BaseModel
-from crslab.model.utils.functions import edge_to_pyg_format
-from crslab.model.utils.modules.transformer import (TransformerDecoder,
-                                                    TransformerEncoder)
 from loguru import logger
 from torch import nn
+
+from crslab.model.base import BaseModel
+from crslab.model.utils.functions import edge_to_pyg_format
+from crslab.model.utils.modules.transformer import TransformerEncoder, TransformerDecoder
 
 
 class TransformerModel(BaseModel):
@@ -70,16 +70,16 @@ class TransformerModel(BaseModel):
         """
         # vocab
         self.vocab_size = vocab['vocab_size']
-        self.pad_token_idx = vocab['special_token_idx']['pad']
-        self.start_token_idx = vocab['special_token_idx']['start']
-        self.end_token_idx = vocab['special_token_idx']['end']
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
         self.token_emb_dim = opt['token_emb_dim']
         self.pretrain_embedding = side_data.get('embedding', None)
         # kg
         self.n_word = vocab['n_word']
         self.n_entity = vocab['n_entity']
-        self.pad_word_idx = vocab['special_token_idx']['pad_word']
-        self.pad_entity_idx = vocab['special_token_idx']['pad_entity']
+        self.pad_word_idx = vocab['pad_word']
+        self.pad_entity_idx = vocab['pad_entity']
         entity_kg = side_data['entity_kg']
         self.n_relation = entity_kg['n_relation']
         entity_edges = entity_kg['edge']

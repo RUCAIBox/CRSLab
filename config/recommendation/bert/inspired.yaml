@@ -2,8 +2,6 @@
 dataset: Inspired
 tokenize:
   rec: bert
-# tokenize path
-rec_tokenize_path: 'bert-base-uncased'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -11,8 +9,6 @@ item_truncate: 100
 scale: 1
 # model
 rec_model: BERT
-# pretrained path
-rec_pretrained_path: 'bert-base-uncased'
 # optim
 rec:
   epoch: 1

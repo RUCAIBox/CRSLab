@@ -5,3 +5,4 @@ from .kgsf import KGSFDataLoader
 from .redial import ReDialDataLoader
 from .tgredial import TGReDialDataLoader
 from .ntrd import NTRDDataLoader
+from .chatgpt import ChatGPTDataLoader

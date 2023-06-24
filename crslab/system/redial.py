@@ -8,11 +8,13 @@
 # @email  : wxl1999@foxmail.com
 
 import torch
+from loguru import logger
+
+from crslab.data import dataset_language_map
 from crslab.evaluator.metrics.base import AverageMetric
 from crslab.evaluator.metrics.gen import PPLMetric
 from crslab.system.base import BaseSystem
 from crslab.system.utils.functions import ind2txt
-from loguru import logger
 
 
 class ReDialSystem(BaseSystem):
@@ -38,7 +40,7 @@ class ReDialSystem(BaseSystem):
         super(ReDialSystem, self).__init__(opt, train_dataloader, valid_dataloader, test_dataloader, vocab, side_data,
                                            restore_system, interact, debug, tensorboard)
         self.ind2tok = vocab['conv']['ind2tok']
-        self.end_token_idx = vocab['conv']['special_token_idx']['end']
+        self.end_token_idx = vocab['conv']['end']
         self.item_ids = side_data['rec']['item_entity_ids']
         self.id2entity = vocab['rec']['id2entity']
 
@@ -48,6 +50,8 @@ class ReDialSystem(BaseSystem):
         self.conv_epoch = self.conv_optim_opt['epoch']
         self.rec_batch_size = self.rec_optim_opt['batch_size']
         self.conv_batch_size = self.conv_optim_opt['batch_size']
+
+        self.language = dataset_language_map[self.opt['dataset']]
 
     def rec_evaluate(self, rec_predict, item_label):
         rec_predict = rec_predict.cpu()
@@ -83,8 +87,7 @@ class ReDialSystem(BaseSystem):
             else:
                 self.rec_evaluate(rec_scores, batch['item'])
             rec_loss = rec_loss.item()
-            self.evaluator.optim_metrics.add(
-                "rec_loss", AverageMetric(rec_loss))
+            self.evaluator.optim_metrics.add("rec_loss", AverageMetric(rec_loss))
         else:
             gen_loss, preds = self.conv_model.forward(batch, mode=mode)
             gen_loss = gen_loss.sum()
@@ -93,8 +96,7 @@ class ReDialSystem(BaseSystem):
             else:
                 self.conv_evaluate(preds, batch['response'])
             gen_loss = gen_loss.item()
-            self.evaluator.optim_metrics.add(
-                'gen_loss', AverageMetric(gen_loss))
+            self.evaluator.optim_metrics.add('gen_loss', AverageMetric(gen_loss))
             self.evaluator.gen_metrics.add('ppl', PPLMetric(gen_loss))
 
     def train_recommender(self):
@@ -106,16 +108,14 @@ class ReDialSystem(BaseSystem):
             logger.info('[Train]')
             for batch in self.train_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size):
                 self.step(batch, stage='rec', mode='train')
-            # report train loss
-            self.evaluator.report(epoch=epoch, mode='train')
+            self.evaluator.report(epoch=epoch, mode='train')  # report train loss
             # val
             logger.info('[Valid]')
             with torch.no_grad():
                 self.evaluator.reset_metrics()
                 for batch in self.valid_dataloader['rec'].get_rec_data(batch_size=self.rec_batch_size, shuffle=False):
                     self.step(batch, stage='rec', mode='valid')
-                # report valid loss
-                self.evaluator.report(epoch=epoch, mode='valid')
+                self.evaluator.report(epoch=epoch, mode='valid')  # report valid loss
                 # early stop
                 metric = self.evaluator.optim_metrics['rec_loss']
                 if self.early_stop(metric):

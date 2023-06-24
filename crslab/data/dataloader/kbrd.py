@@ -8,10 +8,10 @@
 # @Email  : wxl1999@foxmail.com
 
 import torch
-from crslab.data.dataloader.base import BaseDataLoader
-from crslab.data.dataloader.utils import (add_start_end_token_idx, merge_utt,
-                                          padded_tensor, truncate)
 from tqdm import tqdm
+
+from crslab.data.dataloader.base import BaseDataLoader
+from crslab.data.dataloader.utils import add_start_end_token_idx, padded_tensor, truncate, merge_utt
 
 
 class KBRDDataLoader(BaseDataLoader):
@@ -45,10 +45,10 @@ class KBRDDataLoader(BaseDataLoader):
 
         """
         super().__init__(opt, dataset)
-        self.pad_token_idx = vocab['special_token_idx']['pad']
-        self.start_token_idx = vocab['special_token_idx']['start']
-        self.end_token_idx = vocab['special_token_idx']['end']
-        self.pad_entity_idx = vocab['special_token_idx']['pad_entity']
+        self.pad_token_idx = vocab['pad']
+        self.start_token_idx = vocab['start']
+        self.end_token_idx = vocab['end']
+        self.pad_entity_idx = vocab['pad_entity']
         self.context_truncate = opt.get('context_truncate', None)
         self.response_truncate = opt.get('response_truncate', None)
         self.entity_truncate = opt.get('entity_truncate', None)
@@ -58,20 +58,27 @@ class KBRDDataLoader(BaseDataLoader):
         for conv_dict in tqdm(self.dataset):
             if conv_dict['role'] == 'Recommender':
                 for movie in conv_dict['items']:
-                    augment_conv_dict = {'context_entities': conv_dict['context_entities'], 'item': movie}
+                    augment_conv_dict = {
+                        'role': conv_dict['role'],
+                        'context': conv_dict['context'],
+                        'item': movie
+                    }
                     augment_dataset.append(augment_conv_dict)
         return augment_dataset
 
     def rec_batchify(self, batch):
-        batch_context_entities = []
+        batch_role = []
+        batch_context = []
         batch_movies = []
         for conv_dict in batch:
-            batch_context_entities.append(conv_dict['context_entities'])
+            batch_role.append(conv_dict['role'])
+            batch_context.append(conv_dict['context'])
             batch_movies.append(conv_dict['item'])
 
         return {
-            "context_entities": batch_context_entities,
-            "item": torch.tensor(batch_movies, dtype=torch.long)
+            "role": batch_role,
+            'context': batch_context,
+            "item": batch_movies
         }
 
     def conv_process_fn(self, *args, **kwargs):

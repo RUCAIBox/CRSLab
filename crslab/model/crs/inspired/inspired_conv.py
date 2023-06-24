@@ -2,17 +2,15 @@
 # @Author : Beichen Zhang
 # @Email  : zhangbeichen724@gmail.com
 
-# UPDATE:
-# @Time   : 2022/9/28
-# @Author : Xinyu Tang
-# @Email  : txy20010310@163.com
-
-
+import os
 
 import torch
-from crslab.model.base import BaseModel
-from transformers import GPT2Config, GPT2LMHeadModel
+from transformers import GPT2LMHeadModel
 
+from crslab.config import PRETRAIN_PATH
+from crslab.data import dataset_language_map
+from crslab.model.base import BaseModel
+from crslab.model.pretrained_models import resources
 from .modules import SequenceCrossEntropyLoss
 
 
@@ -38,11 +36,13 @@ class InspiredConvModel(BaseModel):
         """
         self.context_truncate = opt['context_truncate']
         self.response_truncate = opt['response_truncate']
-        self.pad_id = vocab['special_token_idx']['pad']
+        self.pad_id = vocab['pad']
         self.label_smoothing = opt['conv']['label_smoothing'] if 'label_smoothing' in opt['conv'] else -1
 
-        self.dpath = opt['conv_pretrained_path']
-        super(InspiredConvModel, self).__init__(opt, device, self.dpath)
+        language = dataset_language_map[opt['dataset']]
+        resource = resources['gpt2'][language]
+        dpath = os.path.join(PRETRAIN_PATH, "gpt2", language)
+        super(InspiredConvModel, self).__init__(opt, device, dpath, resource)
 
     def build_model(self):
         """build model for seeker and recommender separately"""
@@ -67,26 +67,24 @@ class InspiredConvModel(BaseModel):
 
         past = None
         lm_logits_all = []
-        support_up_limits = self.model_sk.config.n_positions
 
         if mode != 'test':
             for turn, iter in enumerate(input_ids_iters):
                 if (roles[turn] == 0):
                     # considering that gpt2 only supports up to 1024 tokens
-                    if past is not None and past[0][0].shape[-2] + iter.shape[1] > support_up_limits:
+                    if past is not None and past[0].shape[3] + iter.shape[1] > 1024:
                         past = None
                     outputs = self.model_sk(iter, past_key_values=past)
                     lm_logits, past = outputs.logits, outputs.past_key_values
                     lm_logits_all.append(lm_logits)
                 else:
-                    if past is not None and past[0][0].shape[-2] + iter.shape[1] > support_up_limits:
+                    if past is not None and past[0].shape[3] + iter.shape[1] > 1024:
                         past = None
                     outputs = self.model_rm(iter, past_key_values=past)
                     lm_logits, past = outputs.logits, outputs.past_key_values
                     lm_logits_all.append(lm_logits)
 
-            # (b_s, seq_len, vocab_size)
-            lm_logits_all = torch.cat(lm_logits_all, dim=0)
+            lm_logits_all = torch.cat(lm_logits_all, dim=0)  # (b_s, seq_len, vocab_size)
 
             # index from 1 to self.reponse_truncate is valid response
             loss = self.calculate_loss(
@@ -118,11 +116,9 @@ class InspiredConvModel(BaseModel):
             context_iters = context.unsqueeze(1)
             for turn, iter in enumerate(context_iters):
                 if roles[turn] == 0:
-                    outputs = self.model_sk(
-                        iter, former_hidden_state)  # (1, s_l, v_s),
+                    outputs = self.model_sk(iter, former_hidden_state)  # (1, s_l, v_s),
                 else:
-                    outputs = self.model_rm(
-                        iter, former_hidden_state)  # (1, s_l, v_s),
+                    outputs = self.model_rm(iter, former_hidden_state)  # (1, s_l, v_s),
                 last_hidden_state, former_hidden_state = outputs.logits, outputs.past_key_values
                 last_hidden_state_all.append(last_hidden_state)
 

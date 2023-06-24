@@ -12,6 +12,7 @@
 # @Author  :   Zhipeng Zhao
 # @email   :   oran_official@outlook.com
 
+import os
 import torch
 
 
@@ -64,3 +65,10 @@ def ind2txt_with_slots(inds,slots,ind2tok, end_token_idx=None, unk_token='unk',s
 
 def ind2slot(inds,ind2slot):
     return [ ind2slot[ind] for ind in inds]
+
+def get_exist_item_set(save_dir):
+    exist_item_set = set()
+    for file in os.listdir(save_dir):
+        user_id = os.path.splitext(file)[0]
+        exist_item_set.add(user_id)
+    return exist_item_set

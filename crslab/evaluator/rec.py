@@ -25,17 +25,18 @@ class RecEvaluator(BaseEvaluator):
         optim_metrics: the metrics to optimize in training
     """
 
-    def __init__(self, tensorboard=False):
+    def __init__(self, k_list=[1, 10, 50], tensorboard=False):
         super(RecEvaluator, self).__init__()
         self.rec_metrics = Metrics()
         self.optim_metrics = Metrics()
         self.tensorboard = tensorboard
+        self.k_list = k_list
         if self.tensorboard:
             self.writer = SummaryWriter(log_dir='runs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
             self.reports_name = ['Recommendation Metrics', 'Optimization Metrics']
 
     def rec_evaluate(self, ranks, label):
-        for k in [1, 10, 50]:
+        for k in self.k_list:
             if len(ranks) >= k:
                 self.rec_metrics.add(f"hit@{k}", HitMetric.compute(ranks, label, k))
                 self.rec_metrics.add(f"ndcg@{k}", NDCGMetric.compute(ranks, label, k))

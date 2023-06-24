@@ -1,0 +1,1 @@
+python run_crslab.py --config config/iEvaLM/chatgpt/redial.yaml --mode ask

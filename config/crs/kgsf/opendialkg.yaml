@@ -1,11 +1,11 @@
 # dataset
 dataset: OpenDialKG
 tokenize: nltk
-embedding: True
+embedding: word2vec.npy
 # dataloader
 context_truncate: 256
 response_truncate: 30
-scale: 0.01
+scale: 1
 # model
 model: KGSF
 token_emb_dim: 300
@@ -21,7 +21,6 @@ learn_positional_embeddings: false
 embeddings_scale: true
 reduction: false
 n_positions: 1024
-copy: true
 # optim
 pretrain:
   epoch: 1

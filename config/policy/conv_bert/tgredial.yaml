@@ -2,8 +2,6 @@
 dataset: TGReDial
 tokenize:
   policy: bert
-# tokenize path
-policy_tokenize_path: 'bert-base-chinese'
 # dataloader
 context_truncate: 256
 response_truncate: 30
@@ -11,8 +9,6 @@ item_truncate: 100
 scale: 1
 # model
 policy_model: ConvBERT
-# pretrained path
-policy_pretrained_path: 'bert-base-chinese'
 # optim
 policy:
   epoch: 50

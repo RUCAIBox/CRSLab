@@ -5,7 +5,7 @@ tokenize:
 # dataloader
 context_truncate: 1024
 response_truncate: 1024
-scale: 0.01
+scale: 1
 # model
 conv_model: Transformer
 token_emb_dim: 300
